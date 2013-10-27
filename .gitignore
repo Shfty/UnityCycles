@@ -1,0 +1,16 @@
+##########
+##Unity
+##########
+/Temp
+/obj
+/library
+*.csproj
+*.unityproj
+*.sln
+
+###############
+##UnityCycles
+###############
+*.dll
+/Build
+/Assets/Textures

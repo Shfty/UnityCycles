@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 400000}
+  - 114: {fileID: 11400000}
+  - 114: {fileID: 11400002}
+  m_Layer: 0
+  m_Name: Drone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55ebad4686fce7145a0de8e1fb77bdaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Player: {fileID: 0}
+  LineRendererPrefab: {fileID: 100000, guid: 8eecabc9f4186e14999f590e88afdc3e, type: 2}
+  MortarHoloPrefab: {fileID: 100000, guid: f562f0ddef724cd40b132d53dc1441e7, type: 2}
+  ExplosionPrefab: {fileID: 100000, guid: 403bea3c063589743aae4c1edcbdd6df, type: 2}
+  RocketPrefab: {fileID: 100000, guid: d6fed42cb4712604b99f27b828324688, type: 2}
+  MortarPrefab: {fileID: 100000, guid: e3078237708626343bb854d3aa74156c, type: 2}
+  SeekerPrefab: {fileID: 100000, guid: c06c1aa21aeb0e24f88fd8a254952e8b, type: 2}
+  raycastAimMask:
+    serializedVersion: 2
+    m_Bits: 4294961151
+  raycastLockMask:
+    serializedVersion: 2
+    m_Bits: 256
+  Type: 0
+  Ammo: 0
+  Aim: 0
+  AimVector: {x: 0, y: 0, z: 0}
+  AimPoint: {x: 0, y: 0, z: 0}
+--- !u!114 &11400002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34c0a8288ff8eee4c80fa6733982d094, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 0}
+  Offset: {x: 0, y: 0, z: 0}
+  Lerp: 1
+  LerpType: 1
+  LerpFactor: 12
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 100000}
+  m_IsPrefabParent: 1
+  m_IsExploded: 1
