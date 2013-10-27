@@ -35,6 +35,13 @@ Material:
           m_Offset: {x: 0, y: 0}
       data:
         first:
+          name: _ProjTex
+        second:
+          m_Texture: {fileID: 2800000, guid: c205ff37e5761bf48acfbe40624222e8, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
           name: _BumpTex
         second:
           m_Texture: {fileID: 0}
@@ -56,13 +63,6 @@ Material:
           m_Offset: {x: 0, y: 0}
       data:
         first:
-          name: _ProjTex
-        second:
-          m_Texture: {fileID: 2800000, guid: c205ff37e5761bf48acfbe40624222e8, type: 3}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
           name: _Texture
         second:
           m_Texture: {fileID: 2800000, guid: d3f2b9e3229330d47b556781883566d1, type: 3}
@@ -72,14 +72,14 @@ Material:
         first:
           name: _MainTexture
         second:
-          m_Texture: {fileID: 2800000, guid: d3f2b9e3229330d47b556781883566d1, type: 3}
+          m_Texture: {fileID: 2800000, guid: b7ab127a7a821c7489c37c85497f4c01, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
           name: _OccludedTexture
         second:
-          m_Texture: {fileID: 2800000, guid: c205ff37e5761bf48acfbe40624222e8, type: 3}
+          m_Texture: {fileID: 2800000, guid: 32f595cf68c12be4d8ccdb86f9f97858, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:

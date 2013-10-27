@@ -95,6 +95,12 @@ public class ObjectPool : MonoBehaviour
 
 	public GameObject Spawn( GameObject prefab )
 	{
+		if( !inactiveObjects.ContainsKey( prefab ) )
+		{
+			Debug.LogWarning( "Could not spawn " + prefab + ": not present in Object Pool" );
+			return null;
+		}
+
 		// If there are any objects of the type requested, activate one and return it
 		if( inactiveObjects[prefab].Count > 0 )
 		{

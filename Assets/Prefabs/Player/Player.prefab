@@ -117,6 +117,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 400012}
   - 114: {fileID: 11400016}
+  - 114: {fileID: 11400020}
   m_Layer: 8
   m_Name: Overlay
   m_TagString: Untagged
@@ -487,7 +488,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.79681015, y: 5.73060226, z: 33.5867081}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400004}
@@ -1132,7 +1133,7 @@ MonoBehaviour:
   Marble: {fileID: 100000}
   Camera: {fileID: 400004}
   GroundForceFactor: 10
-  AirForceFactor: 10
+  AirForceFactor: 15
   GroundTorqueFactor: 20
   AirTorqueFactor: 20
   JumpForce: 7.5
@@ -1191,7 +1192,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Camera: {fileID: 100004}
   Target: {fileID: 400000}
-  CrosshairTexture: {fileID: 2800000, guid: acf0837141f13de408e1e96ee8eddc7b, type: 3}
+  CrosshairTexture: {fileID: 2800000, guid: 5dc62c3ceb82e34498bf32fb1a81d11c, type: 3}
   Offset: {x: 0, y: 2.5, z: 0}
   MinFollowDistance: 1
   MaxFollowDistance: 10
@@ -1242,6 +1243,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Target: {fileID: 400000}
   Offset: {x: 0, y: 1.5, z: 0}
+  Lerp: 0
+  LerpType: 0
+  LerpFactor: .200000003
+--- !u!114 &11400020
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34c0a8288ff8eee4c80fa6733982d094, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 400000}
+  Offset: {x: 0, y: 0, z: 0}
   Lerp: 0
   LerpType: 0
   LerpFactor: .200000003
