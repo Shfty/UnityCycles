@@ -440,6 +440,10 @@ Prefab:
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 11400002, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
+      propertyPath: m_DrawTreesAndFoliage
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
   m_RootGameObject: {fileID: 908908914}
@@ -501,7 +505,7 @@ MonoBehaviour:
   m_CastShadows: 1
   m_LightmapIndex: -1
   m_LightmapSize: 1024
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_MaterialTemplate: {fileID: 0}
 --- !u!4 &908908917
 Transform:

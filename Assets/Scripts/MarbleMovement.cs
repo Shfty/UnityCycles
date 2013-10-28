@@ -27,6 +27,7 @@ public class MarbleMovement : MonoBehaviour
 	public Vector3 Up;
 	public Vector3 Forward;
 	public bool Grounded;
+	public Vector3 GroundPoint;
 	public bool JumpFired = false;
 	public bool DropFired = false;
 	public Vector3 Velocity;
@@ -162,12 +163,17 @@ public class MarbleMovement : MonoBehaviour
 		}
 
 		// Calculate the average collision normal and update the surface vector with it
+		Vector3 averagePoint = Vector3.zero;
 		Vector3 averageNormal = Vector3.zero;
 		foreach( ContactPoint contact in col )
 		{
+			averagePoint += contact.point;
 			averageNormal += contact.normal;
 		}
+		averagePoint /= col.contacts.Length;
 		averageNormal /= col.contacts.Length;
+
+		GroundPoint = averagePoint;
 		Up = averageNormal;
 	}
 }

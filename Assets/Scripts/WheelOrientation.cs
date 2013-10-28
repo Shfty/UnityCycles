@@ -37,14 +37,15 @@ public class WheelOrientation : MonoBehaviour
 	void Update()
 	{
 		// Update the heading based on impulse direction
-		Vector3 heading = new Vector3( inputWrapper.LeftStick.x, 0f, inputWrapper.LeftStick.y ).normalized;
+		Vector3 heading = new Vector3( inputWrapper.LeftStick.x, 0f, inputWrapper.LeftStick.y );
 		
 		// Update the turn angle if the stick is pressed far enough
 		if( heading.magnitude > TurnStickDeadzone )
 		{
-			Vector3 hcf = Vector3.Cross( heading, Vector3.forward );
+			Vector3 normHeading = heading.normalized;
+			Vector3 hcf = Vector3.Cross( normHeading, Vector3.forward );
 			float dir = Vector3.Dot( hcf, Vector3.up );
-			turnAngle = Vector3.Angle( heading, Vector3.forward ) * ( dir >= 0 ? -1 : 1 );
+			turnAngle = Vector3.Angle( normHeading, Vector3.forward ) * ( dir >= 0 ? -1 : 1 );
 		}
 
 		// Calculate the rotation for the current surface
