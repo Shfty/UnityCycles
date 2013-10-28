@@ -13,10 +13,11 @@ public class PlayerOverlay : Billboard
 		// Spawn cameras and billboards via base class
 		base.Start();
 
+		// Prune current player's overlay
 		int playerIndex = Player.GetComponent<InputWrapper>().LocalPlayerIndex;
 		cameras.RemoveAt( playerIndex );
 		GameObject billboard = billboards[ playerIndex ];
-		billboard.SetActive( false );
+		billboard.GetComponent<PooledObject>().Deactivate();
 		billboards.RemoveAt( playerIndex );
 	}
 }

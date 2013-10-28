@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayerInstance : MonoBehaviour
+public class PlayerInstance : PooledObject
 {
 	// Fields
 	InputWrapper inputWrapper;
@@ -13,6 +13,7 @@ public class PlayerInstance : MonoBehaviour
 	// Properties
 	public List<GameObject> Drones;
 	public List<Transform> DroneAnchors;
+	public int Health = 100;
 
 	// Unity Methods
 	void Awake()
@@ -24,7 +25,16 @@ public class PlayerInstance : MonoBehaviour
 		// Find and store the input wrapper
 		inputWrapper = gameObject.GetComponent<InputWrapper>();
 	}
-	
+
+	public override void OnEnable()
+	{
+		// Overridden empty since this object's transform is unused
+	}
+
+	public override void OnDisable()
+	{
+	}
+
 	void Update()
 	{
 		// If an active drone is present
@@ -117,6 +127,15 @@ public class PlayerInstance : MonoBehaviour
 				Drones[ i ].GetComponent<Drone>().Aim = false;
 			}
 			Drones[ 0 ] = temp;
+		}
+	}
+
+	void ApplyDamage( int damage )
+	{
+		Health -= damage;
+		if( Health <= 0 )
+		{
+			Deactivate();
 		}
 	}
 }

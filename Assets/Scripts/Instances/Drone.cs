@@ -4,19 +4,20 @@ using System.Collections;
 public class Drone : PooledObject
 {
 	// Fields
+	ObjectPool dronePool;
+	ObjectPool projectilePool;
+	ObjectPool miscPool;
+	Quaternion targetRotation;
+	LineRenderer aimingLine = null;
+	Projector aimingHolo = null;
+	Transform lockTarget = null;
+
 	GameObject initPlayer;
 	DroneInfo.Type initType;
 	int initAmmo;
 	bool initAim = false;
 	Vector3 initAimVector;
 	Vector3 initAimPoint;
-
-	ObjectPool objectPool;
-	Quaternion targetRotation;
-	LineRenderer aimingLine = null;
-	LineRendererInstance aimingLineScript = null;
-	Projector aimingHolo = null;
-	Transform lockTarget = null;
 
 	// Properties
 	public GameObject Player;
@@ -38,7 +39,9 @@ public class Drone : PooledObject
 	void Awake()
 	{
 		// Need to call this here, PooledStart runs before Start
-		objectPool = GameObject.FindGameObjectWithTag( "GameControl" ).GetComponent<ObjectPool>();
+		dronePool = GameObject.Find( "Drone Pool" ).GetComponent<ObjectPool>();
+		projectilePool = GameObject.Find( "Projectile Pool" ).GetComponent<ObjectPool>();
+		miscPool = GameObject.Find( "Misc Pool" ).GetComponent<ObjectPool>();
 	}
 
 	public override void OnEnable()
@@ -67,19 +70,13 @@ public class Drone : PooledObject
 		Aim = initAim;
 		AimVector = initAimVector;
 		AimPoint = initAimPoint;
-
-		// If the mortar's aiming holo is present, deactivate it
-		if( aimingHolo != null )
-		{
-			aimingHolo.gameObject.SetActive( false );
-		}
 	}
 
 	public void PooledStart()
 	{
 		// Spawn the aiming line
-		aimingLine = objectPool.Spawn( LineRendererPrefab ).GetComponent<LineRenderer>();
-		aimingLineScript = aimingLine.GetComponent<LineRendererInstance>();
+		aimingLine = miscPool.Spawn( LineRendererPrefab ).GetComponent<LineRenderer>();
+		aimingLine.transform.parent = transform;
 
 		// Configure the aiming line per-type and spawn type-specific extras
 		switch( Type )
@@ -93,7 +90,8 @@ public class Drone : PooledObject
 				aimingLine.SetVertexCount( DroneInfo.Mortar.AimLineSubdivisions );
 
 				// Aim Holo
-				aimingHolo = objectPool.Spawn( MortarHoloPrefab ).GetComponent<Projector>();
+				aimingHolo = miscPool.Spawn( MortarHoloPrefab ).GetComponent<Projector>();
+				aimingHolo.transform.parent = transform;
 				break;
 			case DroneInfo.Type.Seeker:
 				aimingLine.SetVertexCount( 3 );
@@ -148,7 +146,7 @@ public class Drone : PooledObject
 
 		// Calculate camera-relative aim and store hit information
 		GameObject player = Player;
-		Camera camera = player.transform.Find( "Camera" ).GetComponent<Camera>();
+		Camera camera = player.GetComponent<FollowCamera>().Camera.camera;
 
 		Ray aimRay = camera.ViewportPointToRay( new Vector3( .5f, .5f ) );
 		RaycastHit rayHitInfo;
@@ -309,24 +307,13 @@ public class Drone : PooledObject
 	}
 
 	// Utility Methods
-	public override void Deactivate()
-	{
-		// Deactivate drone graphics before deactivating self
-		foreach( Transform child in transform )
-		{
-			child.gameObject.SetActive( false );
-		}
-		aimingLineScript.Deactivate();
-		base.Deactivate();
-	}
-
 	public void Fire()
 	{
 		switch( Type )
 		{
 			case DroneInfo.Type.Rocket:
 				// Spawn a rocket, activate it and decrement ammo
-				GameObject rocket = objectPool.Spawn( RocketPrefab );
+				GameObject rocket = projectilePool.Spawn( RocketPrefab );
 				rocket.transform.position = transform.position;
 				rocket.transform.rotation = transform.rotation;
 				Rocket rocketScript = rocket.GetComponent<Rocket>();
@@ -335,7 +322,7 @@ public class Drone : PooledObject
 				break;
 			case DroneInfo.Type.Mortar:
 				// Spawn a mortar shell, set it's target distance, activate it and decrement ammo
-				GameObject mortar = objectPool.Spawn( MortarPrefab );
+				GameObject mortar = projectilePool.Spawn( MortarPrefab );
 				mortar.transform.position = transform.position;
 				mortar.transform.rotation = transform.rotation;
 				MortarShell mortarScript = mortar.GetComponent<MortarShell>();
@@ -347,7 +334,7 @@ public class Drone : PooledObject
 				break;
 			case DroneInfo.Type.Seeker:
 				// Spawn a seeker missile
-				GameObject seeker = objectPool.Spawn( SeekerPrefab );
+				GameObject seeker = projectilePool.Spawn( SeekerPrefab );
 				seeker.transform.position = transform.position;
 
 				// Launch it at a 45 degree angle
@@ -378,7 +365,8 @@ public class Drone : PooledObject
 		// If the drone is out of ammo, create an explosion and deactivate it
 		if( Ammo == 0 )
 		{
-			Instantiate( ExplosionPrefab, transform.position, Quaternion.identity );
+			GameObject explosion = dronePool.Spawn( ExplosionPrefab );
+			explosion.transform.position = transform.position;
 			Deactivate();
 		}
 	}

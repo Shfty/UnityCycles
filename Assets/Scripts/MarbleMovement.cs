@@ -10,6 +10,11 @@ public class MarbleMovement : MonoBehaviour
 	float prevDrop = 0f;
 	InputWrapper inputWrapper;
 
+	Vector3 initPosition;
+	Quaternion initRotation;
+	Vector3 initVelocity;
+	Vector3 initAngularVelocity;
+
 	// Properties
 	public GameObject Marble;
 	public Transform Camera;
@@ -37,6 +42,24 @@ public class MarbleMovement : MonoBehaviour
 	{
 		inputWrapper = gameObject.GetComponent<InputWrapper>();
 		ResetSurfaceNormal();
+	}
+
+	void OnEnable()
+	{
+		// Store init state
+		initPosition = Marble.transform.position;
+		initRotation = Marble.transform.rotation;
+		initVelocity = Marble.rigidbody.velocity;
+		initAngularVelocity = Marble.rigidbody.angularVelocity;
+	}
+
+	void OnDisable()
+	{
+		// Reset object to init state
+		Marble.transform.position = initPosition;
+		Marble.transform.rotation = initRotation;
+		Marble.rigidbody.velocity = initVelocity;
+		Marble.rigidbody.angularVelocity = initAngularVelocity;
 	}
 
 	void Update() // Update is called once per frame

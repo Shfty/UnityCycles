@@ -6,9 +6,12 @@ using System.Linq;
 public class GameControl : MonoBehaviour
 {
 	// Fields
+	ObjectPool playerPool;
+	ObjectPool pickupPool;
+	ObjectPool sharedPool;
 
 	// Properties
-	public ObjectPool ObjectPool;
+	public GameObject CameraPrefab;
 	public GameObject PlayerPrefab;
 	public GameObject PickupPrefab;
 	public GameObject RocketDronePrefab;
@@ -22,6 +25,11 @@ public class GameControl : MonoBehaviour
 	{
 		// Persist this object between scenes
 		GameObject.DontDestroyOnLoad( this );
+
+		// Find object pools
+		playerPool = GameObject.Find( "Player Pool" ).GetComponent<ObjectPool>();
+		pickupPool = GameObject.Find( "Pickup Pool" ).GetComponent<ObjectPool>();
+		sharedPool = GameObject.Find( "Shared Pool" ).GetComponent<ObjectPool>();
 
 		// Instantiate player list
 		Players = new List<GameObject>();
@@ -89,16 +97,29 @@ public class GameControl : MonoBehaviour
 	void SpawnLocalPlayer( Transform spawnPoint, int idx )
 	{
 		// Instantiate a new player object
-		GameObject player = (GameObject)Instantiate( PlayerPrefab, spawnPoint.position, spawnPoint.rotation );
+		GameObject player = playerPool.Spawn( PlayerPrefab );
+		player.transform.position = spawnPoint.position;
+		player.transform.rotation = spawnPoint.rotation;
 
-		// Setup necessary script properties
+		// Setup input wrapper
 		InputWrapper inputScript = player.GetComponent<InputWrapper>();
 		inputScript.LocalPlayerIndex = Players.Count;
 		inputScript.Init();
+		
+		// Instantiate a new camera object
+		GameObject camera = playerPool.Spawn( CameraPrefab );
+		camera.transform.position = player.transform.position;
+		camera.transform.rotation = player.transform.rotation;
 
-		Transform camera = player.transform.Find( "Camera" );
+		FollowCamera cameraScript = player.GetComponent<FollowCamera>();
+		cameraScript.Camera = camera;
+
+		// Setup movement script
+		MarbleMovement movementScript = player.GetComponent<MarbleMovement>();
+		movementScript.Camera = camera.transform;
+
+		// Calculate camera viewport & culling mask
 		camera.camera.rect = CalculateViewport( idx );
-		Camera cameraComponent = camera.GetComponent<Camera>();
 		int cameraMask = 0;
 		for( int i = 0; i < 4; ++i )
 		{
@@ -108,11 +129,11 @@ public class GameControl : MonoBehaviour
 			int layerMask = 1 << LayerMask.NameToLayer( "Camera " + ( i + 1 ) );
 			cameraMask |= layerMask;
 		}
+		Camera cameraComponent = camera.GetComponent<Camera>();
 		cameraComponent.cullingMask = ~cameraMask;
 
 		PlayerOverlay playerOverlay = player.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
 		playerOverlay.GameControl = this;
-		playerOverlay.ObjectPool = ObjectPool;
 
 		// Add to the player list
 		Players.Add( player );
@@ -121,18 +142,18 @@ public class GameControl : MonoBehaviour
 	void SpawnPickup( PickupInfo.Type type, Vector3 position, Quaternion rotation )
 	{
 		// Get a blank pickup from the object pool, spawn the appropriate graphic and attach
-		GameObject pickup = ObjectPool.Spawn( PickupPrefab );
+		GameObject pickup = pickupPool.Spawn( PickupPrefab );
 		GameObject pickupMesh = null;
 		switch( type )
 		{
 			case PickupInfo.Type.Rocket:
-				pickupMesh = ObjectPool.Spawn( RocketDronePrefab );
+				pickupMesh = sharedPool.Spawn( RocketDronePrefab );
 				break;
 			case PickupInfo.Type.Mortar:
-				pickupMesh = ObjectPool.Spawn( MortarDronePrefab );
+				pickupMesh = sharedPool.Spawn( MortarDronePrefab );
 				break;
 			case PickupInfo.Type.Seeker:
-				pickupMesh = ObjectPool.Spawn( SeekerDronePrefab );
+				pickupMesh = sharedPool.Spawn( SeekerDronePrefab );
 				break;
 			default:
 				break;
@@ -141,9 +162,8 @@ public class GameControl : MonoBehaviour
 
 		// Spawn and configure the pickup glow billboard
 		GameObject pickupGlow = pickup.transform.Find( "Overlay" ).gameObject;
-		Billboard pickupBillboard = pickupGlow.GetComponent<Billboard>();
-		pickupBillboard.GameControl = this;
-		pickupBillboard.ObjectPool = ObjectPool;
+		Billboard pickupOverlay = pickupGlow.GetComponent<Billboard>();
+		pickupOverlay.GameControl = this;
 
 		// Setup transform
 		pickup.transform.position = position;
@@ -151,7 +171,6 @@ public class GameControl : MonoBehaviour
 
 		// Set script properties
 		PickupInstance pickupScript = pickup.GetComponent<PickupInstance>();
-		pickupScript.ObjectPool = ObjectPool;
 		pickupScript.Type = type;
 
 		// Start the script

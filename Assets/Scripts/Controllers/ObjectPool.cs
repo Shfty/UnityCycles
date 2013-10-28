@@ -28,10 +28,20 @@ public class ObjectPool : MonoBehaviour
 	{
 		foreach( GameObject prefab in Prefabs )
 		{
+			GameObject container;
 			// Create container objects
-			GameObject container = new GameObject();
-			container.name = prefab.name + " Pool";
-			containerObjects.Add( prefab, container );
+			if( Prefabs.Count > 1 )
+			{
+				container = new GameObject();
+				container.name = prefab.name + " Pool";
+				container.transform.parent = transform;
+				containerObjects.Add( prefab, container );
+			}
+			else
+			{
+				container = gameObject;
+				containerObjects.Add( prefab, container );
+			}
 
 			// Create key-value pairs
 			activeObjects.Add( prefab, new List<GameObject>() );
@@ -49,36 +59,14 @@ public class ObjectPool : MonoBehaviour
 		}
 	}
 
-	public void LateUpdate()
-	{
-		List<GameObject> keys = new List<GameObject>();
-		List<GameObject> recentlyDeactivated = new List<GameObject>();
-		foreach( KeyValuePair<GameObject, List<GameObject>> kvp in activeObjects )
-		{
-			foreach( GameObject go in kvp.Value )
-			{
-				// Check for any recently-deactivated objects and store in recentlyDeactivated
-				if( !go.activeSelf )
-				{
-					keys.Add( kvp.Key );
-					recentlyDeactivated.Add( go );
-				}
-			}
-		}
-
-		// Deactivate the objects stored in recentlyDeactivated
-		for( int i = 0; i < keys.Count; ++i )
-		{
-			Despawn( keys[ i ], recentlyDeactivated[ i ] );
-		}
-	}
-
 	// Utility Methods
 	GameObject instantiate( GameObject prefab, Transform parent )
 	{
 		// Create an instance of prefab, parent it to the respective pool holder and store in inactiveObjects
 		GameObject go = (GameObject)Instantiate( prefab );
 		go.transform.parent = parent;
+		go.SendMessage( "OriginPoolIs", this, SendMessageOptions.DontRequireReceiver );
+		go.SendMessage( "PrefabIs", prefab, SendMessageOptions.DontRequireReceiver );
 		go.SetActive( false );
 		inactiveObjects[ prefab ].Add( go );
 
@@ -143,6 +131,13 @@ public class ObjectPool : MonoBehaviour
 
 	public bool Despawn( GameObject prefab, GameObject go )
 	{
+		// Make sure this prefab is pooled
+		if( !activeObjects.ContainsKey( prefab ) )
+		{
+			Debug.LogWarning( "Could not despawn " + prefab + ": not present in Object Pool" );
+			return false;
+		}
+
 		// Check if prefab is present in the active list
 		if( activeObjects[prefab].Contains( go ) )
 		{

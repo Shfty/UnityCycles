@@ -3,10 +3,18 @@ using System.Collections;
 
 public class MortarBomb : Projectile
 {
+	// Fields
+	ObjectPool projectilePool;
+
 	// Properties
 	public GameObject ExplosionPrefab;
 
 	// Unity Methods
+	public void Start()
+	{
+		projectilePool = GameObject.Find( "Projectile Pool" ).GetComponent<ObjectPool>();
+	}
+
 	public void PooledStart()
 	{
 		// Add the projectile's initial force
@@ -21,7 +29,9 @@ public class MortarBomb : Projectile
 	public virtual void OnCollisionEnter()
 	{
 		// Create an explosion and deactivate the projectile
-		Instantiate( ExplosionPrefab, transform.position, Quaternion.identity );
+		GameObject explosion = projectilePool.Spawn( ExplosionPrefab );
+		explosion.transform.position = transform.position;
+
 		Deactivate();
 	}
 }

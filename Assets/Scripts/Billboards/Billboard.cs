@@ -7,15 +7,17 @@ public class Billboard : MonoBehaviour
 	// Fields
 	protected List<Camera> cameras;
 	protected List<GameObject> billboards;
+	ObjectPool billboardPool;
 
 	// Properties
 	public GameControl GameControl;
-	public ObjectPool ObjectPool;
 	public GameObject BillboardPrefab;
 
 	// Unity Methods
 	public virtual void Start()
 	{
+		billboardPool = GameObject.Find( "Billboard Pool" ).GetComponent<ObjectPool>();
+
 		// Instantiate camera and billboard lists
 		cameras = new List<Camera>();
 		billboards = new List<GameObject>();
@@ -24,9 +26,11 @@ public class Billboard : MonoBehaviour
 		List<GameObject> players = GameControl.Players;
 		for( int i = 0; i < players.Count; ++i )
 		{
-			cameras.Add( players[ i ].transform.Find( "Camera" ).camera );
-			GameObject billboard = ObjectPool.Spawn( BillboardPrefab );
+
+			cameras.Add( players[ i ].GetComponent<FollowCamera>().Camera.camera );
+			GameObject billboard = billboardPool.Spawn( BillboardPrefab );
 			billboard.layer = LayerMask.NameToLayer( "Camera " + ( i + 1 ) );
+			billboard.transform.parent = transform;
 			billboards.Add( billboard );
 		}
 	}
@@ -39,15 +43,5 @@ public class Billboard : MonoBehaviour
 			billboards[ i ].transform.position = transform.position;
 			billboards[ i ].transform.rotation = Quaternion.LookRotation( cameras[ i ].transform.forward );
 		}
-	}
-
-	// Utility Methods
-	public virtual void Deactivate()
-	{
-		foreach( GameObject billboard in billboards )
-		{
-			billboard.SetActive( false );
-		}
-		gameObject.SetActive( false );
 	}
 }

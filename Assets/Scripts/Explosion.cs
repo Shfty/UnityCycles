@@ -31,11 +31,12 @@ public class Explosion : MonoBehaviour
 	void OnTriggerEnter( Collider col )
 	{
 		// If coming into contact with a rigidbody collider, blast it away
-		SphereCollider sc = (SphereCollider)collider;
+		SphereCollider sc = (SphereCollider)this.collider;
 
 		if( col.rigidbody != null )
 		{
 			col.rigidbody.AddExplosionForce( Force, transform.position, sc.radius );
+			col.gameObject.SendMessageUpwards( "ApplyDamage", 100, SendMessageOptions.DontRequireReceiver );
 		}
 	}
 	

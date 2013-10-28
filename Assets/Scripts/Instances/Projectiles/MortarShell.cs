@@ -4,7 +4,7 @@ using System.Collections;
 public class MortarShell : Projectile
 {
 	// Fields
-	ObjectPool objectPool;
+	ObjectPool projectilePool;
 	Vector3 startPos;
 	float timer = 0f;
 
@@ -16,7 +16,7 @@ public class MortarShell : Projectile
 	// Unity Methods
 	public void Awake()
 	{
-		objectPool = GameObject.FindGameObjectWithTag( "GameControl" ).GetComponent<ObjectPool>();
+		projectilePool = GameObject.Find( "Projectile Pool" ).GetComponent<ObjectPool>();
 	}
 
 	public void PooledStart()
@@ -41,13 +41,14 @@ public class MortarShell : Projectile
 		if( diff.magnitude > TargetDist || timer > ProjectileInfo.Properties.MortarShell.Timeout )
 		{
 			// Create an explosion prefab
-			Instantiate( ExplosionPrefab, transform.position, Quaternion.identity );
+			GameObject explosion = projectilePool.Spawn( ExplosionPrefab );
+			explosion.transform.position = transform.position;
 
 			// Release mortar 6 bombs downward
 			Vector3 bombVector = Quaternion.AngleAxis( 85f, Vector3.right ) * Vector3.forward;
 			for( int i = 0; i < 6; ++i )
 			{
-				GameObject mortarBomb = objectPool.Spawn( MortarBombPrefab );
+				GameObject mortarBomb = projectilePool.Spawn( MortarBombPrefab );
 				mortarBomb.transform.position = transform.position;
 				mortarBomb.transform.rotation = Quaternion.FromToRotation( Vector3.forward, bombVector );
 				MortarBomb bombScript = mortarBomb.GetComponent<MortarBomb>();

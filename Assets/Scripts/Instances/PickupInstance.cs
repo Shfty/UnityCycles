@@ -4,16 +4,17 @@ using System.Collections;
 public class PickupInstance : PooledObject
 {
 	// Fields
+	ObjectPool dronePool;
+	ObjectPool sharedPool;
+	int terrainMask;
+
 	PickupInfo.Type initType;
 	bool initFalling;
 	Vector3 initVelocity;
 
-	int terrainMask;
-
 	// Enums
 
 	// Properties
-	public ObjectPool ObjectPool;
 	public GameObject DronePrefab;
 	public GameObject RocketDronePrefab;
 	public GameObject MortarDronePrefab;
@@ -45,6 +46,10 @@ public class PickupInstance : PooledObject
 
 	public void Start()
 	{
+		// Find the object pools
+		dronePool = GameObject.Find( "Drone Pool" ).GetComponent<ObjectPool>();
+		sharedPool = GameObject.Find( "Shared Pool" ).GetComponent<ObjectPool>();
+
 		// Store the terrain layer mask
 		terrainMask = 1 << LayerMask.NameToLayer( "Terrain" );
 	}
@@ -102,7 +107,7 @@ public class PickupInstance : PooledObject
 			{
 
 				// Spawn a drone
-				GameObject drone = ObjectPool.Spawn( DronePrefab );
+				GameObject drone = dronePool.Spawn( DronePrefab );
 				GameObject droneMesh = null;
 				DroneInfo.Type droneType = new DroneInfo.Type();
 
@@ -110,15 +115,15 @@ public class PickupInstance : PooledObject
 				switch( Type )
 				{
 					case PickupInfo.Type.Rocket:
-						droneMesh = ObjectPool.Spawn( RocketDronePrefab );
+						droneMesh = sharedPool.Spawn( RocketDronePrefab );
 						droneType = DroneInfo.Type.Rocket;
 						break;
 					case PickupInfo.Type.Mortar:
-						droneMesh = ObjectPool.Spawn( MortarDronePrefab );
+						droneMesh = sharedPool.Spawn( MortarDronePrefab );
 						droneType = DroneInfo.Type.Mortar;
 						break;
 					case PickupInfo.Type.Seeker:
-						droneMesh = ObjectPool.Spawn( SeekerDronePrefab );
+						droneMesh = sharedPool.Spawn( SeekerDronePrefab );
 						droneType = DroneInfo.Type.Seeker;
 						break;
 					default:
@@ -161,14 +166,5 @@ public class PickupInstance : PooledObject
 				Deactivate();
 			}
 		}
-	}
-
-	// Utility Methods
-	public override void Deactivate()
-	{
-		Billboard billboard = transform.Find("Overlay").GetComponent<Billboard>();
-		billboard.Deactivate();
-
-		base.Deactivate();
 	}
 }
