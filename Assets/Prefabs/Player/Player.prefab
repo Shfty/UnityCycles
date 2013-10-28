@@ -107,7 +107,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &100012
 GameObject:
   m_ObjectHideFlags: 0
@@ -133,7 +133,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400014}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -148,7 +148,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400016}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -163,7 +163,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400018}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: M
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -178,7 +178,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400020}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Drone Anchors
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -195,7 +195,7 @@ GameObject:
   - 4: {fileID: 400022}
   - 119: {fileID: 11900000}
   - 114: {fileID: 11400018}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -212,7 +212,7 @@ GameObject:
   - 4: {fileID: 400024}
   - 198: {fileID: 19800008}
   - 199: {fileID: 19900008}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jump Burst
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -229,7 +229,7 @@ GameObject:
   - 4: {fileID: 400026}
   - 33: {fileID: 3300006}
   - 23: {fileID: 2300006}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Pod
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -246,7 +246,7 @@ GameObject:
   - 4: {fileID: 400028}
   - 33: {fileID: 3300008}
   - 23: {fileID: 2300008}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jet Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,7 +263,7 @@ GameObject:
   - 4: {fileID: 400030}
   - 198: {fileID: 19800010}
   - 199: {fileID: 19900010}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Drop Burst
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -280,7 +280,7 @@ GameObject:
   - 4: {fileID: 400032}
   - 33: {fileID: 3300010}
   - 23: {fileID: 2300010}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jet Arm Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -297,7 +297,7 @@ GameObject:
   - 4: {fileID: 400034}
   - 33: {fileID: 3300012}
   - 23: {fileID: 2300012}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jet Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -312,7 +312,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400036}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Right Jet Wrapper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -329,7 +329,7 @@ GameObject:
   - 4: {fileID: 400038}
   - 33: {fileID: 3300014}
   - 23: {fileID: 2300014}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Pod Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -346,7 +346,7 @@ GameObject:
   - 4: {fileID: 400040}
   - 198: {fileID: 19800000}
   - 199: {fileID: 19900000}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jump Burst
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -363,7 +363,7 @@ GameObject:
   - 4: {fileID: 400042}
   - 198: {fileID: 19800002}
   - 199: {fileID: 19900002}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Drop Burst
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -380,7 +380,7 @@ GameObject:
   - 4: {fileID: 400044}
   - 198: {fileID: 19800004}
   - 199: {fileID: 19900004}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Drop Jet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -397,7 +397,7 @@ GameObject:
   - 4: {fileID: 400046}
   - 198: {fileID: 19800006}
   - 199: {fileID: 19900006}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jump Jet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -414,7 +414,7 @@ GameObject:
   - 4: {fileID: 400048}
   - 198: {fileID: 19800012}
   - 199: {fileID: 19900012}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Drop Jet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -431,7 +431,7 @@ GameObject:
   - 4: {fileID: 400050}
   - 198: {fileID: 19800014}
   - 199: {fileID: 19900014}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jump Jet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -448,7 +448,7 @@ GameObject:
   - 4: {fileID: 400052}
   - 33: {fileID: 3300004}
   - 23: {fileID: 2300004}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Jet Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -463,7 +463,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400054}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Left Jet Wrapper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -488,13 +488,13 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 23.5446548, y: 6.16881037, z: -24.6554947}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 400022}
   - {fileID: 400004}
   - {fileID: 400000}
   - {fileID: 400012}
-  - {fileID: 400022}
   - {fileID: 400010}
   m_Father: {fileID: 0}
 --- !u!4 &400004
@@ -649,7 +649,7 @@ Transform:
   m_GameObject: {fileID: 100028}
   m_LocalRotation: {x: 0, y: 0, z: .707106829, w: .707106829}
   m_LocalPosition: {x: 0, y: -0, z: 0}
-  m_LocalScale: {x: .125, y: .400000006, z: .125}
+  m_LocalScale: {x: .100000001, y: .400000006, z: .100000001}
   m_Children: []
   m_Father: {fileID: 400010}
 --- !u!4 &400030
@@ -671,7 +671,7 @@ Transform:
   m_GameObject: {fileID: 100032}
   m_LocalRotation: {x: 0, y: 0, z: .707106829, w: .707106829}
   m_LocalPosition: {x: 0, y: -0, z: 0}
-  m_LocalScale: {x: .25, y: .300000012, z: .25}
+  m_LocalScale: {x: .200000003, y: .300000012, z: .200000003}
   m_Children: []
   m_Father: {fileID: 400010}
 --- !u!4 &400034
@@ -682,7 +682,7 @@ Transform:
   m_GameObject: {fileID: 100034}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: .100000001, y: .25, z: .125}
+  m_LocalScale: {x: .100000001, y: .200000003, z: .100000001}
   m_Children: []
   m_Father: {fileID: 400036}
 --- !u!4 &400036
@@ -786,7 +786,7 @@ Transform:
   m_GameObject: {fileID: 100052}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: .100000001, y: .25, z: .125}
+  m_LocalScale: {x: .100000001, y: .200000003, z: .100000001}
   m_Children: []
   m_Father: {fileID: 400054}
 --- !u!4 &400054
@@ -839,7 +839,7 @@ Renderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_LightmapIndex: 255
@@ -1140,13 +1140,13 @@ MonoBehaviour:
   HoverForce: 400
   DownBurstForce: 20
   DownJetForce: 1500
-  Right: {x: 0, y: 0, z: 0}
-  Up: {x: 0, y: 0, z: 0}
-  Forward: {x: 0, y: 0, z: 0}
-  Grounded: 0
+  Right: {x: .999990404, y: .00438693864, z: -1.12884945e-05}
+  Up: {x: -.00438689208, y: .999966562, z: -.00514629763}
+  Forward: {x: -1.12884945e-05, y: .00514635211, z: .999986768}
+  Grounded: 1
   JumpFired: 0
   DropFired: 0
-  Velocity: {x: 0, y: 0, z: 0}
+  Velocity: {x: 5.25499217e-07, y: -1.86264526e-06, z: -1.05100435e-06}
 --- !u!114 &11400008
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1242,7 +1242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 400000}
-  Offset: {x: 0, y: 1.5, z: 0}
+  Offset: {x: 0, y: 2.5, z: 0}
   Lerp: 0
   LerpType: 0
   LerpFactor: .200000003
