@@ -71,8 +71,8 @@ MonoBehaviour:
   Target: {fileID: 0}
   Offset: {x: 0, y: 0, z: 0}
   Lerp: 1
-  LerpType: 0
-  LerpFactor: 20
+  LerpType: 1
+  LerpFactor: 6
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

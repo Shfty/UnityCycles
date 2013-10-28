@@ -488,7 +488,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 23.5446548, y: 6.16881037, z: -24.6554947}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400022}
@@ -568,7 +568,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100014}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: .899999976, y: .800000012, z: -.200000003}
+  m_LocalPosition: {x: .800000012, y: .75, z: -.379999995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400020}
@@ -579,7 +579,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100016}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -.899999976, y: .800000012, z: -.200000003}
+  m_LocalPosition: {x: -.800000012, y: .75, z: -.379999995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400020}
@@ -590,7 +590,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100018}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: .800000012, z: -.899999976}
+  m_LocalPosition: {x: 0, y: .75, z: -.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400020}
@@ -1042,7 +1042,7 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 1
   m_Drag: .100000001
-  m_AngularDrag: 4
+  m_AngularDrag: 1
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
@@ -1100,7 +1100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Wheel: {fileID: 100010}
   RotationLerpFactor: 12
-  WheelSpinFactor: 720
+  WheelSpinFactor: 1200
   SpinDecayRate: 180
   TurnStickDeadzone: .25
 --- !u!114 &11400004
@@ -1132,14 +1132,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Marble: {fileID: 100000}
   Camera: {fileID: 400004}
-  GroundForceFactor: 12.5
-  AirForceFactor: 12.5
-  GroundTorqueFactor: 15
-  AirTorqueFactor: 15
-  JumpForce: 7.5
-  HoverForce: 400
-  DownBurstForce: 20
-  DownJetForce: 1500
+  GroundForceFactor: 10
+  AirForceFactor: 10
+  GroundTorqueFactor: 20
+  AirTorqueFactor: 20
+  JumpForce: 7
+  HoverForce: 350
+  DownBurstForce: 15
+  DownJetForce: 1000
   Right: {x: .999990404, y: .00438693864, z: -1.12884945e-05}
   Up: {x: -.00438689208, y: .999966562, z: -.00514629763}
   Forward: {x: -1.12884945e-05, y: .00514635211, z: .999986768}
