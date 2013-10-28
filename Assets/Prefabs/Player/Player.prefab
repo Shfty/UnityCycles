@@ -839,7 +839,7 @@ Renderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_LightmapIndex: 255
@@ -1041,8 +1041,8 @@ Rigidbody:
   m_GameObject: {fileID: 100000}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: .100000001
-  m_AngularDrag: 1
+  m_Drag: 0
+  m_AngularDrag: 2.5
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
@@ -1134,8 +1134,8 @@ MonoBehaviour:
   Camera: {fileID: 400004}
   GroundForceFactor: 10
   AirForceFactor: 10
-  GroundTorqueFactor: 20
-  AirTorqueFactor: 20
+  GroundTorqueFactor: 15
+  AirTorqueFactor: 15
   JumpForce: 7
   HoverForce: 350
   DownBurstForce: 15
