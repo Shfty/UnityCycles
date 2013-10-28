@@ -18,7 +18,8 @@ public class GameControl : MonoBehaviour
 	public GameObject MortarDronePrefab;
 	public GameObject SeekerDronePrefab;
 	public int LocalPlayerCount = 1;
-	public List<GameObject> Players;
+	public List<GameObject> Cameras;
+	public List<GameObject> LocalPlayers;
 
 	// Unity Methods
 	void Awake()
@@ -32,7 +33,7 @@ public class GameControl : MonoBehaviour
 		sharedPool = GameObject.Find( "Shared Pool" ).GetComponent<ObjectPool>();
 
 		// Instantiate player list
-		Players = new List<GameObject>();
+		LocalPlayers = new List<GameObject>();
 
 		// Make sure the local player count is valid
 		LocalPlayerCount = Mathf.Clamp( LocalPlayerCount, 1, 4 );
@@ -103,13 +104,14 @@ public class GameControl : MonoBehaviour
 
 		// Setup input wrapper
 		InputWrapper inputScript = player.GetComponent<InputWrapper>();
-		inputScript.LocalPlayerIndex = Players.Count;
+		inputScript.LocalPlayerIndex = LocalPlayers.Count;
 		inputScript.Init();
 		
 		// Instantiate a new camera object
 		GameObject camera = playerPool.Spawn( CameraPrefab );
 		camera.transform.position = player.transform.position;
 		camera.transform.rotation = player.transform.rotation;
+		Cameras.Add( camera );
 
 		FollowCamera cameraScript = player.GetComponent<FollowCamera>();
 		cameraScript.Camera = camera;
@@ -136,7 +138,7 @@ public class GameControl : MonoBehaviour
 		playerOverlay.GameControl = this;
 
 		// Add to the player list
-		Players.Add( player );
+		LocalPlayers.Add( player );
 	}
 
 	void SpawnPickup( PickupInfo.Type type, Vector3 position, Quaternion rotation )
