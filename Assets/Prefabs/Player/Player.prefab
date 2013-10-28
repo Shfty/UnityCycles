@@ -1136,7 +1136,7 @@ MonoBehaviour:
   AirForceFactor: 12.5
   GroundTorqueFactor: 15
   AirTorqueFactor: 15
-  JumpForce: 6.5
+  JumpForce: 7.5
   HoverForce: 400
   DownBurstForce: 20
   DownJetForce: 1500
@@ -1242,7 +1242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 400000}
-  Offset: {x: 0, y: 2.5, z: 0}
+  Offset: {x: 0, y: 1.5, z: 0}
   Lerp: 0
   LerpType: 0
   LerpFactor: .200000003
