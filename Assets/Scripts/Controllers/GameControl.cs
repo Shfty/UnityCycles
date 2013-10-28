@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 public class GameControl : MonoBehaviour
 {
@@ -11,15 +10,14 @@ public class GameControl : MonoBehaviour
 	ObjectPool sharedPool;
 
 	// Properties
+	public GameObject AvatarPrefab;
 	public GameObject CameraPrefab;
-	public GameObject PlayerPrefab;
 	public GameObject PickupPrefab;
 	public GameObject RocketDronePrefab;
 	public GameObject MortarDronePrefab;
 	public GameObject SeekerDronePrefab;
 	public int LocalPlayerCount = 1;
-	public List<GameObject> Cameras;
-	public List<GameObject> LocalPlayers;
+	public List<GameObject> Players;
 
 	// Unity Methods
 	void Awake()
@@ -33,7 +31,7 @@ public class GameControl : MonoBehaviour
 		sharedPool = GameObject.Find( "Shared Pool" ).GetComponent<ObjectPool>();
 
 		// Instantiate player list
-		LocalPlayers = new List<GameObject>();
+		Players = new List<GameObject>();
 
 		// Make sure the local player count is valid
 		LocalPlayerCount = Mathf.Clamp( LocalPlayerCount, 1, 4 );
@@ -42,12 +40,10 @@ public class GameControl : MonoBehaviour
 	void Start()
 	{
 		// Spawn players
-		List<GameObject> spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" ).ToList<GameObject>();
+		GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" );
 		for( int i = 0; i < LocalPlayerCount; ++i )
 		{
-			int random = Random.Range( 0, spawnPoints.Count );
-			SpawnLocalPlayer( spawnPoints[ random ].transform, i );
-			spawnPoints.RemoveAt( random );
+			SpawnLocalPlayer( spawnPoints[ i + 1 ].transform, i );
 		}
 
 		// Spawn pickups
@@ -97,27 +93,43 @@ public class GameControl : MonoBehaviour
 	// Utility Methods
 	void SpawnLocalPlayer( Transform spawnPoint, int idx )
 	{
-		// Instantiate a new player object
-		GameObject player = playerPool.Spawn( PlayerPrefab );
-		player.transform.position = spawnPoint.position;
-		player.transform.rotation = spawnPoint.rotation;
+		// Instantiate a new player container
+		GameObject player = new GameObject( "Player" );
 
-		// Setup input wrapper
-		InputWrapper inputScript = player.GetComponent<InputWrapper>();
-		inputScript.LocalPlayerIndex = LocalPlayers.Count;
-		inputScript.Init();
+		// AVATAR
+		// Spawn it's world avatar
+		GameObject avatar = playerPool.Spawn( AvatarPrefab );
+		avatar.transform.position = spawnPoint.position;
+		avatar.transform.rotation = spawnPoint.rotation;
+		avatar.transform.parent = player.transform;
+
+		// Setup avatar input wrapper
+		InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
+		avatarInputScript.LocalPlayerIndex = Players.Count;
+		avatarInputScript.Init();
+
+		// Setup avatar overlay's GameControl reference
+		PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
+		avatarOverlay.GameControl = this;
 		
+		// CAMERA
 		// Instantiate a new camera object
 		GameObject camera = playerPool.Spawn( CameraPrefab );
-		camera.transform.position = player.transform.position;
-		camera.transform.rotation = player.transform.rotation;
-		Cameras.Add( camera );
+		camera.transform.position = avatar.transform.position;
+		camera.transform.rotation = avatar.transform.rotation;
+		camera.transform.parent = player.transform;
 
-		FollowCamera cameraScript = player.GetComponent<FollowCamera>();
-		cameraScript.Camera = camera;
+		// Tell the camera to follow the avatar
+		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
+		cameraScript.Target = avatar.transform.Find( "Marble" );
 
-		// Setup movement script
-		MarbleMovement movementScript = player.GetComponent<MarbleMovement>();
+		// Setup camera input wrapper
+		InputWrapper cameraInputScript = camera.GetComponent<InputWrapper>();
+		cameraInputScript.LocalPlayerIndex = Players.Count;
+		cameraInputScript.Init();
+
+		// Setup avatar movement script
+		MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();
 		movementScript.Camera = camera.transform;
 
 		// Calculate camera viewport & culling mask
@@ -134,11 +146,8 @@ public class GameControl : MonoBehaviour
 		Camera cameraComponent = camera.GetComponent<Camera>();
 		cameraComponent.cullingMask = ~cameraMask;
 
-		PlayerOverlay playerOverlay = player.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
-		playerOverlay.GameControl = this;
-
 		// Add to the player list
-		LocalPlayers.Add( player );
+		Players.Add( player );
 	}
 
 	void SpawnPickup( PickupInfo.Type type, Vector3 position, Quaternion rotation )

@@ -13,6 +13,8 @@ GameObject:
   - 92: {fileID: 9200000}
   - 81: {fileID: 8100000}
   - 114: {fileID: 11400000}
+  - 114: {fileID: 11400002}
+  - 114: {fileID: 11400004}
   m_Layer: 8
   m_Name: Camera
   m_TagString: Untagged
@@ -84,6 +86,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9885aaf09c81fd44b775938c488eec3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OriginPool: {fileID: 0}
+  Prefab: {fileID: 0}
+--- !u!114 &11400002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdb1c118b6ef08940bbbe16726639cfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 0}
+  CrosshairTexture: {fileID: 2800000, guid: 5dc62c3ceb82e34498bf32fb1a81d11c, type: 3}
+  Offset: {x: 0, y: 2.5, z: 0}
+  MinFollowDistance: 1
+  MaxFollowDistance: 10
+  PositionLerpFactor: 12
+  CameraRadius: .5
+  SmallValue: .00999999978
+--- !u!114 &11400004
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0c41129fa35d9248a8ebecd53ab4111, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LocalPlayerIndex: 0
+  LeftStick: {x: 0, y: 0}
+  RightStick: {x: 0, y: 0}
+  Jump: 0
+  Drop: 0
+  Aim: 0
+  Fire: 0
+  SwitchLeft: 0
+  SwitchRight: 0
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

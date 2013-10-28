@@ -23,10 +23,10 @@ public class Billboard : MonoBehaviour
 		billboards = new List<GameObject>();
 
 		// Check the player count, create a billboard for each camera and set it to the respective layer
-		for( int i = 0; i < GameControl.Cameras.Count; ++i )
+		for( int i = 0; i < GameControl.Players.Count; ++i )
 		{
 
-			cameras.Add( GameControl.Cameras[ i ].camera );
+			cameras.Add( GameControl.Players[ i ].transform.Find( "Camera" ).camera );
 			GameObject billboard = billboardPool.Spawn( BillboardPrefab );
 			billboard.layer = LayerMask.NameToLayer( "Camera " + ( i + 1 ) );
 			billboard.transform.parent = transform;

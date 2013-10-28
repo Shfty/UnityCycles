@@ -17,7 +17,6 @@ public class FollowCamera : MonoBehaviour
 	int projectileMask;
 
 	// Properties
-	public GameObject Camera;
 	public Transform Target;
 	public Texture CrosshairTexture;
 	public Vector3 Offset;
@@ -26,7 +25,7 @@ public class FollowCamera : MonoBehaviour
 	public float PositionLerpFactor = 12f;
 	public float CameraRadius = .5f;
 	public float SmallValue = .01f;
-
+	
 	// Unity Methods
 	void Awake()
 	{
@@ -41,7 +40,7 @@ public class FollowCamera : MonoBehaviour
 	{
 		// Set the target position behind the target and init the camera position to it
 		targetPosition = Target.position - ( Vector3.forward * followDistance );
-		Camera.transform.position = targetPosition;
+		transform.position = targetPosition;
 
 		// Create layer masks
 		terrainMask = 1 << LayerMask.NameToLayer( "Terrain" );
@@ -69,11 +68,11 @@ public class FollowCamera : MonoBehaviour
 			}
 
 			// Check if camera is clipping into the terrain
-			clipTerrain = Physics.CheckSphere( Camera.transform.position, CameraRadius, terrainMask );
+			clipTerrain = Physics.CheckSphere( transform.position, CameraRadius, terrainMask );
 			if( clipTerrain )
 			{
 				// If so, move the camera upward by a small amount
-				Camera.transform.position += new Vector3( 0f, SmallValue, 0f );
+				transform.position += new Vector3( 0f, SmallValue, 0f );
 			}
 
 			// Check if camera is clipping into a wall
@@ -113,16 +112,16 @@ public class FollowCamera : MonoBehaviour
 		yAngle = Mathf.Clamp( yAngle, -80f, 80f );
 
 		// Apply transform changes
-		Camera.transform.position = Vector3.Lerp( Camera.transform.position, targetPosition, PositionLerpFactor * Time.deltaTime );
-		Camera.transform.rotation = Quaternion.LookRotation( Vector3.Normalize( ( Target.position + Offset ) - Camera.transform.position ), Vector3.up );
+		transform.position = Vector3.Lerp( transform.position, targetPosition, PositionLerpFactor * Time.deltaTime );
+		transform.rotation = Quaternion.LookRotation( Vector3.Normalize( ( Target.position + Offset ) - transform.position ), Vector3.up );
 	}
 
 	void OnGUI()
 	{
 		// Draw the crosshair texture in the center of the viewport
-		Vector3 pt = Camera.camera.ViewportToScreenPoint( new Vector3( .5f, .5f, 0f ) );
-		float pixWidth = Camera.camera.pixelWidth;
-		float pixHeight = Camera.camera.pixelHeight;
+		Vector3 pt = camera.ViewportToScreenPoint( new Vector3( .5f, .5f, 0f ) );
+		float pixWidth = camera.pixelWidth;
+		float pixHeight = camera.pixelHeight;
 		float avgSize = ( pixWidth + pixHeight ) * .5f;
 		float size = avgSize * .004f;
 		float halfSize = size * .5f;

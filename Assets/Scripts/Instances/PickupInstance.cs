@@ -97,9 +97,9 @@ public class PickupInstance : PooledObject
 		// check if a player has grabbed this pickup
 		if( col.tag == "Player" )
 		{
-			// Collider is a Marble, get player as parent
-			GameObject player = col.transform.parent.gameObject;
-			PlayerInstance playerScript = player.GetComponent<PlayerInstance>();
+			// Collider is a Marble, get player as parent of parent
+			GameObject player = col.transform.parent.parent.gameObject;
+			PlayerInstance playerScript = player.transform.Find( "Avatar" ).GetComponent<PlayerInstance>();
 
 			// If the player has an empty drone slot
 

@@ -91,7 +91,6 @@ public class Drone : PooledObject
 
 				// Aim Holo
 				aimingHolo = miscPool.Spawn( MortarHoloPrefab ).GetComponent<Projector>();
-				aimingHolo.transform.parent = transform;
 				break;
 			case DroneInfo.Type.Seeker:
 				aimingLine.SetVertexCount( 3 );
@@ -111,7 +110,7 @@ public class Drone : PooledObject
 			RaycastHit[] raycastHits = Physics.SphereCastAll( lockRay, 10f, 5000f, raycastLockMask );
 			foreach( RaycastHit hitInfo in raycastHits )
 			{
-				if( hitInfo.collider.transform.parent.gameObject != Player )
+				if( hitInfo.collider.transform.parent.parent.gameObject != Player )
 				{
 					lockTarget = hitInfo.collider.transform;
 					break;
@@ -145,8 +144,7 @@ public class Drone : PooledObject
 		}
 
 		// Calculate camera-relative aim and store hit information
-		GameObject player = Player;
-		Camera camera = player.GetComponent<FollowCamera>().Camera.camera;
+		Camera camera = Player.transform.Find( "Camera" ).GetComponent<Camera>();
 
 		Ray aimRay = camera.ViewportPointToRay( new Vector3( .5f, .5f ) );
 		RaycastHit rayHitInfo;
@@ -307,6 +305,14 @@ public class Drone : PooledObject
 	}
 
 	// Utility Methods
+	public override void Deactivate()
+	{
+		// Manually deactivate aiming holo as it's not parented
+		aimingHolo.GetComponent<PooledObject>().Deactivate();
+
+		base.Deactivate();
+	}
+
 	public void Fire()
 	{
 		switch( Type )

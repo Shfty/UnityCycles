@@ -65,6 +65,7 @@ public class ObjectPool : MonoBehaviour
 		// Create an instance of prefab, parent it to the respective pool holder and store in inactiveObjects
 		GameObject go = (GameObject)Instantiate( prefab );
 		go.transform.parent = parent;
+		go.name = prefab.name;
 		go.SendMessage( "OriginPoolIs", this, SendMessageOptions.DontRequireReceiver );
 		go.SendMessage( "PrefabIs", prefab, SendMessageOptions.DontRequireReceiver );
 		go.SetActive( false );

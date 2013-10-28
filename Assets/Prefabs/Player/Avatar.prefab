@@ -32,10 +32,9 @@ GameObject:
   - 114: {fileID: 11400006}
   - 114: {fileID: 11400002}
   - 114: {fileID: 11400000}
-  - 114: {fileID: 11400012}
   - 114: {fileID: 11400008}
   m_Layer: 8
-  m_Name: Player
+  m_Name: Avatar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1072,6 +1071,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c65a5e3df41943f4b923c13754554644, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OriginPool: {fileID: 0}
+  Prefab: {fileID: 0}
   Drones: []
   DroneAnchors:
   - {fileID: 400018}
@@ -1139,26 +1140,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MarbleScript: {fileID: 11400006}
---- !u!114 &11400012
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100002}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdb1c118b6ef08940bbbe16726639cfb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Camera: {fileID: 0}
-  Target: {fileID: 400000}
-  CrosshairTexture: {fileID: 2800000, guid: 5dc62c3ceb82e34498bf32fb1a81d11c, type: 3}
-  Offset: {x: 0, y: 2.5, z: 0}
-  MinFollowDistance: 1
-  MaxFollowDistance: 10
-  PositionLerpFactor: 12
-  CameraRadius: .5
-  SmallValue: .00999999978
 --- !u!114 &11400014
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1187,7 +1168,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameControl: {fileID: 0}
-  ObjectPool: {fileID: 0}
   BillboardPrefab: {fileID: 100000, guid: b2f0dc26e5bc0054698a3ace90cb2aaa, type: 2}
   Player: {fileID: 100002}
 --- !u!114 &11400018
