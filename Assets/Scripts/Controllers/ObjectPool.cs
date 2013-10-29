@@ -152,7 +152,7 @@ public class ObjectPool : MonoBehaviour
 		else
 		{
 			// Otherwise, log a warning message and return false
-			Debug.LogWarning( "Cannot despawn GameObject: not present in active pool." );
+			Debug.LogWarning( "Cannot despawn " + go + ": not present in active pool." );
 			return false;
 		}
 	}

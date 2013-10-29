@@ -31,11 +31,15 @@ public class PlayerInstance : PooledObject
 
 	public override void OnEnable()
 	{
+		base.OnEnable();
+
 		initHealth = Health;
 	}
 
 	public override void OnDisable()
 	{
+		base.OnDisable();
+
 		Health = initHealth;
 	}
 

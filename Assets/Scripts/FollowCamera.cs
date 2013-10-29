@@ -41,11 +41,6 @@ public class FollowCamera : MonoBehaviour
 
 	void Start()
 	{
-		if( Target == null )
-		{
-			return;
-		}
-
 		// Set the target position behind the target and init the camera position to it
 		targetPosition = Target.position - ( Vector3.forward * followDistance );
 		transform.position = targetPosition;
@@ -57,11 +52,6 @@ public class FollowCamera : MonoBehaviour
 	
 	void FixedUpdate()
 	{
-		if( Target == null )
-		{
-			return;
-		}
-
 		// Correct positioning
 		bool targetObscured;
 		bool clipTerrain;
@@ -128,11 +118,6 @@ public class FollowCamera : MonoBehaviour
 
 	void Update()
 	{
-		if( Target == null )
-		{
-			return;
-		}
-
 		// Take Input and clamp Y Axis
 		xAngle += inputWrapper.RightStick.x * 90f * Time.deltaTime;
 		yAngle += inputWrapper.RightStick.y * -90f * Time.deltaTime;
@@ -173,11 +158,6 @@ public class FollowCamera : MonoBehaviour
 	// Utility Methods
 	void UpdateTarget()
 	{
-		if( Target == null )
-		{
-			return;
-		}
-
 		// Calculate the camera's position and rotation relative to the target
 		Vector3 cameraForward = Vector3.forward;
 		cameraForward = Quaternion.AngleAxis( yAngle, Vector3.right ) * cameraForward;

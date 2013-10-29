@@ -266,75 +266,67 @@ public class GameControl : MonoBehaviour
 
 	public void PlayerDeath( GameObject go, GameObject killedBy )
 	{
-		foreach( GameObject player in Players )
+		if( Players.Contains( go.transform.parent.gameObject ) )
 		{
-			if( player.transform.Find( "Avatar" ) == null )
+			GameObject player = Players[ Players.IndexOf( go.transform.parent.gameObject ) ];
+
+			FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
+			cameraScript.DeathCam = true;
+
+			// If killed by another player, target the camera at them
+			if( killedBy != go.transform.parent.gameObject )
 			{
-				continue;
+				cameraScript.Target = killedBy.transform.Find( "Avatar/Marble" );
+			}
+			else // If killed by self, switch to a random map camera
+			{
+				// Randomly pick a camera anchor
+				int i = Random.Range( 0, mapCameraAnchors.Length );
+				GameObject cameraAnchor = mapCameraAnchors[ i ];
+				cameraScript.Target = cameraAnchor.transform;
 			}
 
-			if( player.transform.Find( "Avatar" ).gameObject == go )
-			{
-				FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
-				cameraScript.DeathCam = true;
-
-				// If killed by another player, target the camera at them
-				if( killedBy != go.transform.parent.gameObject )
-				{
-					cameraScript.Target = killedBy.transform.Find( "Avatar/Marble" );
-				}
-				else // If killed by self, switch to a random map camera
-				{
-					// Randomly pick a camera anchor
-					int i = Random.Range( 0, mapCameraAnchors.Length );
-					GameObject cameraAnchor = mapCameraAnchors[ i ];
-					cameraScript.Target = cameraAnchor.transform;
-				}
-
-				go.GetComponent<PlayerInstance>().Deactivate();
-			}
+			go.GetComponent<PlayerInstance>().Deactivate();
 		}
 	}
 
 	public void Respawn( GameObject go )
 	{
-		foreach( GameObject player in Players )
+		if( Players.Contains( go ) )
 		{
-			if( player == go )
-			{
+			GameObject player = Players[ Players.IndexOf( go ) ];
 
-				int i = Random.Range( 0, spawnPoints.Length );
-				Transform spawnPoint = spawnPoints[ i ].transform;
+			int i = Random.Range( 0, spawnPoints.Length );
+			Transform spawnPoint = spawnPoints[ i ].transform;
 
-				FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
+			FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
 
-				// AVATAR
-				// Spawn it's world avatar
-				GameObject avatar = playerPool.Spawn( AvatarPrefab );
-				avatar.transform.position = spawnPoint.position;
-				avatar.transform.rotation = spawnPoint.rotation;
-				avatar.transform.parent = player.transform;
+			// AVATAR
+			// Spawn it's world avatar
+			GameObject avatar = playerPool.Spawn( AvatarPrefab );
+			avatar.transform.position = spawnPoint.position;
+			avatar.transform.rotation = spawnPoint.rotation;
+			avatar.transform.parent = player.transform;
 
-				// Setup avatar input wrapper
-				InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
-				avatarInputScript.LocalPlayerIndex = Players.IndexOf( player );
-				avatarInputScript.Init();
+			// Setup avatar input wrapper
+			InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
+			avatarInputScript.LocalPlayerIndex = Players.IndexOf( player );
+			avatarInputScript.Init();
 
-				// Setup avatar and overlay GameControl references
-				PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
-				avatarScript.GameControl = this;
-				PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
-				avatarOverlay.GameControl = this;
+			// Setup avatar and overlay GameControl references
+			PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
+			avatarScript.GameControl = this;
+			PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
+			avatarOverlay.GameControl = this;
 
-				// Setup avatar movement script
-				MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();
-				movementScript.Camera = player.transform.Find( "Camera" );
+			// Setup avatar movement script
+			MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();
+			movementScript.Camera = player.transform.Find( "Camera" );
 
-				// CAMERA
-				// Tell the camera to follow the avatar
-				cameraScript.Target = avatar.transform.Find( "Marble" );
-				cameraScript.DeathCam = false;
-			}
+			// CAMERA
+			// Tell the camera to follow the avatar
+			cameraScript.Target = avatar.transform.Find( "Marble" );
+			cameraScript.DeathCam = false;
 		}
 	}
 }

@@ -51,6 +51,8 @@ public class MarbleMovement : MonoBehaviour
 		initRotation = Marble.transform.rotation;
 		initVelocity = Marble.rigidbody.velocity;
 		initAngularVelocity = Marble.rigidbody.angularVelocity;
+
+		ResetSurfaceNormal();
 	}
 
 	void OnDisable()
