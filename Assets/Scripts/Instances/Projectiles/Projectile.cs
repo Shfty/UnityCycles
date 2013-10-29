@@ -3,9 +3,12 @@ using System.Collections;
 
 public class Projectile : PooledObject
 {
-	//Fields
+	// Fields
 	Vector3 initVelocity;
 	Vector3 initAngularVelocity;
+
+	// Properties
+	public GameObject Owner;
 
 	// Unity Methods
 	public override void OnEnable()

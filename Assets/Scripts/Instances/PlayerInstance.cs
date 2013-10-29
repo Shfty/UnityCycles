@@ -9,8 +9,11 @@ public class PlayerInstance : PooledObject
 	float prevFire;
 	float prevSwitchLeft;
 	float prevSwitchRight;
+
+	int initHealth;
 	
 	// Properties
+	public GameControl GameControl;
 	public List<GameObject> Drones;
 	public List<Transform> DroneAnchors;
 	public int Health = 100;
@@ -28,11 +31,12 @@ public class PlayerInstance : PooledObject
 
 	public override void OnEnable()
 	{
-		// Overridden empty since this object's transform is unused
+		initHealth = Health;
 	}
 
 	public override void OnDisable()
 	{
+		Health = initHealth;
 	}
 
 	void Update()
@@ -102,6 +106,18 @@ public class PlayerInstance : PooledObject
 	}
 
 	// Utility Methods
+	public override void Deactivate()
+	{
+		// Ensure all drones are deactivated
+		foreach( GameObject drone in Drones )
+		{
+			drone.GetComponent<Drone>().Deactivate();
+		}
+		Drones.Clear();
+
+		base.Deactivate();
+	}
+
 	void SwitchDrone( bool right )
 	{
 		GameObject temp;
@@ -130,12 +146,15 @@ public class PlayerInstance : PooledObject
 		}
 	}
 
-	void ApplyDamage( int damage )
+	void ApplyDamage( object[] args )
 	{
+		int damage = (int)args[ 0 ];
+		GameObject owner = (GameObject)args[ 1 ];
+
 		Health -= damage;
 		if( Health <= 0 )
 		{
-			Deactivate();
+			GameControl.PlayerDeath( gameObject, owner );
 		}
 	}
 }

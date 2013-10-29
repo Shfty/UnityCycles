@@ -307,8 +307,15 @@ public class Drone : PooledObject
 	// Utility Methods
 	public override void Deactivate()
 	{
+		// Spawn Explosion
+		GameObject explosion = dronePool.Spawn( ExplosionPrefab );
+		explosion.transform.position = transform.position;
+
 		// Manually deactivate aiming holo as it's not parented
-		aimingHolo.GetComponent<PooledObject>().Deactivate();
+		if( aimingHolo != null )
+		{
+			aimingHolo.GetComponent<PooledObject>().Deactivate();
+		}
 
 		base.Deactivate();
 	}
@@ -323,6 +330,7 @@ public class Drone : PooledObject
 				rocket.transform.position = transform.position;
 				rocket.transform.rotation = transform.rotation;
 				Rocket rocketScript = rocket.GetComponent<Rocket>();
+				rocketScript.Owner = Player;
 				rocketScript.PooledStart();
 				--Ammo;
 				break;
@@ -335,6 +343,7 @@ public class Drone : PooledObject
 				Vector3 diff = AimPoint - mortar.transform.position;
 				diff.y = 0;
 				mortarScript.TargetDist = diff.magnitude;
+				mortarScript.Owner = Player;
 				mortarScript.PooledStart();
 				--Ammo;
 				break;
@@ -359,6 +368,7 @@ public class Drone : PooledObject
 					seekerScript.SeekTarget = lockTarget;
 					lockTarget = null;
 				}
+				seekerScript.Owner = Player;
 
 				// Activate it and decrement ammo
 				seekerScript.PooledStart();
@@ -371,8 +381,6 @@ public class Drone : PooledObject
 		// If the drone is out of ammo, create an explosion and deactivate it
 		if( Ammo == 0 )
 		{
-			GameObject explosion = dronePool.Spawn( ExplosionPrefab );
-			explosion.transform.position = transform.position;
 			Deactivate();
 		}
 	}

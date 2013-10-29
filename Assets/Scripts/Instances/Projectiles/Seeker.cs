@@ -65,6 +65,7 @@ public class Seeker : Projectile
 		// Create an explosion and wait until the particle system is finished before deactivating
 		GameObject explosion = projectilePool.Spawn( ExplosionPrefab );
 		explosion.transform.position = transform.position;
+		explosion.GetComponent<Explosion>().Owner = Owner;
 
 		ParticleSystem ps = transform.Find( "Exhaust" ).GetComponent<ParticleSystem>();
 		StartCoroutine( WaitForParticles( ps ) );

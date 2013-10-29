@@ -8,6 +8,9 @@ public class GameControl : MonoBehaviour
 	ObjectPool playerPool;
 	ObjectPool pickupPool;
 	ObjectPool sharedPool;
+	GameObject playerContainer;
+	GameObject[] spawnPoints;
+	GameObject[] mapCameraAnchors;
 
 	// Properties
 	public GameObject AvatarPrefab;
@@ -30,6 +33,9 @@ public class GameControl : MonoBehaviour
 		pickupPool = GameObject.Find( "Pickup Pool" ).GetComponent<ObjectPool>();
 		sharedPool = GameObject.Find( "Shared Pool" ).GetComponent<ObjectPool>();
 
+		// Create player container
+		playerContainer = new GameObject( "Players" );
+
 		// Instantiate player list
 		Players = new List<GameObject>();
 
@@ -39,8 +45,11 @@ public class GameControl : MonoBehaviour
 
 	void Start()
 	{
+		// Get spawn points and map camera anchors
+		spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" );
+		mapCameraAnchors = GameObject.FindGameObjectsWithTag( "MapCamera" );
+
 		// Spawn players
-		GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" );
 		for( int i = 0; i < LocalPlayerCount; ++i )
 		{
 			SpawnLocalPlayer( spawnPoints[ i + 1 ].transform, i );
@@ -95,6 +104,7 @@ public class GameControl : MonoBehaviour
 	{
 		// Instantiate a new player container
 		GameObject player = new GameObject( "Player" );
+		player.transform.parent = playerContainer.transform;
 
 		// AVATAR
 		// Spawn it's world avatar
@@ -108,7 +118,9 @@ public class GameControl : MonoBehaviour
 		avatarInputScript.LocalPlayerIndex = Players.Count;
 		avatarInputScript.Init();
 
-		// Setup avatar overlay's GameControl reference
+		// Setup avatar and overlay GameControl references
+		PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
+		avatarScript.GameControl = this;
 		PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
 		avatarOverlay.GameControl = this;
 		
@@ -122,6 +134,7 @@ public class GameControl : MonoBehaviour
 		// Tell the camera to follow the avatar
 		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
 		cameraScript.Target = avatar.transform.Find( "Marble" );
+		cameraScript.GameControl = this;
 
 		// Setup camera input wrapper
 		InputWrapper cameraInputScript = camera.GetComponent<InputWrapper>();
@@ -249,5 +262,79 @@ public class GameControl : MonoBehaviour
 		}
 
 		return cameraRect;
+	}
+
+	public void PlayerDeath( GameObject go, GameObject killedBy )
+	{
+		foreach( GameObject player in Players )
+		{
+			if( player.transform.Find( "Avatar" ) == null )
+			{
+				continue;
+			}
+
+			if( player.transform.Find( "Avatar" ).gameObject == go )
+			{
+				FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
+				cameraScript.DeathCam = true;
+
+				// If killed by another player, target the camera at them
+				if( killedBy != go.transform.parent.gameObject )
+				{
+					cameraScript.Target = killedBy.transform.Find( "Avatar/Marble" );
+				}
+				else // If killed by self, switch to a random map camera
+				{
+					// Randomly pick a camera anchor
+					int i = Random.Range( 0, mapCameraAnchors.Length );
+					GameObject cameraAnchor = mapCameraAnchors[ i ];
+					cameraScript.Target = cameraAnchor.transform;
+				}
+
+				go.GetComponent<PlayerInstance>().Deactivate();
+			}
+		}
+	}
+
+	public void Respawn( GameObject go )
+	{
+		foreach( GameObject player in Players )
+		{
+			if( player == go )
+			{
+
+				int i = Random.Range( 0, spawnPoints.Length );
+				Transform spawnPoint = spawnPoints[ i ].transform;
+
+				FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
+
+				// AVATAR
+				// Spawn it's world avatar
+				GameObject avatar = playerPool.Spawn( AvatarPrefab );
+				avatar.transform.position = spawnPoint.position;
+				avatar.transform.rotation = spawnPoint.rotation;
+				avatar.transform.parent = player.transform;
+
+				// Setup avatar input wrapper
+				InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
+				avatarInputScript.LocalPlayerIndex = Players.IndexOf( player );
+				avatarInputScript.Init();
+
+				// Setup avatar and overlay GameControl references
+				PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
+				avatarScript.GameControl = this;
+				PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
+				avatarOverlay.GameControl = this;
+
+				// Setup avatar movement script
+				MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();
+				movementScript.Camera = player.transform.Find( "Camera" );
+
+				// CAMERA
+				// Tell the camera to follow the avatar
+				cameraScript.Target = avatar.transform.Find( "Marble" );
+				cameraScript.DeathCam = false;
+			}
+		}
 	}
 }

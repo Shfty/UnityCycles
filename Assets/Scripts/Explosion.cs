@@ -7,6 +7,7 @@ public class Explosion : MonoBehaviour
 	
 	// Properties
 	public float Force;
+	public GameObject Owner;
 
 	// Unity Methods
 	void Awake()
@@ -36,7 +37,8 @@ public class Explosion : MonoBehaviour
 		if( col.rigidbody != null )
 		{
 			col.rigidbody.AddExplosionForce( Force, transform.position, sc.radius );
-			col.gameObject.SendMessageUpwards( "ApplyDamage", 100, SendMessageOptions.DontRequireReceiver );
+			object[] args = { 100, Owner };
+			col.gameObject.SendMessageUpwards( "ApplyDamage", args, SendMessageOptions.DontRequireReceiver );
 		}
 	}
 	

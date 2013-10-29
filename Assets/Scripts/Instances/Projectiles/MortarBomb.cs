@@ -31,6 +31,7 @@ public class MortarBomb : Projectile
 		// Create an explosion and deactivate the projectile
 		GameObject explosion = projectilePool.Spawn( ExplosionPrefab );
 		explosion.transform.position = transform.position;
+		explosion.GetComponent<Explosion>().Owner = Owner;
 
 		Deactivate();
 	}

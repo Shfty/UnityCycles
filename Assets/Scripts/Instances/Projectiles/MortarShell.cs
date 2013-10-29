@@ -43,6 +43,7 @@ public class MortarShell : Projectile
 			// Create an explosion prefab
 			GameObject explosion = projectilePool.Spawn( ExplosionPrefab );
 			explosion.transform.position = transform.position;
+			explosion.GetComponent<Explosion>().Owner = Owner;
 
 			// Release mortar 6 bombs downward
 			Vector3 bombVector = Quaternion.AngleAxis( 85f, Vector3.right ) * Vector3.forward;
@@ -52,6 +53,7 @@ public class MortarShell : Projectile
 				mortarBomb.transform.position = transform.position;
 				mortarBomb.transform.rotation = Quaternion.FromToRotation( Vector3.forward, bombVector );
 				MortarBomb bombScript = mortarBomb.GetComponent<MortarBomb>();
+				bombScript.Owner = Owner;
 				bombScript.PooledStart();
 
 				bombVector = Quaternion.AngleAxis( 60f, Vector3.up ) * bombVector;

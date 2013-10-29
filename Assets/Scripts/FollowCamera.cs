@@ -10,6 +10,7 @@ public class FollowCamera : MonoBehaviour
 	float xAngle = 0f;
 	float yAngle = 0f;
 	float followDistance;
+	float prevRespawn = 0f;
 
 	int terrainMask;
 	int wallMask;
@@ -18,6 +19,7 @@ public class FollowCamera : MonoBehaviour
 
 	// Properties
 	public Transform Target;
+	public GameControl GameControl;
 	public Texture CrosshairTexture;
 	public Vector3 Offset;
 	public float MinFollowDistance = 1f;
@@ -25,6 +27,7 @@ public class FollowCamera : MonoBehaviour
 	public float PositionLerpFactor = 12f;
 	public float CameraRadius = .5f;
 	public float SmallValue = .01f;
+	public bool DeathCam = false;
 	
 	// Unity Methods
 	void Awake()
@@ -38,6 +41,11 @@ public class FollowCamera : MonoBehaviour
 
 	void Start()
 	{
+		if( Target == null )
+		{
+			return;
+		}
+
 		// Set the target position behind the target and init the camera position to it
 		targetPosition = Target.position - ( Vector3.forward * followDistance );
 		transform.position = targetPosition;
@@ -49,6 +57,11 @@ public class FollowCamera : MonoBehaviour
 	
 	void FixedUpdate()
 	{
+		if( Target == null )
+		{
+			return;
+		}
+
 		// Correct positioning
 		bool targetObscured;
 		bool clipTerrain;
@@ -101,10 +114,25 @@ public class FollowCamera : MonoBehaviour
 				followDistance += SmallValue;
 			}
 		} while( canReverse );
+
+		// Check respawn
+		if( DeathCam )
+		{
+			if( inputWrapper.Fire == 1f && prevRespawn == 0f )
+			{
+				GameControl.Respawn( transform.parent.gameObject );
+			}
+		}
+		prevRespawn = inputWrapper.Fire;
 	}
 
 	void Update()
 	{
+		if( Target == null )
+		{
+			return;
+		}
+
 		// Take Input and clamp Y Axis
 		xAngle += inputWrapper.RightStick.x * 90f * Time.deltaTime;
 		yAngle += inputWrapper.RightStick.y * -90f * Time.deltaTime;
@@ -118,19 +146,38 @@ public class FollowCamera : MonoBehaviour
 
 	void OnGUI()
 	{
-		// Draw the crosshair texture in the center of the viewport
+		// Crosshair
+		// Get the center of the viewport in screen space
 		Vector3 pt = camera.ViewportToScreenPoint( new Vector3( .5f, .5f, 0f ) );
+		// Convert between screen space and GUI space
+		pt.y = Screen.height - pt.y;
+
+		// Calculate crosshair size and rectangle
 		float pixWidth = camera.pixelWidth;
 		float pixHeight = camera.pixelHeight;
 		float avgSize = ( pixWidth + pixHeight ) * .5f;
 		float size = avgSize * .004f;
 		float halfSize = size * .5f;
 		GUI.DrawTexture( new Rect( pt.x - halfSize, pt.y - halfSize, size, size ), CrosshairTexture );
+
+		// Death Cam
+		if( DeathCam )
+		{
+			// Respawn Prompt
+			string respawnText = "Fire to Respawn";
+			Vector2 textBounds = GUIStyle.none.CalcSize( new GUIContent( respawnText ) );
+			GUI.Label( new Rect( pt.x - ( textBounds.x * .5f ), pt.y + ( textBounds.y * .5f ), textBounds.x, textBounds.y * 2f ), "Fire to Respawn" );
+		}
 	}
 
 	// Utility Methods
 	void UpdateTarget()
 	{
+		if( Target == null )
+		{
+			return;
+		}
+
 		// Calculate the camera's position and rotation relative to the target
 		Vector3 cameraForward = Vector3.forward;
 		cameraForward = Quaternion.AngleAxis( yAngle, Vector3.right ) * cameraForward;
