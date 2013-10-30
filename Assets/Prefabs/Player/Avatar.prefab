@@ -13,6 +13,7 @@ GameObject:
   - 33: {fileID: 3300000}
   - 23: {fileID: 2300000}
   - 114: {fileID: 11400010}
+  - 114: {fileID: 11400022}
   m_Layer: 8
   m_Name: Marble
   m_TagString: Player
@@ -33,6 +34,7 @@ GameObject:
   - 114: {fileID: 11400002}
   - 114: {fileID: 11400000}
   - 114: {fileID: 11400008}
+  - 114: {fileID: 11400012}
   m_Layer: 8
   m_Name: Avatar
   m_TagString: Untagged
@@ -160,23 +162,6 @@ GameObject:
   - 4: {fileID: 400020}
   m_Layer: 8
   m_Name: Drone Anchors
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!1 &100022
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 400022}
-  - 119: {fileID: 11900000}
-  - 114: {fileID: 11400018}
-  m_Layer: 8
-  m_Name: Shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -488,7 +473,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 400022}
   - {fileID: 400000}
   - {fileID: 400012}
   - {fileID: 400010}
@@ -594,17 +578,6 @@ Transform:
   - {fileID: 400016}
   - {fileID: 400014}
   m_Father: {fileID: 400010}
---- !u!4 &400022
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100022}
-  m_LocalRotation: {x: .707106888, y: 0, z: 0, w: .707106769}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 400002}
 --- !u!4 &400024
 Transform:
   m_ObjectHideFlags: 1
@@ -1071,8 +1044,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c65a5e3df41943f4b923c13754554644, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OriginPool: {fileID: 0}
-  Prefab: {fileID: 0}
   GameControl: {fileID: 0}
   Drones: []
   DroneAnchors:
@@ -1141,6 +1112,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MarbleScript: {fileID: 11400006}
+--- !u!114 &11400012
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9885aaf09c81fd44b775938c488eec3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 0}
 --- !u!114 &11400014
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1170,23 +1153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GameControl: {fileID: 0}
   BillboardPrefab: {fileID: 100000, guid: b2f0dc26e5bc0054698a3ace90cb2aaa, type: 2}
-  Player: {fileID: 100002}
---- !u!114 &11400018
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100022}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34c0a8288ff8eee4c80fa6733982d094, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Target: {fileID: 400000}
-  Offset: {x: 0, y: 1.5, z: 0}
-  Lerp: 0
-  LerpType: 0
-  LerpFactor: .200000003
+  Player: {fileID: 0}
 --- !u!114 &11400020
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1203,24 +1170,17 @@ MonoBehaviour:
   Lerp: 0
   LerpType: 0
   LerpFactor: .200000003
---- !u!119 &11900000
-Projector:
+--- !u!114 &11400022
+MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100022}
+  m_GameObject: {fileID: 100000}
   m_Enabled: 1
-  serializedVersion: 2
-  m_NearClipPlane: .100000001
-  m_FarClipPlane: 50
-  m_FieldOfView: 30
-  m_AspectRatio: 1
-  m_Orthographic: 0
-  m_OrthographicSize: 2
-  m_Material: {fileID: 2100000, guid: 78c0a732ad112a541100162a44295342, type: 2}
-  m_IgnoreLayers:
-    serializedVersion: 2
-    m_Bits: 256
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 670e9809ab18ab94c95d0a7b3660ce5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!135 &13500000
 SphereCollider:
   m_ObjectHideFlags: 1

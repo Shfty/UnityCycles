@@ -10,9 +10,10 @@ GameObject:
   - 4: {fileID: 400000}
   - 54: {fileID: 5400000}
   - 114: {fileID: 11400000}
+  - 114: {fileID: 11400002}
   - 136: {fileID: 13600000}
   m_Layer: 12
-  m_Name: Seeker Missile
+  m_Name: Seeker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -354,8 +355,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3692d2a8019b5d744ae7f802c3b50d92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SeekTarget: {x: 0, y: 0, z: 0}
-  ExplosionPrefab: {fileID: 100000, guid: 954b7ba4147dc4b49bbd35cdc5cb368a, type: 2}
+  Owner: {fileID: 0}
+  SeekTarget: {fileID: 0}
+  SeekPoint: {x: 0, y: 0, z: 0}
+--- !u!114 &11400002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9885aaf09c81fd44b775938c488eec3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 0}
 --- !u!136 &13600000
 CapsuleCollider:
   m_ObjectHideFlags: 1

@@ -5,22 +5,21 @@ using System.Collections.Generic;
 public class GameControl : MonoBehaviour
 {
 	// Fields
-	ObjectPool playerPool;
-	ObjectPool pickupPool;
-	ObjectPool sharedPool;
 	GameObject playerContainer;
 	GameObject[] spawnPoints;
-	GameObject[] mapCameraAnchors;
 
 	// Properties
-	public GameObject AvatarPrefab;
-	public GameObject CameraPrefab;
-	public GameObject PickupPrefab;
-	public GameObject RocketDronePrefab;
-	public GameObject MortarDronePrefab;
-	public GameObject SeekerDronePrefab;
 	public int LocalPlayerCount = 1;
 	public List<GameObject> Players;
+
+	// Statics
+	public static ObjectPool BillboardPool;
+	public static ObjectPool DronePool;
+	public static ObjectPool MiscPool;
+	public static ObjectPool PickupPool;
+	public static ObjectPool PlayerPool;
+	public static ObjectPool ProjectilePool;
+	public static ObjectPool SharedPool;
 
 	// Unity Methods
 	void Awake()
@@ -29,9 +28,13 @@ public class GameControl : MonoBehaviour
 		GameObject.DontDestroyOnLoad( this );
 
 		// Find object pools
-		playerPool = GameObject.Find( "Player Pool" ).GetComponent<ObjectPool>();
-		pickupPool = GameObject.Find( "Pickup Pool" ).GetComponent<ObjectPool>();
-		sharedPool = GameObject.Find( "Shared Pool" ).GetComponent<ObjectPool>();
+		BillboardPool = GameObject.Find( "Billboard Pool" ).GetComponent<ObjectPool>();
+		DronePool = GameObject.Find( "Drone Pool" ).GetComponent<ObjectPool>();
+		MiscPool = GameObject.Find( "Misc Pool" ).GetComponent<ObjectPool>();
+		PickupPool = GameObject.Find( "Pickup Pool" ).GetComponent<ObjectPool>();
+		PlayerPool = GameObject.Find( "Player Pool" ).GetComponent<ObjectPool>();
+		ProjectilePool = GameObject.Find( "Projectile Pool" ).GetComponent<ObjectPool>();
+		SharedPool = GameObject.Find( "Shared Pool" ).GetComponent<ObjectPool>();
 
 		// Create player container
 		playerContainer = new GameObject( "Players" );
@@ -47,7 +50,6 @@ public class GameControl : MonoBehaviour
 	{
 		// Get spawn points and map camera anchors
 		spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" );
-		mapCameraAnchors = GameObject.FindGameObjectsWithTag( "MapCamera" );
 
 		// Spawn players
 		for( int i = 0; i < LocalPlayerCount; ++i )
@@ -87,7 +89,9 @@ public class GameControl : MonoBehaviour
 	void Update()
 	{
 		// Grab the cursor when the window is clicked
-		if( !Screen.lockCursor && Input.GetMouseButtonDown( 0 ) )
+		bool mouseInWindowX = Input.mousePosition.x > 0 && Input.mousePosition.x < Screen.width;
+		bool mouseInWindowY = Input.mousePosition.y > 0 && Input.mousePosition.y < Screen.height;
+		if( !Screen.lockCursor && mouseInWindowX && mouseInWindowY && Input.GetMouseButtonDown( 0 ) )
 		{
 			Screen.lockCursor = true;
 		}
@@ -108,25 +112,23 @@ public class GameControl : MonoBehaviour
 
 		// AVATAR
 		// Spawn it's world avatar
-		GameObject avatar = playerPool.Spawn( AvatarPrefab );
+		GameObject avatar = PlayerPool.Spawn( "Avatar" );
+		avatar.transform.parent = player.transform;
 		avatar.transform.position = spawnPoint.position;
 		avatar.transform.rotation = spawnPoint.rotation;
-		avatar.transform.parent = player.transform;
 
 		// Setup avatar input wrapper
 		InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
 		avatarInputScript.LocalPlayerIndex = Players.Count;
 		avatarInputScript.Init();
 
-		// Setup avatar and overlay GameControl references
+		// Setup avatar script
 		PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
 		avatarScript.GameControl = this;
-		PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
-		avatarOverlay.GameControl = this;
 		
 		// CAMERA
 		// Instantiate a new camera object
-		GameObject camera = playerPool.Spawn( CameraPrefab );
+		GameObject camera = PlayerPool.Spawn( "Camera" );
 		camera.transform.position = avatar.transform.position;
 		camera.transform.rotation = avatar.transform.rotation;
 		camera.transform.parent = player.transform;
@@ -159,6 +161,12 @@ public class GameControl : MonoBehaviour
 		Camera cameraComponent = camera.GetComponent<Camera>();
 		cameraComponent.cullingMask = ~cameraMask;
 
+		// Setup overlay last
+		PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
+		avatarOverlay.GameControl = this;
+		avatarOverlay.Player = player;
+		avatarOverlay.LateStart();
+
 		// Add to the player list
 		Players.Add( player );
 	}
@@ -166,18 +174,18 @@ public class GameControl : MonoBehaviour
 	void SpawnPickup( PickupInfo.Type type, Vector3 position, Quaternion rotation )
 	{
 		// Get a blank pickup from the object pool, spawn the appropriate graphic and attach
-		GameObject pickup = pickupPool.Spawn( PickupPrefab );
+		GameObject pickup = PickupPool.Spawn( "Pickup" );
 		GameObject pickupMesh = null;
 		switch( type )
 		{
 			case PickupInfo.Type.Rocket:
-				pickupMesh = sharedPool.Spawn( RocketDronePrefab );
+				pickupMesh = SharedPool.Spawn( "Rocket Drone" );
 				break;
 			case PickupInfo.Type.Mortar:
-				pickupMesh = sharedPool.Spawn( MortarDronePrefab );
+				pickupMesh = SharedPool.Spawn( "Mortar Drone" );
 				break;
 			case PickupInfo.Type.Seeker:
-				pickupMesh = sharedPool.Spawn( SeekerDronePrefab );
+				pickupMesh = SharedPool.Spawn( "Seeker Drone" );
 				break;
 			default:
 				break;
@@ -188,6 +196,7 @@ public class GameControl : MonoBehaviour
 		GameObject pickupGlow = pickup.transform.Find( "Overlay" ).gameObject;
 		Billboard pickupOverlay = pickupGlow.GetComponent<Billboard>();
 		pickupOverlay.GameControl = this;
+		pickupOverlay.LateStart();
 
 		// Setup transform
 		pickup.transform.position = position;
@@ -269,6 +278,14 @@ public class GameControl : MonoBehaviour
 		if( Players.Contains( go.transform.parent.gameObject ) )
 		{
 			GameObject player = Players[ Players.IndexOf( go.transform.parent.gameObject ) ];
+			PlayerInstance playerScript = go.GetComponent<PlayerInstance>();
+
+			// Ensure all drones are deactivated
+			foreach( GameObject drone in playerScript.Drones )
+			{
+				DronePool.Despawn( drone );
+			}
+			playerScript.Drones.Clear();
 
 			FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
 			cameraScript.DeathCam = true;
@@ -276,17 +293,18 @@ public class GameControl : MonoBehaviour
 			// If killed by another player, target the camera at them
 			if( killedBy != go.transform.parent.gameObject )
 			{
-				cameraScript.Target = killedBy.transform.Find( "Avatar/Marble" );
+				Transform target = killedBy.transform.Find( "Avatar/Marble" );
+				if( target != null && target.gameObject.activeSelf )
+				{
+					cameraScript.Target = target;
+				}
 			}
-			else // If killed by self, switch to a random map camera
+			else
 			{
-				// Randomly pick a camera anchor
-				int i = Random.Range( 0, mapCameraAnchors.Length );
-				GameObject cameraAnchor = mapCameraAnchors[ i ];
-				cameraScript.Target = cameraAnchor.transform;
+				cameraScript.Target = null;
 			}
 
-			go.GetComponent<PlayerInstance>().Deactivate();
+			PlayerPool.Despawn( go );
 		}
 	}
 
@@ -303,7 +321,7 @@ public class GameControl : MonoBehaviour
 
 			// AVATAR
 			// Spawn it's world avatar
-			GameObject avatar = playerPool.Spawn( AvatarPrefab );
+			GameObject avatar = PlayerPool.Spawn( "Avatar" );
 			avatar.transform.position = spawnPoint.position;
 			avatar.transform.rotation = spawnPoint.rotation;
 			avatar.transform.parent = player.transform;
@@ -318,6 +336,8 @@ public class GameControl : MonoBehaviour
 			avatarScript.GameControl = this;
 			PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
 			avatarOverlay.GameControl = this;
+			avatarOverlay.Player = player;
+			avatarOverlay.LateStart();
 
 			// Setup avatar movement script
 			MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();

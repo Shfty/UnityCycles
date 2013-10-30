@@ -11,6 +11,7 @@ public class FollowCamera : MonoBehaviour
 	float yAngle = 0f;
 	float followDistance;
 	float prevRespawn = 0f;
+	GameObject[] mapCameraAnchors;
 
 	int terrainMask;
 	int wallMask;
@@ -28,6 +29,7 @@ public class FollowCamera : MonoBehaviour
 	public float CameraRadius = .5f;
 	public float SmallValue = .01f;
 	public bool DeathCam = false;
+	public int RenderLayer;
 	
 	// Unity Methods
 	void Awake()
@@ -41,6 +43,12 @@ public class FollowCamera : MonoBehaviour
 
 	void Start()
 	{
+		// Find fallback camera anchors
+		mapCameraAnchors = GameObject.FindGameObjectsWithTag( "MapCamera" );
+
+		// Setup render layer string
+		RenderLayer = LayerMask.NameToLayer( "Camera " + ( inputWrapper.LocalPlayerIndex + 1 ) );
+
 		// Set the target position behind the target and init the camera position to it
 		targetPosition = Target.position - ( Vector3.forward * followDistance );
 		transform.position = targetPosition;
@@ -49,9 +57,24 @@ public class FollowCamera : MonoBehaviour
 		terrainMask = 1 << LayerMask.NameToLayer( "Terrain" );
 		wallMask = 1 << LayerMask.NameToLayer( "Walls" );
 	}
-	
-	void FixedUpdate()
+
+	void Update()
 	{
+		// Fallback to a map anchor if the follow target is unsuitable
+		if( Target == null || !Target.parent.gameObject.activeSelf )
+		{
+			// Randomly pick a camera anchor
+			int i = Random.Range( 0, mapCameraAnchors.Length );
+			GameObject cameraAnchor = mapCameraAnchors[ i ];
+			Target = cameraAnchor.transform;
+		}
+
+		// Take Input and clamp Y Axis
+		xAngle += inputWrapper.RightStick.x * 90f * Time.deltaTime;
+		yAngle += inputWrapper.RightStick.y * -90f * Time.deltaTime;
+
+		yAngle = Mathf.Clamp( yAngle, -80f, 80f );
+
 		// Correct positioning
 		bool targetObscured;
 		bool clipTerrain;
@@ -114,15 +137,6 @@ public class FollowCamera : MonoBehaviour
 			}
 		}
 		prevRespawn = inputWrapper.Fire;
-	}
-
-	void Update()
-	{
-		// Take Input and clamp Y Axis
-		xAngle += inputWrapper.RightStick.x * 90f * Time.deltaTime;
-		yAngle += inputWrapper.RightStick.y * -90f * Time.deltaTime;
-
-		yAngle = Mathf.Clamp( yAngle, -80f, 80f );
 
 		// Apply transform changes
 		transform.position = Vector3.Lerp( transform.position, targetPosition, PositionLerpFactor * Time.deltaTime );

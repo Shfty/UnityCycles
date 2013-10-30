@@ -10,6 +10,7 @@ GameObject:
   - 4: {fileID: 400000}
   - 135: {fileID: 13500000}
   - 114: {fileID: 11400000}
+  - 114: {fileID: 11400004}
   m_Layer: 11
   m_Name: Pickup
   m_TagString: Untagged
@@ -67,7 +68,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ee918fc1896f1146beea52dbc89093c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ObjectPool: {fileID: 0}
+  OriginPool: {fileID: 0}
+  Prefab: {fileID: 0}
   DronePrefab: {fileID: 100000, guid: 56713d5f26d60994f97d3a3b60bbf808, type: 2}
   RocketDronePrefab: {fileID: 100004, guid: 48ebd7b7e43790b409ef08d43f4b2052, type: 2}
   MortarDronePrefab: {fileID: 100004, guid: 947079c9b3e0ba64b8ca35b209b3e908, type: 2}
@@ -87,8 +89,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameControl: {fileID: 0}
-  ObjectPool: {fileID: 0}
   BillboardPrefab: {fileID: 100000, guid: fafb92a3f1063104396a80d5ef1d6070, type: 2}
+--- !u!114 &11400004
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9885aaf09c81fd44b775938c488eec3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OriginPool: {fileID: 0}
+  Prefab: {fileID: 0}
 --- !u!135 &13500000
 SphereCollider:
   m_ObjectHideFlags: 1

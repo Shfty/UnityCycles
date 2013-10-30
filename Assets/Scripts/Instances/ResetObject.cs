@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PooledObject : MonoBehaviour
+public class ResetObject : MonoBehaviour
 {
 	// Fields
 	Vector3 initPosition;
@@ -10,9 +10,6 @@ public class PooledObject : MonoBehaviour
 
 	Vector3 initVelocity;
 	Vector3 initAngularVelocity;
-
-	// Properties
-	public GameObject Prefab;
 
 	// Unity Methods
 	public virtual void Awake()
@@ -44,8 +41,11 @@ public class PooledObject : MonoBehaviour
 	}
 
 	// Utility Methods
-	protected void PrefabIs( GameObject prefab )
+	public virtual void Deactivate()
 	{
-		Prefab = prefab;
+		foreach( Transform child in transform )
+		{
+			child.SendMessage( "Deactivate", SendMessageOptions.DontRequireReceiver );
+		}
 	}
 }

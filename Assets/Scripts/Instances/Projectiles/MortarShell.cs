@@ -4,21 +4,13 @@ using System.Collections;
 public class MortarShell : Projectile
 {
 	// Fields
-	ObjectPool projectilePool;
 	Vector3 startPos;
 	float timer = 0f;
 
 	// Properties
-	public GameObject ExplosionPrefab;
-	public GameObject MortarBombPrefab;
 	public float TargetDist;
 
 	// Unity Methods
-	public void Awake()
-	{
-		projectilePool = GameObject.Find( "Projectile Pool" ).GetComponent<ObjectPool>();
-	}
-
 	public void PooledStart()
 	{
 		// Store starting position
@@ -41,7 +33,7 @@ public class MortarShell : Projectile
 		if( diff.magnitude > TargetDist || timer > ProjectileInfo.Properties.MortarShell.Timeout )
 		{
 			// Create an explosion prefab
-			GameObject explosion = projectilePool.Spawn( ExplosionPrefab );
+			GameObject explosion = GameControl.ProjectilePool.Spawn( "Rocket Explosion" );
 			explosion.transform.position = transform.position;
 			explosion.GetComponent<Explosion>().Owner = Owner;
 
@@ -49,7 +41,7 @@ public class MortarShell : Projectile
 			Vector3 bombVector = Quaternion.AngleAxis( 85f, Vector3.right ) * Vector3.forward;
 			for( int i = 0; i < 6; ++i )
 			{
-				GameObject mortarBomb = projectilePool.Spawn( MortarBombPrefab );
+				GameObject mortarBomb = GameControl.ProjectilePool.Spawn( "Mortar Bomb" );
 				mortarBomb.transform.position = transform.position;
 				mortarBomb.transform.rotation = Quaternion.FromToRotation( Vector3.forward, bombVector );
 				MortarBomb bombScript = mortarBomb.GetComponent<MortarBomb>();
@@ -60,7 +52,7 @@ public class MortarShell : Projectile
 			}
 
 			// Deactivate the mortar shell
-			Deactivate();
+			GameControl.ProjectilePool.Despawn( gameObject );
 		}
 	}
 }

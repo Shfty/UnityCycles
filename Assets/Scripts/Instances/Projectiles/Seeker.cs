@@ -4,21 +4,14 @@ using System.Collections;
 public class Seeker : Projectile
 {
 	// Fields
-	ObjectPool projectilePool;
 	float elapsedTime = 0f;
 	bool seeking = false;
 
 	// Properties
 	public Transform SeekTarget = null;
 	public Vector3 SeekPoint;
-	public GameObject ExplosionPrefab;
 
 	// Unity Methods
-	public void Start()
-	{
-		projectilePool = GameObject.Find( "Projectile Pool" ).GetComponent<ObjectPool>();
-	}
-
 	public void PooledStart()
 	{
 		// Add initial force and torque
@@ -63,7 +56,7 @@ public class Seeker : Projectile
 	public void OnCollisionEnter()
 	{
 		// Create an explosion and wait until the particle system is finished before deactivating
-		GameObject explosion = projectilePool.Spawn( ExplosionPrefab );
+		GameObject explosion = GameControl.ProjectilePool.Spawn( "Rocket Explosion" );
 		explosion.transform.position = transform.position;
 		explosion.GetComponent<Explosion>().Owner = Owner;
 
@@ -84,7 +77,7 @@ public class Seeker : Projectile
 		rigidbody.isKinematic = false;
 		ps.enableEmission = true;
 
-		Deactivate();
+		GameControl.ProjectilePool.Despawn( gameObject );
 	}
 
 	void Seek()

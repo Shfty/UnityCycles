@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayerInstance : PooledObject
+public class PlayerInstance : MonoBehaviour
 {
 	// Fields
 	InputWrapper inputWrapper;
@@ -21,26 +21,18 @@ public class PlayerInstance : PooledObject
 	// Unity Methods
 	void Awake()
 	{
+		initHealth = Health;
+	}
+
+	public void OnEnable()
+	{
+		Health = initHealth;
 	}
 	
 	void Start()
 	{
 		// Find and store the input wrapper
 		inputWrapper = gameObject.GetComponent<InputWrapper>();
-	}
-
-	public override void OnEnable()
-	{
-		base.OnEnable();
-
-		initHealth = Health;
-	}
-
-	public override void OnDisable()
-	{
-		base.OnDisable();
-
-		Health = initHealth;
 	}
 
 	void Update()
@@ -110,18 +102,6 @@ public class PlayerInstance : PooledObject
 	}
 
 	// Utility Methods
-	public override void Deactivate()
-	{
-		// Ensure all drones are deactivated
-		foreach( GameObject drone in Drones )
-		{
-			drone.GetComponent<Drone>().Deactivate();
-		}
-		Drones.Clear();
-
-		base.Deactivate();
-	}
-
 	void SwitchDrone( bool right )
 	{
 		GameObject temp;

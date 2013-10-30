@@ -7,17 +7,34 @@ public class PlayerOverlay : Billboard
 	// Properties
 	public GameObject Player;
 
-	// Unity Methods
-	public override void Start()
+	// Utility Methods
+	public override void RespawnBillboards()
 	{
-		// Spawn cameras and billboards via base class
-		base.Start();
+		if( cameras != null )
+		{
+			cameras.Clear();
 
-		// Prune current player's overlay
-		int playerIndex = Player.GetComponent<InputWrapper>().LocalPlayerIndex;
-		cameras.RemoveAt( playerIndex );
-		GameObject billboard = billboards[ playerIndex ];
-		billboard.GetComponent<PooledObject>().Deactivate();
-		billboards.RemoveAt( playerIndex );
+			foreach( GameObject billboard in billboards )
+			{
+				GameControl.BillboardPool.Despawn( billboard );
+			}
+			billboards.Clear();
+
+			// Check the player count, create a billboard for each camera and set it to the respective layer
+			for( int i = 0; i < GameControl.Players.Count; ++i )
+			{
+				if( GameControl.Players[ i ] == Player )
+				{
+					continue;
+				}
+
+				GameObject cam = GameControl.Players[ i ].transform.Find( "Camera" ).gameObject;
+				cameras.Add( cam.camera );
+				GameObject billboard = GameControl.BillboardPool.Spawn( BillboardPrefab );
+				billboard.layer = LayerMask.NameToLayer( "Camera " + ( i + 1 ) );
+				billboard.transform.parent = transform;
+				billboards.Add( billboard );
+			}
+		}
 	}
 }

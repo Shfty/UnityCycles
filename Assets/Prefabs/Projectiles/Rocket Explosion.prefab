@@ -43,6 +43,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Force: 1000
+  Owner: {fileID: 0}
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -51,14 +52,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f22227677d9d3bb4abbea05661b8b889, type: 3}
+  m_Script: {fileID: 11500000, guid: a9885aaf09c81fd44b775938c488eec3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Prefabs: []
-  Preallocate: 1
-  PreallocateCount: 10
-  Limit: 1
-  LimitCount: 40
+  OriginPool: {fileID: 0}
+  Prefab: {fileID: 0}
 --- !u!135 &13500000
 SphereCollider:
   m_ObjectHideFlags: 1

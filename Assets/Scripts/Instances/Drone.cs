@@ -1,16 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Drone : PooledObject
+public class Drone : MonoBehaviour
 {
 	// Fields
-	ObjectPool dronePool;
-	ObjectPool projectilePool;
-	ObjectPool miscPool;
 	Quaternion targetRotation;
 	LineRenderer aimingLine = null;
 	Projector aimingHolo = null;
 	Transform lockTarget = null;
+	GameObject droneMesh = null;
 
 	GameObject initPlayer;
 	DroneInfo.Type initType;
@@ -21,12 +19,6 @@ public class Drone : PooledObject
 
 	// Properties
 	public GameObject Player;
-	public GameObject LineRendererPrefab;
-	public GameObject MortarHoloPrefab;
-	public GameObject ExplosionPrefab;
-	public GameObject RocketPrefab;
-	public GameObject MortarPrefab;
-	public GameObject SeekerPrefab;
 	public LayerMask raycastAimMask;
 	public LayerMask raycastLockMask;
 	public DroneInfo.Type Type;
@@ -36,19 +28,8 @@ public class Drone : PooledObject
 	public Vector3 AimPoint;
 
 	// Unity Methods
-	void Awake()
+	public void Awake()
 	{
-		// Need to call this here, PooledStart runs before Start
-		dronePool = GameObject.Find( "Drone Pool" ).GetComponent<ObjectPool>();
-		projectilePool = GameObject.Find( "Projectile Pool" ).GetComponent<ObjectPool>();
-		miscPool = GameObject.Find( "Misc Pool" ).GetComponent<ObjectPool>();
-	}
-
-	public override void OnEnable()
-	{
-		// Call parent OnEnable method
-		base.OnEnable();
-
 		// Store initial droid-related state
 		initPlayer = Player;
 		initType = Type;
@@ -58,11 +39,8 @@ public class Drone : PooledObject
 		initAimPoint = AimPoint;
 	}
 
-	public override void OnDisable()
+	public void OnEnable()
 	{
-		// Call parent OnDisable method
-		base.OnDisable();
-
 		// Restore initial droid-related state
 		Player = initPlayer;
 		Type = initType;
@@ -75,29 +53,46 @@ public class Drone : PooledObject
 	public void PooledStart()
 	{
 		// Spawn the aiming line
-		aimingLine = miscPool.Spawn( LineRendererPrefab ).GetComponent<LineRenderer>();
+		aimingLine = GameControl.MiscPool.Spawn( "Line Renderer" ).GetComponent<LineRenderer>();
 		aimingLine.transform.parent = transform;
+		aimingLine.gameObject.layer = Player.transform.Find( "Camera" ).GetComponent<FollowCamera>().RenderLayer;
 
 		// Configure the aiming line per-type and spawn type-specific extras
 		switch( Type )
 		{
 			case DroneInfo.Type.Rocket:
+				// Mesh
+				droneMesh = GameControl.SharedPool.Spawn( "Rocket Drone" );
+
 				// LineRenderer
 				aimingLine.SetVertexCount( 2 );
 				break;
 			case DroneInfo.Type.Mortar:
+				// Mesh
+				droneMesh = GameControl.SharedPool.Spawn( "Mortar Drone" );
+
 				// LineRenderer
 				aimingLine.SetVertexCount( DroneInfo.Mortar.AimLineSubdivisions );
 
 				// Aim Holo
-				aimingHolo = miscPool.Spawn( MortarHoloPrefab ).GetComponent<Projector>();
+				aimingHolo = GameControl.MiscPool.Spawn( "Mortar Holo" ).GetComponent<Projector>();
+				aimingHolo.gameObject.layer = Player.transform.Find( "Camera" ).GetComponent<FollowCamera>().RenderLayer;
 				break;
 			case DroneInfo.Type.Seeker:
+				// Mesh
+				droneMesh = GameControl.SharedPool.Spawn( "Seeker Drone" );
+
+				// LineRenderer
 				aimingLine.SetVertexCount( 3 );
 				break;
 			default:
 				break;
 		}
+
+		// Parent it to the blank drone
+		droneMesh.transform.parent = transform;
+		droneMesh.transform.position = transform.position;
+		droneMesh.transform.rotation = transform.rotation;
 	}
 
 	void FixedUpdate()
@@ -305,28 +300,13 @@ public class Drone : PooledObject
 	}
 
 	// Utility Methods
-	public override void Deactivate()
-	{
-		// Spawn Explosion
-		GameObject explosion = dronePool.Spawn( ExplosionPrefab );
-		explosion.transform.position = transform.position;
-
-		// Manually deactivate aiming holo as it's not parented
-		if( aimingHolo != null )
-		{
-			aimingHolo.GetComponent<PooledObject>().Deactivate();
-		}
-
-		base.Deactivate();
-	}
-
 	public void Fire()
 	{
 		switch( Type )
 		{
 			case DroneInfo.Type.Rocket:
 				// Spawn a rocket, activate it and decrement ammo
-				GameObject rocket = projectilePool.Spawn( RocketPrefab );
+				GameObject rocket = GameControl.ProjectilePool.Spawn( "Rocket" );
 				rocket.transform.position = transform.position;
 				rocket.transform.rotation = transform.rotation;
 				Rocket rocketScript = rocket.GetComponent<Rocket>();
@@ -336,7 +316,7 @@ public class Drone : PooledObject
 				break;
 			case DroneInfo.Type.Mortar:
 				// Spawn a mortar shell, set it's target distance, activate it and decrement ammo
-				GameObject mortar = projectilePool.Spawn( MortarPrefab );
+				GameObject mortar = GameControl.ProjectilePool.Spawn( "Mortar Shell" );
 				mortar.transform.position = transform.position;
 				mortar.transform.rotation = transform.rotation;
 				MortarShell mortarScript = mortar.GetComponent<MortarShell>();
@@ -349,7 +329,7 @@ public class Drone : PooledObject
 				break;
 			case DroneInfo.Type.Seeker:
 				// Spawn a seeker missile
-				GameObject seeker = projectilePool.Spawn( SeekerPrefab );
+				GameObject seeker = GameControl.ProjectilePool.Spawn( "Seeker" );
 				seeker.transform.position = transform.position;
 
 				// Launch it at a 45 degree angle
@@ -381,7 +361,22 @@ public class Drone : PooledObject
 		// If the drone is out of ammo, create an explosion and deactivate it
 		if( Ammo == 0 )
 		{
-			Deactivate();
+			// Spawn Explosion
+			GameObject explosion = GameControl.DronePool.Spawn( "Drone Explosion" );
+			explosion.transform.position = transform.position;
+			
+			// Deactivate spawned children
+			GameControl.MiscPool.Despawn( aimingLine.gameObject );
+
+			if( aimingHolo != null )
+			{
+				GameControl.MiscPool.Despawn( aimingHolo.gameObject );
+			}
+
+			GameControl.SharedPool.Despawn( droneMesh );
+
+			// Deactivate self
+			GameControl.DronePool.Despawn( gameObject );
 		}
 	}
 }

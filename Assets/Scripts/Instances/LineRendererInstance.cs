@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class LineRendererInstance : PooledObject
+public class LineRendererInstance : MonoBehaviour
 {
 	// Fields
 	LineRenderer lineRenderer;
@@ -12,10 +12,8 @@ public class LineRendererInstance : PooledObject
 		lineRenderer = gameObject.GetComponent<LineRenderer>();
 	}
 
-	public override void OnDisable()
+	public void OnEnable()
 	{
-		base.OnDisable();
-
 		// Reset object to init state
 		lineRenderer.SetVertexCount( 0 );
 		lineRenderer.SetColors( Color.white, Color.white );

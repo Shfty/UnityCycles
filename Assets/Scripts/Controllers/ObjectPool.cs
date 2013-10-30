@@ -64,11 +64,11 @@ public class ObjectPool : MonoBehaviour
 	{
 		// Create an instance of prefab, parent it to the respective pool holder and store in inactiveObjects
 		GameObject go = (GameObject)Instantiate( prefab );
-		go.transform.parent = parent;
 		go.name = prefab.name;
 		go.SendMessage( "OriginPoolIs", this, SendMessageOptions.DontRequireReceiver );
 		go.SendMessage( "PrefabIs", prefab, SendMessageOptions.DontRequireReceiver );
 		go.SetActive( false );
+		go.transform.parent = parent;
 		inactiveObjects[ prefab ].Add( go );
 
 		return go;
@@ -82,14 +82,30 @@ public class ObjectPool : MonoBehaviour
 		go.SetActive( true );
 	}
 
-	public GameObject Spawn( GameObject prefab )
+	public GameObject Spawn( string prefabName )
 	{
-		if( !inactiveObjects.ContainsKey( prefab ) )
+		GameObject prefab = null;
+		foreach( KeyValuePair<GameObject, List<GameObject>> pair in inactiveObjects )
+		{
+			if( pair.Key.name == prefabName )
+			{
+				prefab = pair.Key;
+			}
+		}
+
+		if( prefab != null )
+		{
+			return Spawn( prefab );
+		}
+		else
 		{
 			Debug.LogWarning( "Could not spawn " + prefab + ": not present in Object Pool" );
 			return null;
 		}
+	}
 
+	public GameObject Spawn( GameObject prefab )
+	{
 		// If there are any objects of the type requested, activate one and return it
 		if( inactiveObjects[prefab].Count > 0 )
 		{
@@ -130,8 +146,10 @@ public class ObjectPool : MonoBehaviour
 		}
 	}
 
-	public bool Despawn( GameObject prefab, GameObject go )
+	public bool Despawn( GameObject go )
 	{
+		GameObject prefab = go.GetComponent<PooledObject>().Prefab;
+
 		// Make sure this prefab is pooled
 		if( !activeObjects.ContainsKey( prefab ) )
 		{
