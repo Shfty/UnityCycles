@@ -361,22 +361,27 @@ public class Drone : MonoBehaviour
 		// If the drone is out of ammo, create an explosion and deactivate it
 		if( Ammo == 0 )
 		{
-			// Spawn Explosion
-			GameObject explosion = GameControl.DronePool.Spawn( "Drone Explosion" );
-			explosion.transform.position = transform.position;
-			
-			// Deactivate spawned children
-			GameControl.MiscPool.Despawn( aimingLine.gameObject );
-
-			if( aimingHolo != null )
-			{
-				GameControl.MiscPool.Despawn( aimingHolo.gameObject );
-			}
-
-			GameControl.SharedPool.Despawn( droneMesh );
-
-			// Deactivate self
-			GameControl.DronePool.Despawn( gameObject );
+			Deactivate();
 		}
+	}
+
+	public void Deactivate()
+	{
+		// Spawn Explosion
+		GameObject explosion = GameControl.DronePool.Spawn( "Drone Explosion" );
+		explosion.transform.position = transform.position;
+
+		// Deactivate spawned children
+		GameControl.MiscPool.Despawn( aimingLine.gameObject );
+
+		if( aimingHolo != null )
+		{
+			GameControl.MiscPool.Despawn( aimingHolo.gameObject );
+		}
+
+		GameControl.SharedPool.Despawn( droneMesh );
+
+		// Deactivate self
+		GameControl.DronePool.Despawn( gameObject );
 	}
 }

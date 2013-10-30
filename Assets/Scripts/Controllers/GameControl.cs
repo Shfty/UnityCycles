@@ -307,7 +307,7 @@ public class GameControl : MonoBehaviour
 			// Ensure all drones are deactivated
 			foreach( GameObject drone in playerScript.Drones )
 			{
-				DronePool.Despawn( drone );
+				drone.GetComponent<Drone>().Deactivate();
 			}
 			playerScript.Drones.Clear();
 
