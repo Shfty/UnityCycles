@@ -8,7 +8,7 @@ public class PlayerOverlay : Billboard
 	public GameObject Player;
 
 	// Utility Methods
-	public override void RespawnBillboards()
+	public override void LateStart()
 	{
 		if( cameras != null )
 		{

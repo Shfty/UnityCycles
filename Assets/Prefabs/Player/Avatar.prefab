@@ -90,23 +90,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &100012
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 400012}
-  - 114: {fileID: 11400016}
-  - 114: {fileID: 11400020}
-  m_Layer: 8
-  m_Name: Overlay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!1 &100014
 GameObject:
   m_ObjectHideFlags: 1
@@ -474,7 +457,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400000}
-  - {fileID: 400012}
   - {fileID: 400010}
   m_Father: {fileID: 0}
 --- !u!4 &400006
@@ -519,17 +501,6 @@ Transform:
   - {fileID: 400038}
   - {fileID: 400032}
   - {fileID: 400056}
-  m_Father: {fileID: 400002}
---- !u!4 &400012
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100012}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
   m_Father: {fileID: 400002}
 --- !u!4 &400014
 Transform:
@@ -1130,36 +1101,6 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34c0a8288ff8eee4c80fa6733982d094, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Target: {fileID: 400000}
-  Offset: {x: 0, y: 0, z: 0}
-  Lerp: 0
-  LerpType: 0
-  LerpFactor: .200000003
---- !u!114 &11400016
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100012}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fc7653b7f58bba4cb431828362a11b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GameControl: {fileID: 0}
-  BillboardPrefab: {fileID: 100000, guid: b2f0dc26e5bc0054698a3ace90cb2aaa, type: 2}
-  Player: {fileID: 0}
---- !u!114 &11400020
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100012}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 34c0a8288ff8eee4c80fa6733982d094, type: 3}

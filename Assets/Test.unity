@@ -357,8 +357,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab5d48f2d185f04bab2650d34d3bb83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalPlayerCount: 4
+  LocalPlayerCount: 2
   Players: []
+  Pickups: []
+  PlayerOverlays: []
+  PickupOverlays: []
 --- !u!1 &521612185
 GameObject:
   m_ObjectHideFlags: 0
@@ -742,6 +745,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Prefabs:
+  - {fileID: 100000, guid: fe95fba19fb45974198db9d7b0c63bc9, type: 2}
+  - {fileID: 100000, guid: f4c940d29f7e43a468cd3c119d622ada, type: 2}
   - {fileID: 100000, guid: b2f0dc26e5bc0054698a3ace90cb2aaa, type: 2}
   - {fileID: 100000, guid: fafb92a3f1063104396a80d5ef1d6070, type: 2}
   Preallocate: 1

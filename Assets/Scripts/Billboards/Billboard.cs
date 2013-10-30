@@ -31,12 +31,7 @@ public class Billboard : MonoBehaviour
 	}
 
 	// Utility Methods
-	public void LateStart()
-	{
-		RespawnBillboards();
-	}
-
-	public virtual void RespawnBillboards()
+	public virtual void LateStart()
 	{
 		if( cameras != null )
 		{

@@ -8,11 +8,11 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400000}
-  - 135: {fileID: 13500000}
-  - 114: {fileID: 11400000}
   - 114: {fileID: 11400004}
-  m_Layer: 11
-  m_Name: Pickup
+  - 114: {fileID: 11400000}
+  - 114: {fileID: 11400002}
+  m_Layer: 0
+  m_Name: Pickup Overlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37,12 +37,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ee918fc1896f1146beea52dbc89093c, type: 3}
+  m_Script: {fileID: 11500000, guid: 173201a05482c7f42946a9ed9062f54b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 0
-  Falling: 1
-  Velocity: {x: 0, y: 0, z: 0}
+  GameControl: {fileID: 0}
+  BillboardPrefab: {fileID: 100000, guid: fafb92a3f1063104396a80d5ef1d6070, type: 2}
+--- !u!114 &11400002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34c0a8288ff8eee4c80fa6733982d094, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 0}
+  Offset: {x: 0, y: 0, z: 0}
+  Lerp: 0
+  LerpType: 0
+  LerpFactor: .200000003
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -55,18 +70,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Prefab: {fileID: 0}
---- !u!135 &13500000
-SphereCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100000}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 2.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

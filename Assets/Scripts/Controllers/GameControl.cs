@@ -11,6 +11,9 @@ public class GameControl : MonoBehaviour
 	// Properties
 	public int LocalPlayerCount = 1;
 	public List<GameObject> Players;
+	public List<GameObject> Pickups;
+	public List<GameObject> PlayerOverlays;
+	public List<GameObject> PickupOverlays;
 
 	// Statics
 	public static ObjectPool BillboardPool;
@@ -57,6 +60,15 @@ public class GameControl : MonoBehaviour
 			SpawnLocalPlayer( spawnPoints[ i + 1 ].transform, i );
 		}
 
+		// Spawn player overlays
+		for( int i = 0; i < Players.Count; ++i )
+		{
+			GameObject playerOverlay = BillboardPool.Spawn( "Player Overlay" );
+			playerOverlay.GetComponent<PlayerOverlay>().GameControl = this;
+			ResetPlayerOverlay( playerOverlay, Players[ i ] );
+			PlayerOverlays.Add( playerOverlay );
+		}
+
 		// Spawn pickups
 		Terrain terrain = GameObject.Find( "Terrain" ).GetComponent<Terrain>();
 		Vector3 bounds = terrain.terrainData.size;
@@ -84,6 +96,15 @@ public class GameControl : MonoBehaviour
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
 			SpawnPickup( PickupInfo.Type.Seeker, randomPosition, randomRotation );
 		}
+
+		// Spawn pickup overlays
+		for( int i = 0; i < Pickups.Count; ++i )
+		{
+			GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
+			pickupOverlay.GetComponent<Billboard>().GameControl = this;
+			ResetPickupOverlay( pickupOverlay, Pickups[ i ] );
+			PickupOverlays.Add( pickupOverlay );
+		}
 	}
 
 	void Update()
@@ -100,6 +121,17 @@ public class GameControl : MonoBehaviour
 		if( Screen.lockCursor && Input.GetKeyDown( "escape" ) )
 		{
 			Screen.lockCursor = false;
+		}
+
+		// Check for any deactivated pickups
+		for( int i = 0; i < Pickups.Count; ++i )
+		{
+			if( !Pickups[ i ].activeSelf )
+			{
+				BillboardPool.Despawn( PickupOverlays[ i ] );
+				Pickups.RemoveAt( i );
+				PickupOverlays.RemoveAt( i );
+			}
 		}
 	}
 
@@ -161,12 +193,6 @@ public class GameControl : MonoBehaviour
 		Camera cameraComponent = camera.GetComponent<Camera>();
 		cameraComponent.cullingMask = ~cameraMask;
 
-		// Setup overlay last
-		PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
-		avatarOverlay.GameControl = this;
-		avatarOverlay.Player = player;
-		avatarOverlay.LateStart();
-
 		// Add to the player list
 		Players.Add( player );
 	}
@@ -192,12 +218,6 @@ public class GameControl : MonoBehaviour
 		}
 		pickupMesh.transform.parent = pickup.transform;
 
-		// Spawn and configure the pickup glow billboard
-		GameObject pickupGlow = pickup.transform.Find( "Overlay" ).gameObject;
-		Billboard pickupOverlay = pickupGlow.GetComponent<Billboard>();
-		pickupOverlay.GameControl = this;
-		pickupOverlay.LateStart();
-
 		// Setup transform
 		pickup.transform.position = position;
 		pickup.transform.rotation = rotation;
@@ -208,6 +228,9 @@ public class GameControl : MonoBehaviour
 
 		// Start the script
 		pickupScript.Start();
+
+		// Add to pickup list
+		Pickups.Add( pickup );
 	}
 
 	// Setup camera rect based on player count and index
@@ -277,7 +300,8 @@ public class GameControl : MonoBehaviour
 	{
 		if( Players.Contains( go.transform.parent.gameObject ) )
 		{
-			GameObject player = Players[ Players.IndexOf( go.transform.parent.gameObject ) ];
+			int playerIndex = Players.IndexOf( go.transform.parent.gameObject );
+			GameObject player = Players[ playerIndex ];
 			PlayerInstance playerScript = go.GetComponent<PlayerInstance>();
 
 			// Ensure all drones are deactivated
@@ -304,15 +328,35 @@ public class GameControl : MonoBehaviour
 				cameraScript.Target = null;
 			}
 
+			// Disable billboard
+			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent <PlayerOverlay>();
+			overlay.gameObject.SetActive( false );
+
 			PlayerPool.Despawn( go );
 		}
+	}
+
+	void ResetPlayerOverlay( GameObject playerOverlay, GameObject player )
+	{
+		int index = PlayerOverlays.IndexOf( playerOverlay );
+		playerOverlay.GetComponent<KinematicHover>().Target = player.transform.Find( "Avatar/Marble" );
+		playerOverlay.GetComponent<PlayerOverlay>().Player = player;
+		playerOverlay.GetComponent<PlayerOverlay>().LateStart();
+	}
+
+	void ResetPickupOverlay( GameObject pickupOverlay, GameObject pickup )
+	{
+		int index = PlayerOverlays.IndexOf( pickupOverlay );
+		pickupOverlay.GetComponent<KinematicHover>().Target = pickup.transform;
+		pickupOverlay.GetComponent<Billboard>().LateStart();
 	}
 
 	public void Respawn( GameObject go )
 	{
 		if( Players.Contains( go ) )
 		{
-			GameObject player = Players[ Players.IndexOf( go ) ];
+			int playerIndex = Players.IndexOf( go );
+			GameObject player = Players[ playerIndex ];
 
 			int i = Random.Range( 0, spawnPoints.Length );
 			Transform spawnPoint = spawnPoints[ i ].transform;
@@ -334,10 +378,11 @@ public class GameControl : MonoBehaviour
 			// Setup avatar and overlay GameControl references
 			PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
 			avatarScript.GameControl = this;
-			PlayerOverlay avatarOverlay = avatar.transform.Find( "Overlay" ).GetComponent<PlayerOverlay>();
-			avatarOverlay.GameControl = this;
-			avatarOverlay.Player = player;
-			avatarOverlay.LateStart();
+
+			// Reenable and reset the appropriate overlay
+			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
+			overlay.gameObject.SetActive( true );
+			ResetPlayerOverlay( PlayerOverlays[ playerIndex ], Players[ playerIndex ] );
 
 			// Setup avatar movement script
 			MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();
