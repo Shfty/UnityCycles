@@ -10,11 +10,10 @@ GameObject:
   - 4: {fileID: 400000}
   - 198: {fileID: 19800000}
   - 199: {fileID: 19900000}
-  - 135: {fileID: 13500000}
   - 114: {fileID: 11400000}
   - 114: {fileID: 11400002}
-  m_Layer: 12
-  m_Name: Rocket Explosion
+  m_Layer: 0
+  m_Name: Avatar Explosion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,8 +41,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b79d0fa1cabe3bc4dbe9caaaa5f190b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damage: 35
-  Force: 1000
+  Force: 0
   Owner: {fileID: 0}
 --- !u!114 &11400002
 MonoBehaviour:
@@ -57,18 +55,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Prefab: {fileID: 0}
---- !u!135 &13500000
-SphereCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100000}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 10
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!198 &19800000
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -86,7 +72,7 @@ ParticleSystem:
   InitialModule:
     enabled: 1
     startLifetime:
-      scalar: .400000006
+      scalar: .5
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -119,7 +105,7 @@ ParticleSystem:
         m_PostInfinity: 2
       minMaxState: 0
     startSpeed:
-      scalar: 12
+      scalar: 2.5
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -246,7 +232,7 @@ ParticleSystem:
         rgba: 4294967295
       minMaxState: 0
     startSize:
-      scalar: 2
+      scalar: .5
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -318,7 +304,7 @@ ParticleSystem:
     serializedVersion: 2
     enabled: 1
     type: 0
-    radius: .5
+    radius: .100000001
     angle: 25
     length: 5
     boxX: 1
@@ -363,7 +349,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
       minMaxState: 0
-    cnt0: 100
+    cnt0: 50
     cnt1: 30
     cnt2: 30
     cnt3: 30
@@ -1095,7 +1081,7 @@ ParticleSystem:
     range: {x: 0, y: 1}
   CollisionModule:
     enabled: 0
-    type: 1
+    type: 0
     plane0: {fileID: 0}
     plane1: {fileID: 0}
     plane2: {fileID: 0}

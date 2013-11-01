@@ -6,8 +6,9 @@ public class Explosion : MonoBehaviour
 	// Fields
 	bool firstFrame = true;
 	bool applyDamage = true;
-	
+
 	// Properties
+	public int Damage;
 	public float Force;
 	public GameObject Owner;
 
@@ -32,15 +33,15 @@ public class Explosion : MonoBehaviour
 
 	void OnTriggerEnter( Collider col )
 	{
-		if( applyDamage )
+		if( applyDamage && collider != null )
 		{
 			// If coming into contact with a rigidbody collider, blast it away
-			SphereCollider sc = (SphereCollider)this.collider;
+			SphereCollider sc = (SphereCollider)collider;
 
 			if( col.rigidbody != null )
 			{
 				col.rigidbody.AddExplosionForce( Force, transform.position, sc.radius );
-				object[] args = { 100, Owner };
+				object[] args = { Damage, Owner };
 				col.gameObject.SendMessageUpwards( "ApplyDamage", args, SendMessageOptions.DontRequireReceiver );
 			}
 		}

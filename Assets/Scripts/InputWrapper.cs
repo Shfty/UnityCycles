@@ -29,6 +29,9 @@ public class InputWrapper : MonoBehaviour
 	public float SwitchLeft;
 	public float SwitchRight;
 
+	public float Dash;
+	public Vector2 DashVector;
+
 	// Startup function to be called manually by instantiator
 	public void Init()
 	{
@@ -73,13 +76,13 @@ public class InputWrapper : MonoBehaviour
 		switch( type )
 		{
 			case InputType.UnityPad:
-				LeftStick.x = Input.GetAxis( "Move Horizontal" + typeSuffix );
-				LeftStick.y = Input.GetAxis( "Move Vertical" + typeSuffix );
+				LeftStick.x = Input.GetAxisRaw( "Move Horizontal" + typeSuffix );
+				LeftStick.y = Input.GetAxisRaw( "Move Vertical" + typeSuffix );
 
 				if( typeSuffix != " (Keyboard)" )
 				{
-					RightStick.x = Input.GetAxis( "Camera Horizontal" + typeSuffix );
-					RightStick.y = Input.GetAxis( "Camera Vertical" + typeSuffix );
+					RightStick.x = Input.GetAxisRaw( "Camera Horizontal" + typeSuffix );
+					RightStick.y = Input.GetAxisRaw( "Camera Vertical" + typeSuffix );
 				}
 				else
 				{
@@ -112,5 +115,88 @@ public class InputWrapper : MonoBehaviour
 				break;
 		}
 
+		// Dash detection
+		if( typeSuffix != " (Keyboard)" )
+		{
+			CheckJoyDashInput();
+		}
+		else
+		{
+			CheckKeyDashInput();
+		}
+	}
+
+	/* Dash states:
+	 * 0 - Stick outside outer zone
+	 * 1 - Stick within inner zone
+	 * 2 - Stick passed out of inner zone and into outer zone
+	 * 3 - Stick passed back into inner zone
+	 */
+	int dashInputState = 1;
+	float innerZoneBoundary = 0.25f;
+	float outerZoneBoundary = 0.75f;
+	float dashTimer = 0f;
+	float dashTimeout = .2f;
+
+	void CheckJoyDashInput()
+	{
+		if( dashTimer > 0f )
+		{
+			dashTimer -= Time.deltaTime;
+		}
+
+		if( dashTimer <= 0f )
+		{
+			if( dashInputState != 0 )
+			{
+				dashInputState = 0;
+			}
+		}
+
+		if( dashInputState == 4 )
+		{
+			Dash = 0f;
+			dashInputState = 0;
+			dashTimer = 0f;
+		}
+
+		if( dashInputState == 0 && LeftStick.magnitude < innerZoneBoundary )
+		{
+			dashInputState = 1;
+			dashTimer = dashTimeout;
+		}
+		if( dashInputState == 1 && LeftStick.magnitude > outerZoneBoundary )
+		{
+			dashInputState = 2;
+			dashTimer = dashTimeout;
+			DashVector = LeftStick.normalized;
+		}
+		if( dashInputState == 2 && LeftStick.magnitude < innerZoneBoundary )
+		{
+			dashInputState = 3;
+			dashTimer = dashTimeout;
+		}
+		if( dashInputState == 3 )
+		{
+			Dash = 1f;
+			dashInputState = 4;
+			dashTimer = dashTimeout;
+		}
+	}
+
+	float prevDash = 0f;
+	void CheckKeyDashInput()
+	{
+		if( Dash == 1f )
+		{
+			Dash = 0f;
+		}
+
+		if( prevDash == 0f && Input.GetKey( KeyCode.LeftShift ) )
+		{
+			DashVector = LeftStick.normalized;
+			Dash = 1f;
+		}
+		prevDash = Input.GetAxis( "Dash" + typeSuffix );
 	}
 }

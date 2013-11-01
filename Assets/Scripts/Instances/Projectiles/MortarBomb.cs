@@ -13,7 +13,7 @@ public class MortarBomb : Projectile
 	public virtual void OnCollisionEnter()
 	{
 		// Create an explosion and deactivate the projectile
-		GameObject explosion = GameControl.ProjectilePool.Spawn( "Rocket Explosion" );
+		GameObject explosion = GameControl.ProjectilePool.Spawn( "Mortar Bomb Explosion" );
 		explosion.transform.position = transform.position;
 		explosion.GetComponent<Explosion>().Owner = Owner;
 

@@ -39,13 +39,4 @@ public class ResetObject : MonoBehaviour
 			rigidbody.angularVelocity = initAngularVelocity;
 		}
 	}
-
-	// Utility Methods
-	public virtual void Deactivate()
-	{
-		foreach( Transform child in transform )
-		{
-			child.SendMessage( "Deactivate", SendMessageOptions.DontRequireReceiver );
-		}
-	}
 }

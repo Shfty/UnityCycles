@@ -9,6 +9,7 @@ public class MortarShell : Projectile
 
 	// Properties
 	public float TargetDist;
+	public int Bombs;
 
 	// Unity Methods
 	public void PooledStart()
@@ -38,8 +39,9 @@ public class MortarShell : Projectile
 			explosion.GetComponent<Explosion>().Owner = Owner;
 
 			// Release mortar 6 bombs downward
+			float angleSlice = 360f / Bombs;
 			Vector3 bombVector = Quaternion.AngleAxis( 85f, Vector3.right ) * Vector3.forward;
-			for( int i = 0; i < 6; ++i )
+			for( int i = 0; i < angleSlice; ++i )
 			{
 				GameObject mortarBomb = GameControl.ProjectilePool.Spawn( "Mortar Bomb" );
 				mortarBomb.transform.position = transform.position;
@@ -48,7 +50,7 @@ public class MortarShell : Projectile
 				bombScript.Owner = Owner;
 				bombScript.PooledStart();
 
-				bombVector = Quaternion.AngleAxis( 60f, Vector3.up ) * bombVector;
+				bombVector = Quaternion.AngleAxis( angleSlice, Vector3.up ) * bombVector;
 			}
 
 			// Deactivate the mortar shell

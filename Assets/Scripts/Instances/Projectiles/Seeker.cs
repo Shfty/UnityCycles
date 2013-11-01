@@ -56,7 +56,7 @@ public class Seeker : Projectile
 	public void OnCollisionEnter()
 	{
 		// Create an explosion and wait until the particle system is finished before deactivating
-		GameObject explosion = GameControl.ProjectilePool.Spawn( "Rocket Explosion" );
+		GameObject explosion = GameControl.ProjectilePool.Spawn( "Seeker Explosion" );
 		explosion.transform.position = transform.position;
 		explosion.GetComponent<Explosion>().Owner = Owner;
 

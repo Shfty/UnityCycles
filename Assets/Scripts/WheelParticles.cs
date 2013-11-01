@@ -13,11 +13,15 @@ public class WheelParticles : MonoBehaviour
 
 	// Properties
 	public Transform DustParticles;
+	public Transform ChargeParticles;
 	public float ParticleStickDeadzone = .25f;
+	public float ChargeEmissionVelocityFactor = 2f;
 	public List<Transform> JumpJets;
 	public List<Transform> DropJets;
 	public List<Transform> JumpBursts;
 	public List<Transform> DropBursts;
+	public List<Transform> DashJets;
+	public List<Transform> DashBursts;
 	public bool JumpJetsEnabled = false;
 	public bool DropJetsEnabled = false;
 
@@ -35,6 +39,7 @@ public class WheelParticles : MonoBehaviour
 	
 	void LateUpdate()
 	{
+		// Ground Particles
 		if( marbleScript.Grounded )
 		{
 			// Raycast UV and get texture colour
@@ -49,7 +54,7 @@ public class WheelParticles : MonoBehaviour
 				dustColor.a = 1f;
 			}
 
-			// Particles
+			// Dust Particles
 			Vector3 heading = new Vector3( inputWrapper.LeftStick.x, 0f, inputWrapper.LeftStick.y );
 			DustParticles.particleSystem.startSpeed = heading.magnitude * 5f;
 			DustParticles.particleSystem.startColor = dustColor;
@@ -68,6 +73,24 @@ public class WheelParticles : MonoBehaviour
 					DustParticles.particleSystem.Stop();
 				}
 			}
+
+			// Charge particles
+			if( transform.Find( "Marble" ).rigidbody.angularVelocity.magnitude > 0f )
+			{
+				if( !ChargeParticles.particleSystem.isPlaying )
+				{
+					ChargeParticles.particleSystem.Play();
+				}
+				float dashFactor = 1f - ( GetComponent<PlayerInstance>().Dash / GetComponent<PlayerInstance>().MaxDash );
+				ChargeParticles.particleSystem.emissionRate = transform.Find( "Marble" ).rigidbody.angularVelocity.magnitude * ChargeEmissionVelocityFactor * dashFactor;
+			}
+			else
+			{
+				if( ChargeParticles.particleSystem.isPlaying )
+				{
+					ChargeParticles.particleSystem.Stop();
+				}
+			}
 		}
 		else
 		{
@@ -75,6 +98,19 @@ public class WheelParticles : MonoBehaviour
 			{
 				DustParticles.particleSystem.Stop();
 			}
+
+			if( ChargeParticles.particleSystem.isPlaying )
+			{
+				ChargeParticles.particleSystem.Stop();
+			}
+		}
+
+		// Dash jets
+		foreach( Transform jet in DashJets )
+		{
+			float dashFactor = GetComponent<PlayerInstance>().Dash / GetComponent<PlayerInstance>().MaxDash;
+			jet.particleSystem.emissionRate = dashFactor * 100;
+			jet.particleSystem.startSize = dashFactor * .3f;
 		}
 
 		// Enable the jump jets if the button is pressed
@@ -166,14 +202,15 @@ public class WheelParticles : MonoBehaviour
 
 		foreach( Transform burst in bursts )
 		{
-			if( enabled )
-			{
-				burst.particleSystem.Play();
-			}
-			else
-			{
-				burst.particleSystem.Stop();
-			}
+			burst.particleSystem.Play();
+		}
+	}
+
+	public void DashBurst()
+	{
+		foreach( Transform burst in DashBursts )
+		{
+			burst.particleSystem.Play();
 		}
 	}
 }

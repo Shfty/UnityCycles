@@ -21,14 +21,14 @@ public class PlayerOverlay : Billboard
 			billboards.Clear();
 
 			// Check the player count, create a billboard for each camera and set it to the respective layer
-			for( int i = 0; i < GameControl.Players.Count; ++i )
+			for( int i = 0; i < GameControl.Instance.Players.Count; ++i )
 			{
-				if( GameControl.Players[ i ] == Player )
+				if( GameControl.Instance.Players[ i ] == Player )
 				{
 					continue;
 				}
 
-				GameObject cam = GameControl.Players[ i ].transform.Find( "Camera" ).gameObject;
+				GameObject cam = GameControl.Instance.Players[ i ].transform.Find( "Camera" ).gameObject;
 				cameras.Add( cam.camera );
 				GameObject billboard = GameControl.BillboardPool.Spawn( BillboardPrefab );
 				billboard.layer = LayerMask.NameToLayer( "Camera " + ( i + 1 ) );

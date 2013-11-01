@@ -16,6 +16,7 @@ public class GameControl : MonoBehaviour
 	public List<GameObject> PickupOverlays;
 
 	// Statics
+	public static GameControl Instance;
 	public static ObjectPool BillboardPool;
 	public static ObjectPool DronePool;
 	public static ObjectPool MiscPool;
@@ -29,6 +30,9 @@ public class GameControl : MonoBehaviour
 	{
 		// Persist this object between scenes
 		GameObject.DontDestroyOnLoad( this );
+
+		// Set instance static
+		Instance = this;
 
 		// Find object pools
 		BillboardPool = GameObject.Find( "Billboard Pool" ).GetComponent<ObjectPool>();
@@ -64,7 +68,6 @@ public class GameControl : MonoBehaviour
 		for( int i = 0; i < Players.Count; ++i )
 		{
 			GameObject playerOverlay = BillboardPool.Spawn( "Player Overlay" );
-			playerOverlay.GetComponent<PlayerOverlay>().GameControl = this;
 			ResetPlayerOverlay( playerOverlay, Players[ i ] );
 			PlayerOverlays.Add( playerOverlay );
 		}
@@ -101,7 +104,6 @@ public class GameControl : MonoBehaviour
 		for( int i = 0; i < Pickups.Count; ++i )
 		{
 			GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
-			pickupOverlay.GetComponent<Billboard>().GameControl = this;
 			ResetPickupOverlay( pickupOverlay, Pickups[ i ] );
 			PickupOverlays.Add( pickupOverlay );
 		}
@@ -153,10 +155,6 @@ public class GameControl : MonoBehaviour
 		InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
 		avatarInputScript.LocalPlayerIndex = Players.Count;
 		avatarInputScript.Init();
-
-		// Setup avatar script
-		PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
-		avatarScript.GameControl = this;
 		
 		// CAMERA
 		// Instantiate a new camera object
@@ -168,7 +166,6 @@ public class GameControl : MonoBehaviour
 		// Tell the camera to follow the avatar
 		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
 		cameraScript.Target = avatar.transform.Find( "Marble" );
-		cameraScript.GameControl = this;
 
 		// Setup camera input wrapper
 		InputWrapper cameraInputScript = camera.GetComponent<InputWrapper>();
@@ -296,6 +293,67 @@ public class GameControl : MonoBehaviour
 		return cameraRect;
 	}
 
+	public void PickupGrabbed( PickupInstance pickup, PlayerInstance player )
+	{
+		// If the player has an empty drone slot
+
+		if( player.Drones.Count < 3 )
+		{
+
+			// Spawn a drone
+			GameObject drone = GameControl.DronePool.Spawn( "Drone" );
+			DroneInfo.Type droneType = new DroneInfo.Type();
+
+			// Set type
+			switch( pickup.Type )
+			{
+				case PickupInfo.Type.Rocket:
+					droneType = DroneInfo.Type.Rocket;
+					break;
+				case PickupInfo.Type.Mortar:
+					droneType = DroneInfo.Type.Mortar;
+					break;
+				case PickupInfo.Type.Seeker:
+					droneType = DroneInfo.Type.Seeker;
+					break;
+				default:
+					break;
+			}
+
+			// Position and rotate the drone to match this pickup
+			drone.transform.position = pickup.transform.position;
+			drone.transform.rotation = pickup.transform.rotation;
+
+			// Setup the drone's scripts
+			Drone droneScript = drone.GetComponent<Drone>();
+			droneScript.Player = player.transform.parent.gameObject;
+			droneScript.Type = droneType;
+			droneScript.PooledStart();
+
+			KinematicHover droneHover = drone.GetComponent<KinematicHover>();
+			droneHover.Target = player.DroneAnchors[ player.Drones.Count ];
+			player.Drones.Add( drone );
+
+			// Assign type-specific ammo
+			switch( pickup.Type )
+			{
+				case PickupInfo.Type.Rocket:
+					droneScript.Ammo = 3;
+					break;
+				case PickupInfo.Type.Mortar:
+					droneScript.Ammo = 2;
+					break;
+				case PickupInfo.Type.Seeker:
+					droneScript.Ammo = 1;
+					break;
+				default:
+					break;
+			}
+
+			PickupPool.Despawn( pickup.gameObject );
+		}
+	}
+
 	public void PlayerDeath( GameObject go, GameObject killedBy )
 	{
 		if( Players.Contains( go.transform.parent.gameObject ) )
@@ -338,7 +396,6 @@ public class GameControl : MonoBehaviour
 
 	void ResetPlayerOverlay( GameObject playerOverlay, GameObject player )
 	{
-		int index = PlayerOverlays.IndexOf( playerOverlay );
 		playerOverlay.GetComponent<KinematicHover>().Target = player.transform.Find( "Avatar/Marble" );
 		playerOverlay.GetComponent<PlayerOverlay>().Player = player;
 		playerOverlay.GetComponent<PlayerOverlay>().LateStart();
@@ -346,7 +403,6 @@ public class GameControl : MonoBehaviour
 
 	void ResetPickupOverlay( GameObject pickupOverlay, GameObject pickup )
 	{
-		int index = PlayerOverlays.IndexOf( pickupOverlay );
 		pickupOverlay.GetComponent<KinematicHover>().Target = pickup.transform;
 		pickupOverlay.GetComponent<Billboard>().LateStart();
 	}
@@ -377,7 +433,6 @@ public class GameControl : MonoBehaviour
 
 			// Setup avatar and overlay GameControl references
 			PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
-			avatarScript.GameControl = this;
 
 			// Reenable and reset the appropriate overlay
 			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();

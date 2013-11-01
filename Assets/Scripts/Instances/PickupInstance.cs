@@ -84,66 +84,8 @@ public class PickupInstance : MonoBehaviour
 		if( col.tag == "Player" )
 		{
 			// Collider is a Marble, get player as parent of parent
-			GameObject player = col.transform.parent.parent.gameObject;
-			PlayerInstance playerScript = player.transform.Find( "Avatar" ).GetComponent<PlayerInstance>();
-
-			// If the player has an empty drone slot
-
-			if( playerScript.Drones.Count < 3 )
-			{
-
-				// Spawn a drone
-				GameObject drone = GameControl.DronePool.Spawn( "Drone" );
-				DroneInfo.Type droneType = new DroneInfo.Type();
-
-				// Set type
-				switch( Type )
-				{
-					case PickupInfo.Type.Rocket:
-						droneType = DroneInfo.Type.Rocket;
-						break;
-					case PickupInfo.Type.Mortar:
-						droneType = DroneInfo.Type.Mortar;
-						break;
-					case PickupInfo.Type.Seeker:
-						droneType = DroneInfo.Type.Seeker;
-						break;
-					default:
-						break;
-				}
-
-				// Position and rotate the drone to match this pickup
-				drone.transform.position = transform.position;
-				drone.transform.rotation = transform.rotation;
-
-				// Setup the drone's scripts
-				Drone droneScript = drone.GetComponent<Drone>();
-				droneScript.Player = player;
-				droneScript.Type = droneType;
-				droneScript.PooledStart();
-
-				KinematicHover droneHover = drone.GetComponent<KinematicHover>();
-				droneHover.Target = playerScript.DroneAnchors[ playerScript.Drones.Count ];
-				playerScript.Drones.Add( drone );
-
-				// Assign type-specific ammo
-				switch( Type )
-				{
-					case PickupInfo.Type.Rocket:
-						droneScript.Ammo = 3;
-						break;
-					case PickupInfo.Type.Mortar:
-						droneScript.Ammo = 2;
-						break;
-					case PickupInfo.Type.Seeker:
-						droneScript.Ammo = 1;
-						break;
-					default:
-						break;
-				}
-
-				GameControl.PickupPool.Despawn( gameObject );
-			}
+			GameObject player = col.transform.parent.gameObject;
+			GameControl.Instance.PickupGrabbed( this, player.GetComponent<PlayerInstance>() );
 		}
 	}
 }

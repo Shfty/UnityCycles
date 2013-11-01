@@ -13,10 +13,14 @@ public class PlayerInstance : MonoBehaviour
 	int initHealth;
 	
 	// Properties
-	public GameControl GameControl;
 	public List<GameObject> Drones;
 	public List<Transform> DroneAnchors;
 	public int Health = 100;
+	public int MaxHealth = 100;
+	public float Dash = 0f;
+	public float MaxDash = 1f;
+	public float DashRechargeVelocityFactor = 0.01f;
+	public float DashRechargeSpinFactor = 0.01f;
 
 	// Unity Methods
 	void Awake()
@@ -37,6 +41,13 @@ public class PlayerInstance : MonoBehaviour
 
 	void Update()
 	{
+		// Recharge Dash
+		if( Dash < MaxDash && GetComponent<MarbleMovement>().Grounded )
+		{
+			Rigidbody rb = transform.Find( "Marble" ).rigidbody;
+			Dash = Mathf.Min( Dash + ( rb.angularVelocity.magnitude * DashRechargeSpinFactor * rb.velocity.magnitude * DashRechargeVelocityFactor * Time.deltaTime ), MaxDash );
+		}
+
 		// If an active drone is present
 		if( Drones.Count > 0 )
 		{
@@ -138,7 +149,11 @@ public class PlayerInstance : MonoBehaviour
 		Health -= damage;
 		if( Health <= 0 )
 		{
-			GameControl.PlayerDeath( gameObject, owner );
+			// Spawn Explosion
+			GameObject explosion = GameControl.PlayerPool.Spawn( "Avatar Explosion" );
+			explosion.transform.position = transform.Find( "Marble" ).position;
+
+			GameControl.Instance.PlayerDeath( gameObject, owner );
 		}
 	}
 }

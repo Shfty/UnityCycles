@@ -18,14 +18,15 @@ public class MarbleMovement : MonoBehaviour
 	// Properties
 	public GameObject Marble;
 	public Transform Camera;
-	public float GroundForceFactor = 2f;
-	public float AirForceFactor = 5f;
-	public float GroundTorqueFactor = 10f;
-	public float AirTorqueFactor = 5f;
-	public float JumpForce = 250f;
-	public float HoverForce = 5f;
-	public float DownBurstForce = 250f;
-	public float DownJetForce = 5f;
+	public float GroundForceFactor = 10f;
+	public float AirForceFactor = 10f;
+	public float GroundTorqueFactor = 15f;
+	public float AirTorqueFactor = 15f;
+	public float JumpForce = 7f;
+	public float HoverForce = 350f;
+	public float DownBurstForce = 15f;
+	public float DownJetForce = 1000f;
+	public float DashForce = 7f;
 
 	// Read by WheelOrientation
 	public Vector3 Right;
@@ -130,6 +131,18 @@ public class MarbleMovement : MonoBehaviour
 			}
 		}
 		prevDrop = inputWrapper.Drop;
+
+		// Dash
+		if( inputWrapper.Dash == 1f && GetComponent<PlayerInstance>().Dash > 0f )
+		{
+			float dash = GetComponent<PlayerInstance>().Dash;
+			float force = Mathf.Min( dash, 1f );
+			Marble.rigidbody.AddForce( force * Forward * inputWrapper.DashVector.y * DashForce, ForceMode.VelocityChange );
+			Marble.rigidbody.AddForce( force * Right * inputWrapper.DashVector.x * DashForce, ForceMode.VelocityChange );
+			GetComponent<WheelParticles>().DashBurst();
+			dash -= force;
+			GetComponent<PlayerInstance>().Dash = dash;
+		}
 
 		// Surface normal dot up - Make sure player isn't wall riding
 		float sndu = Vector3.Dot( Up, Vector3.up );

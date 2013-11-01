@@ -41,6 +41,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85218d2978ccd5d41bf57a4aee04a80d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Threaded: 0
   RegenerateOnLoad: 1
   GridDivisions: {x: 5, y: 5}
   MaxPointsPerCell: 10

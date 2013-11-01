@@ -1,14 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 public class WorleyNoiseTerrain : MonoBehaviour
 {
 	// Fields
 	Terrain t;
-	Vector2 bounds;
-	Vector2 cellSize;
-	List< List < Vector2 > > pointGrid;
+	static Vector2 bounds;
+	static Vector2 cellSize;
+	static List<List<Vector2>> pointGrid;
+	static float[ , ] heights;
+	static Vector2 gridDivisions;
+	static DistMetric distanceMetric;
+	static float minkowskiNumber;
+	static int fValue;
 
 	// Enums
 	public enum DistMetric
@@ -21,7 +27,23 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		Minkowski = 5
 	}
 
+	// Thread data class
+	public class ThreadData
+	{
+		public int startX;
+		public int endX;
+		public int y;
+
+		public ThreadData( int sX, int eX, int inY )
+		{
+			startX = sX;
+			endX = eX;
+			y = inY;
+		}
+	}
+
 	// Properties
+	public bool Threaded = false;
 	public bool RegenerateOnLoad;
 	public Vector2 GridDivisions;
 	public int MaxPointsPerCell;
@@ -32,6 +54,14 @@ public class WorleyNoiseTerrain : MonoBehaviour
 	public int Seed;
 
 	// Unity Methods
+	void Awake()
+	{
+		gridDivisions = GridDivisions;
+		distanceMetric = DistanceMetric;
+		minkowskiNumber = MinkowskiNumber;
+		fValue = FValue;
+	}
+
 	void Start() // Use this for initialization
 	{
 		if( RegenerateOnLoad == false ) return;
@@ -40,15 +70,50 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		{
 			Random.seed = Seed;
 		}
-		t = GetComponent<Terrain>();
+		t = Terrain.activeTerrain;
 		bounds = new Vector2( t.terrainData.heightmapWidth, t.terrainData.heightmapHeight );
+
+		heights = new float[ t.terrainData.heightmapWidth, t.terrainData.heightmapHeight ];
 
 		// Setup
 		SetupCells();
 
 		// Terrain
 		FlattenTerrain( t.terrainData );
-		NoiseTerrain( t.terrainData );
+
+		int cores = Mathf.Min( SystemInfo.processorCount, t.terrainData.heightmapWidth );
+		int slice = t.terrainData.heightmapWidth / cores;
+
+		for( int y = 0; y < t.terrainData.heightmapHeight; ++y )
+		{
+			if( cores > 1 && Threaded )
+			{
+				int i;
+				ThreadData threadData;
+				List<Thread> threads = new List<Thread>();
+				for( i = 0; i < cores - 1; ++i )
+				{
+					threadData = new ThreadData( slice * i, slice * ( i + 1 ), y );
+					Thread thread = new Thread( () => NoiseRow( threadData ) );
+					threads.Add( thread );
+					thread.Start();
+				}
+				threadData = new ThreadData( slice * i, slice * ( i + 1 ), y );
+				NoiseRow( threadData );
+
+				foreach( Thread thread in threads )
+				{
+					thread.Join();
+				}
+			}
+			else
+			{
+				ThreadData threadData = new ThreadData( 0, t.terrainData.heightmapWidth, y );
+				NoiseRow( threadData );
+			}
+		}
+
+		t.terrainData.SetHeights( 0, 0, heights );
 	}
 
 	// Utility Methods
@@ -79,7 +144,7 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		}
 	}
 
-	float Dist( Vector2 a, Vector2 b, int metric )
+	private static float Dist( Vector2 a, Vector2 b, int metric )
 	{
 		float distance = 0;
 
@@ -123,7 +188,7 @@ public class WorleyNoiseTerrain : MonoBehaviour
 			}
 			case 5: // Minkowski
 			{
-				distance = Mathf.Pow( Mathf.Pow( Mathf.Abs( d.x ), MinkowskiNumber ) + Mathf.Pow( Mathf.Abs( d.y ), MinkowskiNumber ), ( 1f / MinkowskiNumber ) );
+				distance = Mathf.Pow( Mathf.Pow( Mathf.Abs( d.x ), minkowskiNumber ) + Mathf.Pow( Mathf.Abs( d.y ), minkowskiNumber ), ( 1f / minkowskiNumber ) );
 				break;
 			}
 			default:
@@ -135,14 +200,14 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		return distance;
 	}
 
-	float Noise2D( Vector2 pt )
+	static float Noise2D( Vector2 pt )
 	{
 		// Return error if the point is out of bounds
-		if( pt.x < 0 || pt.x > t.terrainData.heightmapWidth || pt.y < 0 || pt.y > t.terrainData.heightmapHeight ) return -1;
+		if( pt.x < 0 || pt.x > bounds.x || pt.y < 0 || pt.y > bounds.y ) return -1;
 
 		// Calculate grid coordinates
-		int m_cellX = (int)Mathf.Floor( pt.x / bounds.x * GridDivisions.x );
-		int m_cellY = (int)Mathf.Floor( pt.y / bounds.y * GridDivisions.y );
+		int m_cellX = (int)Mathf.Floor( pt.x / bounds.x * gridDivisions.x );
+		int m_cellY = (int)Mathf.Floor( pt.y / bounds.y * gridDivisions.y );
 
 		// Add 3x3 block of cells surrounding point to search candidates
 		List< Vector2 > searchPoints = new List< Vector2 >();
@@ -151,33 +216,33 @@ public class WorleyNoiseTerrain : MonoBehaviour
 			int xOff = ( i % 3 ) - 1;
 			int yOff = ( i / 3 ) - 1;
 			if( m_cellX + xOff < 0 ) continue;
-			if( m_cellX + xOff > GridDivisions.x - 1 ) continue;
+			if( m_cellX + xOff > gridDivisions.x - 1 ) continue;
 			if( m_cellY + yOff < 0 ) continue;
-			if( m_cellY + yOff > GridDivisions.y - 1 ) continue;
-			int cellIdx = (int)( ( m_cellY + yOff ) * GridDivisions.x + m_cellX + xOff );
+			if( m_cellY + yOff > gridDivisions.y - 1 ) continue;
+			int cellIdx = (int)( ( m_cellY + yOff ) * gridDivisions.x + m_cellX + xOff );
 			List< Vector2 > cell = pointGrid[ cellIdx ];
 			searchPoints.InsertRange( searchPoints.Count, cell );
 		}
 
 		// Return error if the fValue is greater than the number of potential search points
-		if( FValue == 0 || FValue > searchPoints.Count ) return -1;
+		if( fValue == 0 || fValue > searchPoints.Count ) return -1;
 
 		// Sort the points from near-far
 		searchPoints.Sort(
 			delegate( Vector2 a, Vector2 b )
 			{
-				float distA = Dist( pt, a, (int)DistanceMetric );
-				float distB = Dist( pt, b, (int)DistanceMetric );
+				float distA = Dist( pt, a, (int)distanceMetric );
+				float distB = Dist( pt, b, (int)distanceMetric );
 				return distA.CompareTo( distB );
 			}
 		);
 
 		// Calculate the distance and maximum length using our predefined metric
-		float distance = Dist( pt, searchPoints[ FValue - 1 ], (int)DistanceMetric );
-		float maxLength = Dist( new Vector2( 0, 0 ), cellSize, (int)DistanceMetric );
+		float distance = Dist( pt, searchPoints[ fValue - 1 ], (int)distanceMetric );
+		float maxLength = Dist( new Vector2( 0, 0 ), cellSize, (int)distanceMetric );
 
 		// Adjust maxLength to account for squared outputs
-		if( DistanceMetric == DistMetric.Linear2 || DistanceMetric == DistMetric.Quadratic )
+		if( distanceMetric == DistMetric.Linear2 || distanceMetric == DistMetric.Quadratic )
 		{
 			maxLength *= .1f;
 		}
@@ -193,29 +258,16 @@ public class WorleyNoiseTerrain : MonoBehaviour
 
 	void FlattenTerrain( TerrainData td )
 	{
-		float[ , ] heights = new float[ td.heightmapWidth, td.heightmapHeight ];
-		for( int x = 0; x < td.heightmapWidth; ++x )
-		{
-			for( int y = 0; y < td.heightmapHeight; ++y )
-			{
-				heights[ x, y ] = 0f;
-			}
-		}
-
+		heights.Initialize();
 		td.SetHeights( 0, 0, heights );
 	}
 
-	void NoiseTerrain( TerrainData td )
+	public void NoiseRow( ThreadData threadData )
 	{
-		float[ , ] heights = new float[ td.heightmapWidth, td.heightmapHeight ];
-		for( int x = 0; x < td.heightmapWidth; ++x )
+		for( int x = threadData.startX; x < threadData.endX; ++x )
 		{
-			for( int y = 0; y < td.heightmapHeight; ++y )
-			{
-				heights[ x, y ] = Noise2D( new Vector2( x, y ) );
-			}
+			float height = Noise2D( new Vector2( x, threadData.y ) );
+			heights[ x, threadData.y ] = height;
 		}
-
-		td.SetHeights( 0, 0, heights );
 	}
 }
