@@ -10,11 +10,16 @@ public class AvatarGUI : MonoBehaviour
 	int activeDroneIndex = 0;
 	List<Vector2> droneIconPositions;
 	List<Vector2> droneIconTargets;
+	int health = 0;
+	int healthTarget;
+	float dash = 0;
+	float dashTarget;
 
 	// Properties
 	public Texture CrosshairTexture;
 	public List<Texture> DroneIconTextures;
 	public float IconLerpFactor = 5f;
+	public float BarLerpFactor = 5f;
 
 	// Unity Methods
 	void Awake()
@@ -62,7 +67,8 @@ public class AvatarGUI : MonoBehaviour
 				GUI.DrawTexture( new Rect( centerPt.x - halfSize, centerPt.y - halfSize, size, size ), CrosshairTexture );
 
 				// Health
-				int health = target.parent.GetComponent<Avatar>().Health;
+				int healthTarget = target.parent.GetComponent<Avatar>().Health;
+				health = (int)Mathf.Lerp( health, healthTarget, BarLerpFactor * Time.deltaTime );
 				GUIContent healthText = new GUIContent( "Health: " + health.ToString() );
 
 				Vector2 healthTextBounds = GUIStyle.none.CalcSize( healthText );
@@ -75,7 +81,8 @@ public class AvatarGUI : MonoBehaviour
 				GUI.HorizontalSlider( healthBarRect, health, 0, 100 );
 
 				// Dash
-				float dash = target.parent.GetComponent<Avatar>().Dash;
+				dashTarget = target.parent.GetComponent<Avatar>().Dash;
+				dash = Mathf.Lerp( dash, dashTarget, BarLerpFactor * Time.deltaTime );
 				float maxDash = target.parent.GetComponent<Avatar>().MaxDash;
 				GUIContent dashText = new GUIContent( "Dash: " + dash.ToString( "p2" ) );
 
