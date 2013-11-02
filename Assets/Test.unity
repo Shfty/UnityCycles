@@ -138,6 +138,46 @@ Transform:
   - {fileID: 539079765}
   - {fileID: 707520729}
   m_Father: {fileID: 0}
+--- !u!1 &219586425
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 219586426}
+  - 114: {fileID: 219586427}
+  m_Layer: 0
+  m_Name: Game Rules
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &219586426
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 219586425}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &219586427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 219586425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a1d4f089389ec46bd9539dc30ee80e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GameElements: 00000000
+  ScoreLimit: 2
 --- !u!1 &222061843
 GameObject:
   m_ObjectHideFlags: 0
@@ -317,7 +357,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab5d48f2d185f04bab2650d34d3bb83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalPlayerCount: 2
+  LocalPlayerCount: 1
+  OverlayMaterials:
+  - {fileID: 2100000, guid: 9edc96c1e0c5cb145bd1ad1bd91caf49, type: 2}
+  - {fileID: 2100000, guid: f4517f0404c235e4c86b15b609af44fb, type: 2}
+  - {fileID: 2100000, guid: 25e995d65d53b144d9ac07e5b91e3672, type: 2}
   Players: []
   Pickups: []
   PlayerOverlays: []

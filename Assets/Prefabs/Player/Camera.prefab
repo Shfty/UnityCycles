@@ -16,6 +16,7 @@ GameObject:
   - 114: {fileID: 11400002}
   - 114: {fileID: 11400004}
   - 114: {fileID: 11400006}
+  - 114: {fileID: 11400008}
   m_Layer: 8
   m_Name: Camera
   m_TagString: Untagged
@@ -87,7 +88,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9885aaf09c81fd44b775938c488eec3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OriginPool: {fileID: 0}
   Prefab: {fileID: 0}
 --- !u!114 &11400002
 MonoBehaviour:
@@ -101,8 +101,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 0}
-  GameControl: {fileID: 0}
-  CrosshairTexture: {fileID: 2800000, guid: 5dc62c3ceb82e34498bf32fb1a81d11c, type: 3}
   Offset: {x: 0, y: 2.5, z: 0}
   MinFollowDistance: 1
   MaxFollowDistance: 10
@@ -110,6 +108,13 @@ MonoBehaviour:
   CameraRadius: .5
   SmallValue: .00999999978
   DeathCam: 0
+  RenderLayer: 0
+  CrosshairTexture: {fileID: 2800000, guid: 5dc62c3ceb82e34498bf32fb1a81d11c, type: 3}
+  DroneIconTextures:
+  - {fileID: 2800000, guid: 8576087f16a98f446b43f3d5bec62652, type: 3}
+  - {fileID: 2800000, guid: ce73a42df88a2f240a6a074dfaa7d395, type: 3}
+  - {fileID: 2800000, guid: d04f3f984fb83ed45a30d5c4d023ba4a, type: 3}
+  DroneIconLerpFactor: 5
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -130,6 +135,8 @@ MonoBehaviour:
   Fire: 0
   SwitchLeft: 0
   SwitchRight: 0
+  Dash: 0
+  DashVector: {x: 0, y: 0}
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -141,8 +148,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9885aaf09c81fd44b775938c488eec3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OriginPool: {fileID: 0}
   Prefab: {fileID: 0}
+--- !u!114 &11400008
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68dd30c644bd030469334af07252d652, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CrosshairTexture: {fileID: 2800000, guid: 5dc62c3ceb82e34498bf32fb1a81d11c, type: 3}
+  DroneIconTextures:
+  - {fileID: 2800000, guid: 8576087f16a98f446b43f3d5bec62652, type: 3}
+  - {fileID: 2800000, guid: ce73a42df88a2f240a6a074dfaa7d395, type: 3}
+  - {fileID: 2800000, guid: d04f3f984fb83ed45a30d5c4d023ba4a, type: 3}
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

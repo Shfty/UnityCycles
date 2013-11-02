@@ -10,6 +10,7 @@ public class Billboard : MonoBehaviour
 
 	// Properties
 	public GameObject BillboardPrefab;
+	public Material Material;
 
 	// Unity Methods
 	public void Awake()
@@ -51,6 +52,7 @@ public class Billboard : MonoBehaviour
 				GameObject billboard = GameControl.BillboardPool.Spawn( BillboardPrefab );
 				billboard.layer = LayerMask.NameToLayer( "Camera " + ( i + 1 ) );
 				billboard.transform.parent = transform;
+				billboard.GetComponent<MeshRenderer>().material = Material;
 				billboards.Add( billboard );
 			}
 		}

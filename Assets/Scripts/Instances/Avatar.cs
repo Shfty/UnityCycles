@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayerInstance : MonoBehaviour
+public class Avatar : MonoBehaviour
 {
 	// Fields
 	InputWrapper inputWrapper;
@@ -13,12 +13,14 @@ public class PlayerInstance : MonoBehaviour
 	int initHealth;
 	
 	// Properties
+	public int ActiveDroneIndex = 0;
 	public List<GameObject> Drones;
 	public List<Transform> DroneAnchors;
 	public int Health = 100;
 	public int MaxHealth = 100;
 	public float Dash = 0f;
 	public float MaxDash = 1f;
+	public int Kills = 0;
 	public float DashRechargeVelocityFactor = 0.01f;
 	public float DashRechargeSpinFactor = 0.01f;
 
@@ -42,7 +44,7 @@ public class PlayerInstance : MonoBehaviour
 	void Update()
 	{
 		// Recharge Dash
-		if( Dash < MaxDash && GetComponent<MarbleMovement>().Grounded )
+		if( Dash < MaxDash && GetComponent<MarbleMovement>().Grounded && !GetComponent<MarbleMovement>().ObtuseAngle )
 		{
 			Rigidbody rb = transform.Find( "Marble" ).rigidbody;
 			Dash = Mathf.Min( Dash + ( rb.angularVelocity.magnitude * DashRechargeSpinFactor * rb.velocity.magnitude * DashRechargeVelocityFactor * Time.deltaTime ), MaxDash );
@@ -51,10 +53,10 @@ public class PlayerInstance : MonoBehaviour
 		// If an active drone is present
 		if( Drones.Count > 0 )
 		{
-			if( Drones[ 0 ].activeSelf )
+			if( Drones[ ActiveDroneIndex ].activeSelf )
 			{
 				// Set the drone's Aim property
-				Drone droneScript = Drones[ 0 ].GetComponent<Drone>();
+				Drone droneScript = Drones[ ActiveDroneIndex ].GetComponent<Drone>();
 				if( inputWrapper.Aim == 1f )
 				{
 					droneScript.Aim = true;
@@ -84,60 +86,81 @@ public class PlayerInstance : MonoBehaviour
 				}
 				prevSwitchLeft = inputWrapper.SwitchLeft;
 			}
-			else
-			{
-				// If the drone is inactive, set it to null
-				Drones[ 0 ] = null;
-			}
 		}
 
-		// Check if any drones disabled themselves & remove references
 		for( int i = 0; i < Drones.Count; ++i )
 		{
-			if( Drones[ i ] != null && !Drones[ i ].activeSelf )
+			GameObject drone = Drones[ i ];
+			// Check if any drones disabled themselves & remove references
+			if( drone != null && !drone.activeSelf )
 			{
 				Drones.RemoveAt( i );
+				if( Drones.Count > 0 && ActiveDroneIndex >= Drones.Count - 1 )
+				{
+					ActiveDroneIndex = Drones.Count - 1;
+				}
 				--i;
+				continue;
+			}
+
+			// Disable aim if not the active drone
+			Drone droneScript = drone.GetComponent<Drone>();
+			if( i != ActiveDroneIndex && droneScript.Aim )
+			{
+				droneScript.Aim = false;
 			}
 		}
 
-		// Reshuffle drones into their respective positions
-		for( int i = 0; i < Drones.Count; ++i )
+		// Reshuffle into position
+		if( Drones.Count > 0 )
 		{
-			if( Drones[ i ] != null )
+			KinematicHover mDroneScript = Drones[ ActiveDroneIndex ].GetComponent<KinematicHover>();
+			if( mDroneScript.Target != DroneAnchors[ 0 ] )
 			{
-				KinematicHover droneHover = Drones[ i ].GetComponent<KinematicHover>();
-				droneHover.Target = DroneAnchors[ i ];
+				mDroneScript.Target = DroneAnchors[ 0 ];
+			}
+			if( Drones.Count > 1 )
+			{
+				KinematicHover lDroneScript = Drones[ WrapIndex( ActiveDroneIndex + 1, Drones.Count - 1 ) ].GetComponent<KinematicHover>();
+				if( lDroneScript.Target != DroneAnchors[ 1 ] )
+				{
+					lDroneScript.Target = DroneAnchors[ 1 ];
+				}
+				if( Drones.Count > 2 )
+				{
+					KinematicHover rDroneScript = Drones[ WrapIndex( ActiveDroneIndex - 1, Drones.Count - 1 ) ].GetComponent<KinematicHover>();
+					if( rDroneScript.Target != DroneAnchors[ 2 ] )
+					{
+						rDroneScript.Target = DroneAnchors[ 2 ];
+					}
+				}
 			}
 		}
 	}
 
 	// Utility Methods
+	public int WrapIndex( int idx, int maxIdx )
+	{
+		if( idx < 0 )
+		{
+			return maxIdx;
+		}
+		if( idx > maxIdx )
+		{
+			return 0;
+		}
+		return idx;
+	}
+
 	void SwitchDrone( bool right )
 	{
-		GameObject temp;
-
-		if( !right )
+		if( right )
 		{
-			// If switching left, shuffle all the drones down by one index
-			temp = Drones[ 0 ];
-			for( int i = 0; i < Drones.Count - 1; ++i )
-			{
-				Drones[ i ].GetComponent<Drone>().Aim = false;
-				Drones[ i ] = Drones[ i + 1 ];
-			}
-			Drones[ Drones.Count - 1 ] = temp;
+			ActiveDroneIndex = WrapIndex( ActiveDroneIndex - 1, Drones.Count - 1 );
 		}
 		else
 		{
-			// If switching right, shuffle all the drones up by one index
-			temp = Drones[ Drones.Count - 1 ];
-			for( int i = Drones.Count - 1; i > 0; --i )
-			{
-				Drones[ i ] = Drones[ i - 1 ];
-				Drones[ i ].GetComponent<Drone>().Aim = false;
-			}
-			Drones[ 0 ] = temp;
+			ActiveDroneIndex = WrapIndex( ActiveDroneIndex + 1, Drones.Count - 1 );
 		}
 	}
 

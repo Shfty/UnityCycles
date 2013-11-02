@@ -85,7 +85,7 @@ public class PickupInstance : MonoBehaviour
 		{
 			// Collider is a Marble, get player as parent of parent
 			GameObject player = col.transform.parent.gameObject;
-			GameControl.Instance.PickupGrabbed( this, player.GetComponent<PlayerInstance>() );
+			GameControl.Instance.PickupGrabbed( this, player.GetComponent<Avatar>() );
 		}
 	}
 }

@@ -21,25 +21,36 @@ public class KinematicHover : MonoBehaviour
 	public float LerpFactor = .2f;
 
 	// Unity Methods
+	void OnEnable()
+	{
+		if( Target == null )
+		{
+			Debug.LogWarning( gameObject + " KinematicHover Target is not set" );
+		}
+	}
+
 	void Update()
 	{
-		targetPosition = Target.position + Offset;
+		if( Target != null )
+		{
+			targetPosition = Target.position + Offset;
 
-		if( Lerp )
-		{
-			switch( LerpType )
+			if( Lerp )
 			{
-				case LerpMode.Linear:
-					transform.position = Vector3.Lerp( transform.position, targetPosition, LerpFactor * Time.deltaTime );
-					break;
-				case LerpMode.Spherical:
-					transform.position = Vector3.Slerp( transform.position, targetPosition, LerpFactor * Time.deltaTime );
-					break;
+				switch( LerpType )
+				{
+					case LerpMode.Linear:
+						transform.position = Vector3.Lerp( transform.position, targetPosition, LerpFactor * Time.deltaTime );
+						break;
+					case LerpMode.Spherical:
+						transform.position = Vector3.Slerp( transform.position, targetPosition, LerpFactor * Time.deltaTime );
+						break;
+				}
 			}
-		}
-		else
-		{
-			transform.position = targetPosition;
+			else
+			{
+				transform.position = targetPosition;
+			}
 		}
 	}
 }

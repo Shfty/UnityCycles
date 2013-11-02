@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Enum = System.Enum;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,9 +8,14 @@ public class GameControl : MonoBehaviour
 	// Fields
 	GameObject playerContainer;
 	GameObject[] spawnPoints;
+	float pickupTimer = 0f;
+	Vector3 mapBounds;
 
 	// Properties
 	public int LocalPlayerCount = 1;
+	int MaxPickups = 15;
+	float PickupTimeout = 2f;
+	public List<Material> OverlayMaterials;
 	public List<GameObject> Players;
 	public List<GameObject> Pickups;
 	public List<GameObject> PlayerOverlays;
@@ -73,13 +79,12 @@ public class GameControl : MonoBehaviour
 		}
 
 		// Spawn pickups
-		Terrain terrain = GameObject.Find( "Terrain" ).GetComponent<Terrain>();
-		Vector3 bounds = terrain.terrainData.size;
+		mapBounds = Terrain.activeTerrain.terrainData.size;
 
 		// Rocket Drones
 		for( int i = 0; i < 5; ++i )
 		{
-			Vector3 randomPosition = new Vector3( Random.Range( 0, bounds.x ) - bounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, bounds.z ) - bounds.z * .5f );
+			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
 			SpawnPickup( PickupInfo.Type.Rocket, randomPosition, randomRotation );
 		}
@@ -87,7 +92,7 @@ public class GameControl : MonoBehaviour
 		// Mortar Drones
 		for( int i = 0; i < 5; ++i )
 		{
-			Vector3 randomPosition = new Vector3( Random.Range( 0, bounds.x ) - bounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, bounds.z ) - bounds.z * .5f );
+			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
 			SpawnPickup( PickupInfo.Type.Mortar, randomPosition, randomRotation );
 		}
@@ -95,7 +100,7 @@ public class GameControl : MonoBehaviour
 		// Seeker Drones
 		for( int i = 0; i < 5; ++i )
 		{
-			Vector3 randomPosition = new Vector3( Random.Range( 0, bounds.x ) - bounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, bounds.z ) - bounds.z * .5f );
+			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
 			SpawnPickup( PickupInfo.Type.Seeker, randomPosition, randomRotation );
 		}
@@ -135,6 +140,27 @@ public class GameControl : MonoBehaviour
 				PickupOverlays.RemoveAt( i );
 			}
 		}
+
+		// Increment the pickup timer if there are less pickups than the limit
+		if( Pickups.Count < MaxPickups )
+		{
+			pickupTimer += Time.deltaTime;
+			if( pickupTimer >= PickupTimeout )
+			{
+				// Spawn random pickup
+				int randomPickup = Random.Range( 1, Enum.GetNames( typeof( PickupInfo.Type ) ).Length );
+				Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
+				Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
+				SpawnPickup( ( PickupInfo.Type )randomPickup, randomPosition, randomRotation );
+
+				// Attach overlay
+				GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
+				ResetPickupOverlay( pickupOverlay, Pickups[ Pickups.Count - 1 ] );
+				PickupOverlays.Add( pickupOverlay );
+
+				pickupTimer = 0f;
+			}
+		}
 	}
 
 	// Utility Methods
@@ -143,6 +169,7 @@ public class GameControl : MonoBehaviour
 		// Instantiate a new player container
 		GameObject player = new GameObject( "Player" );
 		player.transform.parent = playerContainer.transform;
+		player.AddComponent<Player>();
 
 		// AVATAR
 		// Spawn it's world avatar
@@ -164,7 +191,7 @@ public class GameControl : MonoBehaviour
 		camera.transform.parent = player.transform;
 
 		// Tell the camera to follow the avatar
-		FollowCamera cameraScript = camera.GetComponent<FollowCamera>();
+		AvatarCamera cameraScript = camera.GetComponent<AvatarCamera>();
 		cameraScript.Target = avatar.transform.Find( "Marble" );
 
 		// Setup camera input wrapper
@@ -222,9 +249,6 @@ public class GameControl : MonoBehaviour
 		// Set script properties
 		PickupInstance pickupScript = pickup.GetComponent<PickupInstance>();
 		pickupScript.Type = type;
-
-		// Start the script
-		pickupScript.Start();
 
 		// Add to pickup list
 		Pickups.Add( pickup );
@@ -293,7 +317,7 @@ public class GameControl : MonoBehaviour
 		return cameraRect;
 	}
 
-	public void PickupGrabbed( PickupInstance pickup, PlayerInstance player )
+	public void PickupGrabbed( PickupInstance pickup, Avatar player )
 	{
 		// If the player has an empty drone slot
 
@@ -329,9 +353,6 @@ public class GameControl : MonoBehaviour
 			droneScript.Player = player.transform.parent.gameObject;
 			droneScript.Type = droneType;
 			droneScript.PooledStart();
-
-			KinematicHover droneHover = drone.GetComponent<KinematicHover>();
-			droneHover.Target = player.DroneAnchors[ player.Drones.Count ];
 			player.Drones.Add( drone );
 
 			// Assign type-specific ammo
@@ -350,6 +371,11 @@ public class GameControl : MonoBehaviour
 					break;
 			}
 
+			// Despawn drone graphics
+			foreach( Transform child in pickup.transform )
+			{
+				SharedPool.Despawn( child.gameObject );
+			}
 			PickupPool.Despawn( pickup.gameObject );
 		}
 	}
@@ -358,9 +384,10 @@ public class GameControl : MonoBehaviour
 	{
 		if( Players.Contains( go.transform.parent.gameObject ) )
 		{
+			// Find the player and it's instance script
 			int playerIndex = Players.IndexOf( go.transform.parent.gameObject );
 			GameObject player = Players[ playerIndex ];
-			PlayerInstance playerScript = go.GetComponent<PlayerInstance>();
+			Avatar playerScript = go.GetComponent<Avatar>();
 
 			// Ensure all drones are deactivated
 			foreach( GameObject drone in playerScript.Drones )
@@ -369,12 +396,16 @@ public class GameControl : MonoBehaviour
 			}
 			playerScript.Drones.Clear();
 
-			FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
+			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
 			cameraScript.DeathCam = true;
 
 			// If killed by another player, target the camera at them
 			if( killedBy != go.transform.parent.gameObject )
 			{
+				// Trigger Game Rules callback
+				GameRules.Instance.PlayerDeath( go, killedBy );
+
+				// Set the victim's camera follow target
 				Transform target = killedBy.transform.Find( "Avatar/Marble" );
 				if( target != null && target.gameObject.activeSelf )
 				{
@@ -404,6 +435,22 @@ public class GameControl : MonoBehaviour
 	void ResetPickupOverlay( GameObject pickupOverlay, GameObject pickup )
 	{
 		pickupOverlay.GetComponent<KinematicHover>().Target = pickup.transform;
+		Billboard billboardScript = pickupOverlay.GetComponent<Billboard>();
+		// Setup material
+		switch( pickup.GetComponent<PickupInstance>().Type )
+		{
+			case PickupInfo.Type.Rocket:
+				billboardScript.Material = OverlayMaterials.Find( item => item.name == "Rocket Overlay" );
+				break;
+			case PickupInfo.Type.Mortar:
+				billboardScript.Material = OverlayMaterials.Find( item => item.name == "Mortar Overlay" );
+				break;
+			case PickupInfo.Type.Seeker:
+				billboardScript.Material = OverlayMaterials.Find( item => item.name == "Seeker Overlay" );
+				break;
+			default:
+				break;
+		}
 		pickupOverlay.GetComponent<Billboard>().LateStart();
 	}
 
@@ -417,7 +464,7 @@ public class GameControl : MonoBehaviour
 			int i = Random.Range( 0, spawnPoints.Length );
 			Transform spawnPoint = spawnPoints[ i ].transform;
 
-			FollowCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<FollowCamera>();
+			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
 
 			// AVATAR
 			// Spawn it's world avatar
@@ -430,9 +477,6 @@ public class GameControl : MonoBehaviour
 			InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
 			avatarInputScript.LocalPlayerIndex = Players.IndexOf( player );
 			avatarInputScript.Init();
-
-			// Setup avatar and overlay GameControl references
-			PlayerInstance avatarScript = avatar.GetComponent<PlayerInstance>();
 
 			// Reenable and reset the appropriate overlay
 			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();

@@ -81,7 +81,7 @@ public class WheelParticles : MonoBehaviour
 				{
 					ChargeParticles.particleSystem.Play();
 				}
-				float dashFactor = 1f - ( GetComponent<PlayerInstance>().Dash / GetComponent<PlayerInstance>().MaxDash );
+				float dashFactor = GetComponent<Avatar>().Dash / GetComponent<Avatar>().MaxDash;
 				ChargeParticles.particleSystem.emissionRate = transform.Find( "Marble" ).rigidbody.angularVelocity.magnitude * ChargeEmissionVelocityFactor * dashFactor;
 			}
 			else
@@ -108,7 +108,7 @@ public class WheelParticles : MonoBehaviour
 		// Dash jets
 		foreach( Transform jet in DashJets )
 		{
-			float dashFactor = GetComponent<PlayerInstance>().Dash / GetComponent<PlayerInstance>().MaxDash;
+			float dashFactor = GetComponent<Avatar>().Dash / GetComponent<Avatar>().MaxDash;
 			jet.particleSystem.emissionRate = dashFactor * 100;
 			jet.particleSystem.startSize = dashFactor * .3f;
 		}

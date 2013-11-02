@@ -34,6 +34,7 @@ public class MarbleMovement : MonoBehaviour
 	public Vector3 Forward;
 	public bool Grounded;
 	public Vector3 GroundPoint;
+	public bool ObtuseAngle;
 	public bool JumpFired = false;
 	public bool DropFired = false;
 	public Vector3 Velocity;
@@ -69,7 +70,6 @@ public class MarbleMovement : MonoBehaviour
 	{
 		// Update properties
 		int playerMask = 1 << gameObject.layer;
-		Grounded = Physics.CheckSphere( Marble.transform.position, .6f, ~playerMask );
 		Velocity = Marble.rigidbody.velocity;
 
 		// Rotation / Directional Force
@@ -105,13 +105,13 @@ public class MarbleMovement : MonoBehaviour
 			{
 				// If the jump jets are ready, apply jump force and set jumpFired flag
 				Marble.rigidbody.AddForce( jumpVector * JumpForce, ForceMode.Impulse );
-				JumpFired = true;
 			}
 			else
 			{
 				// Otherwise, apply hover force
 				Marble.rigidbody.AddForce( jumpVector * HoverForce * Time.deltaTime, ForceMode.Force );
 			}
+			JumpFired = true;
 		}
 		prevJump = inputWrapper.Jump;
 
@@ -122,31 +122,32 @@ public class MarbleMovement : MonoBehaviour
 			{
 				// If the drop jets are ready, apply drop force and set dropFired flag
 				Marble.rigidbody.AddForce( Up * -DownBurstForce, ForceMode.Impulse );
-				DropFired = true;
 			}
 			else
 			{
 				// Otherwise, apply downward accelleration
 				Marble.rigidbody.AddForce( Vector3.up * -DownJetForce * Time.deltaTime, ForceMode.Force );
 			}
+			DropFired = true;
 		}
 		prevDrop = inputWrapper.Drop;
 
 		// Dash
-		if( inputWrapper.Dash == 1f && GetComponent<PlayerInstance>().Dash > 0f )
+		if( inputWrapper.Dash == 1f && GetComponent<Avatar>().Dash > 0f )
 		{
-			float dash = GetComponent<PlayerInstance>().Dash;
+			float dash = GetComponent<Avatar>().Dash;
 			float force = Mathf.Min( dash, 1f );
+			Marble.rigidbody.velocity = Vector3.zero;
 			Marble.rigidbody.AddForce( force * Forward * inputWrapper.DashVector.y * DashForce, ForceMode.VelocityChange );
 			Marble.rigidbody.AddForce( force * Right * inputWrapper.DashVector.x * DashForce, ForceMode.VelocityChange );
 			GetComponent<WheelParticles>().DashBurst();
 			dash -= force;
-			GetComponent<PlayerInstance>().Dash = dash;
+			GetComponent<Avatar>().Dash = dash;
 		}
 
 		// Surface normal dot up - Make sure player isn't wall riding
-		float sndu = Vector3.Dot( Up, Vector3.up );
-		if( Grounded && sndu > .5f )
+		ObtuseAngle = Vector3.Dot( Up, Vector3.up ) <= 0f;
+		if( Grounded && !ObtuseAngle )
 		{
 			JumpFired = false;
 			DropFired = false;
@@ -190,6 +191,7 @@ public class MarbleMovement : MonoBehaviour
 	void ResetSurfaceNormal()
 	{
 		Up = Vector3.up;
+		Grounded = false;
 	}
 
 	void CalculateSurfaceNormal( Collision col )
@@ -211,6 +213,7 @@ public class MarbleMovement : MonoBehaviour
 		averagePoint /= col.contacts.Length;
 		averageNormal /= col.contacts.Length;
 
+		Grounded = true;
 		GroundPoint = averagePoint;
 		Up = averageNormal;
 	}

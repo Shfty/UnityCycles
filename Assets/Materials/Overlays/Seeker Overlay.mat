@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Mortar Holo Material
-  m_Shader: {fileID: 4800000, guid: 44f06552a9236c04bb64b1ca9a59da58, type: 3}
+  m_Name: Seeker Overlay
+  m_Shader: {fileID: 4800000, guid: 35cec6671eb5ba14888684739bd7d0bd, type: 3}
   m_ShaderKeywords: []
   m_SavedProperties:
     serializedVersion: 2
@@ -37,7 +37,7 @@ Material:
         first:
           name: _ProjTex
         second:
-          m_Texture: {fileID: 2800000, guid: ef183b9292f2f4e45ba56a06039d50e2, type: 3}
+          m_Texture: {fileID: 2800000, guid: c205ff37e5761bf48acfbe40624222e8, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -61,6 +61,27 @@ Material:
           m_Texture: {fileID: 2800000, guid: f7a0a732ad112a541100162a44295342, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Texture
+        second:
+          m_Texture: {fileID: 2800000, guid: d3f2b9e3229330d47b556781883566d1, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _MainTexture
+        second:
+          m_Texture: {fileID: 2800000, guid: d04f3f984fb83ed45a30d5c4d023ba4a, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _OccludedTexture
+        second:
+          m_Texture: {fileID: 2800000, guid: d04f3f984fb83ed45a30d5c4d023ba4a, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
     m_Floats:
       data:
         first:
@@ -70,7 +91,7 @@ Material:
       data:
         first:
           name: _Color
-        second: {r: 1, g: 1, b: 0, a: .784313738}
+        second: {r: 1, g: 1, b: 1, a: .501960814}
       data:
         first:
           name: _TintColor
@@ -127,6 +148,14 @@ Material:
         first:
           name: _Projector_3
         second: {r: -.104516894, g: -.175117612, b: .978984177, a: 2.08773851}
+      data:
+        first:
+          name: _MainColor
+        second: {r: 1, g: 1, b: 1, a: .313725501}
+      data:
+        first:
+          name: _OccludedColor
+        second: {r: 1, g: 1, b: 1, a: .501960814}
 --- !u!1002 &2100001
 EditorExtensionImpl:
   serializedVersion: 6

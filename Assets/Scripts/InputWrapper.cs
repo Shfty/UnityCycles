@@ -45,9 +45,17 @@ public class InputWrapper : MonoBehaviour
 			switch( Input.GetJoystickNames()[ LocalPlayerIndex ] )
 			{
 				case "Controller (XBOX 360 For Windows)":
-					// Set the appropriate type and instantiate the XInput pad index
-					type = InputType.XboxPad;
-					xboxPadIndex = (PlayerIndex)LocalPlayerIndex;
+					// Only works under Windows
+					if( Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsEditor )
+					{
+						// Set the appropriate type and instantiate the XInput pad index
+						type = InputType.XboxPad;
+						xboxPadIndex = (PlayerIndex)LocalPlayerIndex;
+					}
+					else
+					{
+						goto default;
+					}
 					break;
 				default:
 					// Set the appropriate type and create an axis name suffix for this joystick index

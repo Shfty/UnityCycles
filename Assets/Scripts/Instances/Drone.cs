@@ -55,7 +55,7 @@ public class Drone : MonoBehaviour
 		// Spawn the aiming line
 		aimingLine = GameControl.MiscPool.Spawn( "Line Renderer" ).GetComponent<LineRenderer>();
 		aimingLine.transform.parent = transform;
-		aimingLine.gameObject.layer = Player.transform.Find( "Camera" ).GetComponent<FollowCamera>().RenderLayer;
+		aimingLine.gameObject.layer = Player.transform.Find( "Camera" ).GetComponent<AvatarCamera>().RenderLayer;
 
 		// Configure the aiming line per-type and spawn type-specific extras
 		switch( Type )
@@ -72,11 +72,11 @@ public class Drone : MonoBehaviour
 				droneMesh = GameControl.SharedPool.Spawn( "Mortar Drone" );
 
 				// LineRenderer
-				aimingLine.SetVertexCount( DroneInfo.Mortar.AimLineSubdivisions );
+				aimingLine.SetVertexCount( DroneInfo.Mortar.AimLineSubdivisions + 1 );
 
 				// Aim Holo
 				aimingHolo = GameControl.MiscPool.Spawn( "Mortar Holo" ).GetComponent<Projector>();
-				aimingHolo.gameObject.layer = Player.transform.Find( "Camera" ).GetComponent<FollowCamera>().RenderLayer;
+				aimingHolo.gameObject.layer = Player.transform.Find( "Camera" ).GetComponent<AvatarCamera>().RenderLayer;
 				break;
 			case DroneInfo.Type.Seeker:
 				// Mesh
@@ -220,7 +220,8 @@ public class Drone : MonoBehaviour
 					float v = ProjectileInfo.Properties.MortarShell.InitialForce;
 					float d = Mathf.Sqrt( x * x + z * z );
 
-					for( int i = 0; i < DroneInfo.Mortar.AimLineSubdivisions; ++i )
+					int i;
+					for( i = 0; i < DroneInfo.Mortar.AimLineSubdivisions; ++i )
 					{
 						float dist = ( d / DroneInfo.Mortar.AimLineSubdivisions ) * i;
 						float div = ( g * ( dist * dist ) ) / ( 2f * Mathf.Pow( v * Mathf.Cos( theta ), 2f ) );
@@ -231,6 +232,7 @@ public class Drone : MonoBehaviour
 
 						aimingLine.SetPosition( i, transform.position + pos );
 					}
+					aimingLine.SetPosition( i, AimPoint );
 
 					aimingLine.SetColors( Color.yellow, Color.yellow );
 					break;
