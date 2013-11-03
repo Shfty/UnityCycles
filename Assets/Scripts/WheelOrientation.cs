@@ -3,8 +3,11 @@ using System.Collections;
 
 public class WheelOrientation : MonoBehaviour
 {
-	//Fields
-	InputWrapper inputWrapper;
+	// Properties
+	public InputWrapper InputWrapper { get; set; }
+
+	// Variables
+	// Private
 	MarbleMovement marbleScript;
 	Transform wheelMesh;
 	Quaternion baseOrientation;
@@ -12,7 +15,7 @@ public class WheelOrientation : MonoBehaviour
 	float turnAngle;
 	float spinRate = 0f;
 
-	// Properties
+	// Public
 	public GameObject Wheel;
 	public float RotationLerpFactor = 6f;
 	public float WheelSpinFactor = 1.5f;
@@ -31,13 +34,12 @@ public class WheelOrientation : MonoBehaviour
 		// Find and store the marble movement script, wheel mesh and input wrapper
 		marbleScript = gameObject.GetComponent<MarbleMovement>();
 		wheelMesh = Wheel.transform.Find( "Wheel Mesh Wrapper" );
-		inputWrapper = GetComponent<InputWrapper>();
 	}
 	
 	void Update()
 	{
 		// Update the heading based on impulse direction
-		Vector3 heading = new Vector3( inputWrapper.LeftStick.x, 0f, inputWrapper.LeftStick.y );
+		Vector3 heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
 		
 		// Update the turn angle if the stick is pressed far enough
 		if( heading.magnitude > TurnStickDeadzone )

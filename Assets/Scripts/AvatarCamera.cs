@@ -5,7 +5,30 @@ using System.Collections.Generic;
 public class AvatarCamera : MonoBehaviour
 {
 	// Fields
-	InputWrapper inputWrapper;
+	InputWrapper _inputWrapper = null;
+	int _renderLayer;
+
+	// Properties
+	public InputWrapper InputWrapper
+	{
+		get { return _inputWrapper; }
+		set
+		{
+			_inputWrapper = value;
+			if( _inputWrapper != null )
+			{
+				RenderLayer = LayerMask.NameToLayer( "Camera " + ( _inputWrapper.LocalPlayerIndex + 1 ) );
+			}
+		}
+	}
+	public int RenderLayer
+	{
+		get { return _renderLayer; }
+		set { _renderLayer = value; }
+	}
+
+	// Variables
+	// Private
 	Vector3 targetPosition;
 	Vector3 velocity;
 	float xAngle = 0f;
@@ -18,7 +41,7 @@ public class AvatarCamera : MonoBehaviour
 	int pickupMask;
 	int projectileMask;
 
-	// Properties
+	// Public
 	public Transform Target;
 	public Vector3 Offset;
 	public float MinFollowDistance = 1f;
@@ -26,25 +49,18 @@ public class AvatarCamera : MonoBehaviour
 	public float PositionLerpFactor = 12f;
 	public float CameraRadius = .5f;
 	public float SmallValue = .01f;
-	public int RenderLayer;
 	
 	// Unity Methods
 	void Awake()
 	{
 		// Start at maximum follow distance
 		followDistance = MaxFollowDistance;
-
-		// Find and store the input wrapper component
-		inputWrapper = gameObject.GetComponent<InputWrapper>();
 	}
 
 	void Start()
 	{
 		// Find fallback camera anchors
 		mapCameraAnchors = GameObject.FindGameObjectsWithTag( "MapCamera" );
-
-		// Setup render layer string
-		RenderLayer = LayerMask.NameToLayer( "Camera " + ( inputWrapper.LocalPlayerIndex + 1 ) );
 
 		// Set the target position behind the target and init the camera position to it
 		targetPosition = Target.position - ( Vector3.forward * followDistance );
@@ -67,8 +83,8 @@ public class AvatarCamera : MonoBehaviour
 		}
 
 		// Take Input and clamp Y Axis
-		xAngle += inputWrapper.RightStick.x * 90f * Time.deltaTime;
-		yAngle += inputWrapper.RightStick.y * -90f * Time.deltaTime;
+		xAngle += InputWrapper.RightStick.x * 90f * Time.deltaTime;
+		yAngle += InputWrapper.RightStick.y * -90f * Time.deltaTime;
 
 		yAngle = Mathf.Clamp( yAngle, -80f, 80f );
 

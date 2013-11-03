@@ -363,7 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab5d48f2d185f04bab2650d34d3bb83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalPlayerCount: 4
+  LocalPlayerCount: 2
   MaxPickups: 15
   PickupTimeout: 2
   OverlayMaterials:

@@ -4,15 +4,17 @@ using System.Collections.Generic;
 
 public class Avatar : MonoBehaviour
 {
-	// Fields
-	InputWrapper inputWrapper;
+	// Properties
+	public InputWrapper InputWrapper { get; set; }
+
+	// Variables
+	// Private
 	float prevFire;
 	float prevSwitchLeft;
 	float prevSwitchRight;
-
 	int initHealth;
 	
-	// Properties
+	// Public
 	public int ActiveDroneIndex = 0;
 	public List<GameObject> Drones;
 	public List<Transform> DroneAnchors;
@@ -24,6 +26,8 @@ public class Avatar : MonoBehaviour
 	public float DashRechargeVelocityFactor = 0.01f;
 	public float DashRechargeSpinFactor = 0.01f;
 
+	public float DamageRumbleFactor = .02f;
+
 	// Unity Methods
 	void Awake()
 	{
@@ -33,12 +37,6 @@ public class Avatar : MonoBehaviour
 	public void OnEnable()
 	{
 		Health = initHealth;
-	}
-	
-	void Start()
-	{
-		// Find and store the input wrapper
-		inputWrapper = gameObject.GetComponent<InputWrapper>();
 	}
 
 	void Update()
@@ -57,7 +55,7 @@ public class Avatar : MonoBehaviour
 			{
 				// Set the drone's Aim property
 				Drone droneScript = Drones[ ActiveDroneIndex ].GetComponent<Drone>();
-				if( inputWrapper.Aim == 1f )
+				if( InputWrapper.Aim == 1f )
 				{
 					droneScript.Aim = true;
 				}
@@ -67,24 +65,24 @@ public class Avatar : MonoBehaviour
 				}
 
 				// Relay fire events
-				if( inputWrapper.Fire == 1f && prevFire == 0f )
+				if( InputWrapper.Fire == 1f && prevFire == 0f )
 				{
 					droneScript.Fire();
 				}
-				prevFire = inputWrapper.Fire;
+				prevFire = InputWrapper.Fire;
 
 				// Switch drones
-				if( inputWrapper.SwitchRight == 1f && prevSwitchRight == 0f )
+				if( InputWrapper.SwitchRight == 1f && prevSwitchRight == 0f )
 				{
 					SwitchDrone( true );
 				}
-				prevSwitchRight = inputWrapper.SwitchRight;
+				prevSwitchRight = InputWrapper.SwitchRight;
 
-				if( inputWrapper.SwitchLeft == 1f && prevSwitchLeft == 0f )
+				if( InputWrapper.SwitchLeft == 1f && prevSwitchLeft == 0f )
 				{
 					SwitchDrone( false );
 				}
-				prevSwitchLeft = inputWrapper.SwitchLeft;
+				prevSwitchLeft = InputWrapper.SwitchLeft;
 			}
 		}
 
@@ -170,6 +168,7 @@ public class Avatar : MonoBehaviour
 		GameObject owner = (GameObject)args[ 1 ];
 
 		Health -= damage;
+		InputWrapper.StrongRumbleForce += damage * DamageRumbleFactor;
 		if( Health <= 0 )
 		{
 			// Spawn Explosion

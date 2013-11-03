@@ -4,7 +4,11 @@ using System.Collections.Generic;
 
 public class AvatarGUI : MonoBehaviour
 {
-	// Fields
+	// Properties
+	public InputWrapper InputWrapper { get; set; }
+
+	// Variables
+	// Private
 	float gridSize;
 	List<GameObject> drones;
 	int activeDroneIndex = 0;
@@ -16,9 +20,8 @@ public class AvatarGUI : MonoBehaviour
 	float dashTarget;
 	float prevRespawn = 0f;
 	float scaleFactor;
-	InputWrapper inputWrapper;
 
-	// Properties
+	// Public
 	public GUISkin Skin;
 	public Texture CrosshairTexture;
 	public List<Texture> DroneIconTextures;
@@ -30,8 +33,6 @@ public class AvatarGUI : MonoBehaviour
 	// Unity Methods
 	void Awake()
 	{
-		inputWrapper = GetComponent<InputWrapper>();
-
 		droneIconPositions = new List<Vector2>();
 		droneIconTargets = new List<Vector2>();
 		Vector2 droneStartPos = new Vector2( Screen.width * .5f, Screen.height * 2f );
@@ -47,12 +48,12 @@ public class AvatarGUI : MonoBehaviour
 		// Check respawn
 		if( DeathCam )
 		{
-			if( inputWrapper.Fire == 1f && prevRespawn == 0f )
+			if( InputWrapper.Fire == 1f && prevRespawn == 0f )
 			{
-				GameControl.Instance.Respawn( transform.parent.gameObject );
+				GameControl.Instance.RespawnPlayer( transform.parent.gameObject );
 			}
 		}
-		prevRespawn = inputWrapper.Fire;
+		prevRespawn = InputWrapper.Fire;
 	}
 	
 	void OnGUI()

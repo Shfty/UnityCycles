@@ -175,6 +175,15 @@ public class InputWrapper : MonoBehaviour
 		}
 	}
 
+	void OnApplicationQuit()
+	{
+		if( type == InputType.XboxPad )
+		{
+			GamePad.SetVibration( xboxPadIndex, 0f, 0f );
+		}
+	}
+
+	// Utility Methods
 	/* Dash states:
 	 * 0 - Stick outside outer zone
 	 * 1 - Stick within inner zone

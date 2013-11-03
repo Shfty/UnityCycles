@@ -4,14 +4,16 @@ using System.Collections.Generic;
 
 public class WheelParticles : MonoBehaviour
 {
-	// Fields
+	// Properties
+	public InputWrapper InputWrapper { get; set; }
+
+	// Private
 	MarbleMovement marbleScript;
-	InputWrapper inputWrapper;
 	int terrainMask;
 	float prevJump = 0f;
 	float prevDrop = 0f;
 
-	// Properties
+	// Public
 	public Transform DustParticles;
 	public Transform ChargeParticles;
 	public float ParticleStickDeadzone = .25f;
@@ -29,7 +31,6 @@ public class WheelParticles : MonoBehaviour
 	void Awake()
 	{
 		marbleScript = gameObject.GetComponent<MarbleMovement>();
-		inputWrapper = gameObject.GetComponent<InputWrapper>();
 		terrainMask = 1 << LayerMask.NameToLayer( "Terrain" );
 	}
 	
@@ -55,7 +56,7 @@ public class WheelParticles : MonoBehaviour
 			}
 
 			// Dust Particles
-			Vector3 heading = new Vector3( inputWrapper.LeftStick.x, 0f, inputWrapper.LeftStick.y );
+			Vector3 heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
 			DustParticles.particleSystem.startSpeed = heading.magnitude * 5f;
 			DustParticles.particleSystem.startColor = dustColor;
 
@@ -114,7 +115,7 @@ public class WheelParticles : MonoBehaviour
 		}
 
 		// Enable the jump jets if the button is pressed
-		if( inputWrapper.Jump == 1f )
+		if( InputWrapper.Jump == 1f )
 		{
 			if( !JumpJetsEnabled )
 			{
@@ -134,10 +135,10 @@ public class WheelParticles : MonoBehaviour
 				SetJetsEnabled( true, false );
 			}
 		}
-		prevJump = inputWrapper.Jump;
+		prevJump = InputWrapper.Jump;
 
 		// Enable the drop jets if the button is pressed
-		if( inputWrapper.Drop == 1f )
+		if( InputWrapper.Drop == 1f )
 		{
 			if( !DropJetsEnabled )
 			{
@@ -157,7 +158,7 @@ public class WheelParticles : MonoBehaviour
 				SetJetsEnabled( false, false );
 			}
 		}
-		prevDrop = inputWrapper.Drop;
+		prevDrop = InputWrapper.Drop;
 	}
 
 	// Utility Methods

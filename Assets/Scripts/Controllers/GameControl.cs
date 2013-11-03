@@ -164,43 +164,77 @@ public class GameControl : MonoBehaviour
 	}
 
 	// Utility Methods
-	void SpawnLocalPlayer( Transform spawnPoint, int idx )
+	// PLAYERS
+	GameObject SpawnPooledAvatar( Transform spawnPoint, GameObject player )
 	{
-		// Instantiate a new player container
-		GameObject player = new GameObject( "Player" );
-		player.transform.parent = playerContainer.transform;
-
-		// AVATAR
 		// Spawn it's world avatar
 		GameObject avatar = PlayerPool.Spawn( "Avatar" );
 		avatar.transform.parent = player.transform;
 		avatar.transform.position = spawnPoint.position;
 		avatar.transform.rotation = spawnPoint.rotation;
+		return avatar;
+	}
 
-		// Setup avatar input wrapper
-		InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
-		avatarInputScript.LocalPlayerIndex = Players.Count;
-		avatarInputScript.Init();
-		
-		// CAMERA
+	GameObject SpawnPooledCamera( Transform target, GameObject player )
+	{
 		// Instantiate a new camera object
 		GameObject camera = PlayerPool.Spawn( "Camera" );
-		camera.transform.position = avatar.transform.position;
-		camera.transform.rotation = avatar.transform.rotation;
+		camera.transform.position = target.position;
+		camera.transform.rotation = target.rotation;
 		camera.transform.parent = player.transform;
+		return camera;
+	}
+
+	void BindPlayerMembers( GameObject player )
+	{
+		// Find gameobjects
+		GameObject camera = player.transform.Find( "Camera" ).gameObject;
+		GameObject avatar = player.transform.Find( "Avatar" ).gameObject;
+
+		// Find components
+		Avatar avatarScript = avatar.GetComponent<Avatar>();
+		MarbleMovement marbleScript = avatar.GetComponent<MarbleMovement>();
+		WheelOrientation wheelOrientation = avatar.GetComponent<WheelOrientation>();
+		WheelParticles wheelParticles = avatar.GetComponent<WheelParticles>();
+
+		AvatarCamera cameraScript = camera.GetComponent<AvatarCamera>();
+		AvatarGUI guiScript = camera.GetComponent<AvatarGUI>();
 
 		// Tell the camera to follow the avatar
-		AvatarCamera cameraScript = camera.GetComponent<AvatarCamera>();
 		cameraScript.Target = avatar.transform.Find( "Marble" );
 
-		// Setup camera input wrapper
-		InputWrapper cameraInputScript = camera.GetComponent<InputWrapper>();
-		cameraInputScript.LocalPlayerIndex = Players.Count;
-		cameraInputScript.Init();
+		// Setup avatar movement camera reference
+		marbleScript.Camera = camera.transform;
 
-		// Setup avatar movement script
-		MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();
-		movementScript.Camera = camera.transform;
+		// Setup InputWrapper references
+		InputWrapper playerInput = player.GetComponent<InputWrapper>();
+
+		avatarScript.InputWrapper = playerInput;
+		marbleScript.InputWrapper = playerInput;
+		wheelOrientation.InputWrapper = playerInput;
+		wheelParticles.InputWrapper = playerInput;
+
+		cameraScript.InputWrapper = playerInput;
+		guiScript.InputWrapper = playerInput;
+	}
+
+	void SpawnLocalPlayer( Transform spawnPoint, int idx )
+	{
+		// Instantiate a new player container
+		GameObject player = new GameObject( "Player" );
+		player.transform.parent = playerContainer.transform;
+		InputWrapper playerInput = player.AddComponent<InputWrapper>();
+		playerInput.LocalPlayerIndex = Players.Count;
+		playerInput.WeakRumbleDecayRate = 12f;
+		playerInput.StrongRumbleDecayRate = 6f;
+		playerInput.Init();
+
+		// Spawn child objects
+		GameObject avatar = SpawnPooledAvatar( spawnPoint, player );
+		GameObject camera = SpawnPooledCamera( avatar.transform, player );
+
+		// Connect the player and it's children
+		BindPlayerMembers( player );
 
 		// Calculate camera viewport & culling mask
 		camera.camera.rect = CalculateViewport( idx );
@@ -220,42 +254,90 @@ public class GameControl : MonoBehaviour
 		Players.Add( player );
 	}
 
-	void SpawnPickup( PickupInfo.Type type, Vector3 position, Quaternion rotation )
+	public void RespawnPlayer( GameObject player )
 	{
-		// Get a blank pickup from the object pool, spawn the appropriate graphic and attach
-		GameObject pickup = PickupPool.Spawn( "Pickup" );
-		GameObject pickupMesh = null;
-		switch( type )
+		if( Players.Contains( player ) )
 		{
-			case PickupInfo.Type.Rocket:
-				pickupMesh = SharedPool.Spawn( "Rocket Drone" );
-				break;
-			case PickupInfo.Type.Mortar:
-				pickupMesh = SharedPool.Spawn( "Mortar Drone" );
-				break;
-			case PickupInfo.Type.Seeker:
-				pickupMesh = SharedPool.Spawn( "Seeker Drone" );
-				break;
-			default:
-				break;
+			int playerIndex = Players.IndexOf( player );
+
+			int i = Random.Range( 0, spawnPoints.Length );
+			Transform spawnPoint = spawnPoints[ i ].transform;
+
+			// AVATAR
+			// Spawn it's world avatar
+			GameObject avatar = SpawnPooledAvatar( spawnPoint, player );
+
+			// Reenable and reset the appropriate overlay
+			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
+			overlay.gameObject.SetActive( true );
+			ResetPlayerOverlay( PlayerOverlays[ playerIndex ], Players[ playerIndex ] );
+
+			// Connect the player and it's children
+			BindPlayerMembers( player );
+
+			// Reset the GUI DeathCam
+			AvatarGUI cameraGui = player.transform.Find( "Camera" ).GetComponent<AvatarGUI>();
+			cameraGui.DeathCam = false;
 		}
-		pickupMesh.transform.parent = pickup.transform;
-
-		// Setup transform
-		pickup.transform.position = position;
-		pickup.transform.rotation = rotation;
-
-		// Set script properties
-		PickupInstance pickupScript = pickup.GetComponent<PickupInstance>();
-		pickupScript.Type = type;
-
-		// Add to pickup list
-		Pickups.Add( pickup );
 	}
 
-	// Setup camera rect based on player count and index
+	public void PlayerDeath( GameObject go, GameObject killedBy )
+	{
+		if( Players.Contains( go.transform.parent.gameObject ) )
+		{
+			// Find the player and it's instance script
+			int playerIndex = Players.IndexOf( go.transform.parent.gameObject );
+			GameObject player = Players[ playerIndex ];
+			Avatar playerScript = go.GetComponent<Avatar>();
+
+			// Ensure all drones are deactivated
+			foreach( GameObject drone in playerScript.Drones )
+			{
+				drone.GetComponent<Drone>().Deactivate();
+			}
+			playerScript.Drones.Clear();
+
+
+			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
+			AvatarGUI guiScript = player.transform.Find( "Camera" ).GetComponent<AvatarGUI>();
+			guiScript.DeathCam = true;
+
+			// If killed by another player, target the camera at them
+			if( killedBy != go.transform.parent.gameObject )
+			{
+				// Trigger Game Rules callback
+				GameRules.Instance.PlayerDeath( go, killedBy );
+
+				// Set the victim's camera follow target
+				Transform target = killedBy.transform.Find( "Avatar/Marble" );
+				if( target != null && target.gameObject.activeSelf )
+				{
+					cameraScript.Target = target;
+				}
+			}
+			else
+			{
+				cameraScript.Target = null;
+			}
+
+			// Disable billboard
+			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
+			overlay.gameObject.SetActive( false );
+
+			PlayerPool.Despawn( go );
+		}
+	}
+
+	void ResetPlayerOverlay( GameObject playerOverlay, GameObject player )
+	{
+		playerOverlay.GetComponent<KinematicHover>().Target = player.transform.Find( "Avatar/Marble" );
+		playerOverlay.GetComponent<PlayerOverlay>().Player = player;
+		playerOverlay.GetComponent<PlayerOverlay>().LateStart();
+	}
+
 	Rect CalculateViewport( int idx )
 	{
+		// Setup camera rect based on player count and index
 		Rect cameraRect = new Rect( 0f, 0f, 1f, 1f );
 
 		switch( LocalPlayerCount )
@@ -314,6 +396,40 @@ public class GameControl : MonoBehaviour
 		}
 
 		return cameraRect;
+	}
+
+	// PICKUPS
+	void SpawnPickup( PickupInfo.Type type, Vector3 position, Quaternion rotation )
+	{
+		// Get a blank pickup from the object pool, spawn the appropriate graphic and attach
+		GameObject pickup = PickupPool.Spawn( "Pickup" );
+		GameObject pickupMesh = null;
+		switch( type )
+		{
+			case PickupInfo.Type.Rocket:
+				pickupMesh = SharedPool.Spawn( "Rocket Drone" );
+				break;
+			case PickupInfo.Type.Mortar:
+				pickupMesh = SharedPool.Spawn( "Mortar Drone" );
+				break;
+			case PickupInfo.Type.Seeker:
+				pickupMesh = SharedPool.Spawn( "Seeker Drone" );
+				break;
+			default:
+				break;
+		}
+		pickupMesh.transform.parent = pickup.transform;
+
+		// Setup transform
+		pickup.transform.position = position;
+		pickup.transform.rotation = rotation;
+
+		// Set script properties
+		PickupInstance pickupScript = pickup.GetComponent<PickupInstance>();
+		pickupScript.Type = type;
+
+		// Add to pickup list
+		Pickups.Add( pickup );
 	}
 
 	public void PickupGrabbed( PickupInstance pickup, Avatar player )
@@ -379,60 +495,6 @@ public class GameControl : MonoBehaviour
 		}
 	}
 
-	public void PlayerDeath( GameObject go, GameObject killedBy )
-	{
-		if( Players.Contains( go.transform.parent.gameObject ) )
-		{
-			// Find the player and it's instance script
-			int playerIndex = Players.IndexOf( go.transform.parent.gameObject );
-			GameObject player = Players[ playerIndex ];
-			Avatar playerScript = go.GetComponent<Avatar>();
-
-			// Ensure all drones are deactivated
-			foreach( GameObject drone in playerScript.Drones )
-			{
-				drone.GetComponent<Drone>().Deactivate();
-			}
-			playerScript.Drones.Clear();
-
-			
-			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
-			AvatarGUI guiScript = player.transform.Find( "Camera" ).GetComponent<AvatarGUI>();
-			guiScript.DeathCam = true;
-
-			// If killed by another player, target the camera at them
-			if( killedBy != go.transform.parent.gameObject )
-			{
-				// Trigger Game Rules callback
-				GameRules.Instance.PlayerDeath( go, killedBy );
-
-				// Set the victim's camera follow target
-				Transform target = killedBy.transform.Find( "Avatar/Marble" );
-				if( target != null && target.gameObject.activeSelf )
-				{
-					cameraScript.Target = target;
-				}
-			}
-			else
-			{
-				cameraScript.Target = null;
-			}
-
-			// Disable billboard
-			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent <PlayerOverlay>();
-			overlay.gameObject.SetActive( false );
-
-			PlayerPool.Despawn( go );
-		}
-	}
-
-	void ResetPlayerOverlay( GameObject playerOverlay, GameObject player )
-	{
-		playerOverlay.GetComponent<KinematicHover>().Target = player.transform.Find( "Avatar/Marble" );
-		playerOverlay.GetComponent<PlayerOverlay>().Player = player;
-		playerOverlay.GetComponent<PlayerOverlay>().LateStart();
-	}
-
 	void ResetPickupOverlay( GameObject pickupOverlay, GameObject pickup )
 	{
 		pickupOverlay.GetComponent<KinematicHover>().Target = pickup.transform;
@@ -453,46 +515,5 @@ public class GameControl : MonoBehaviour
 				break;
 		}
 		pickupOverlay.GetComponent<Billboard>().LateStart();
-	}
-
-	public void Respawn( GameObject go )
-	{
-		if( Players.Contains( go ) )
-		{
-			int playerIndex = Players.IndexOf( go );
-			GameObject player = Players[ playerIndex ];
-
-			int i = Random.Range( 0, spawnPoints.Length );
-			Transform spawnPoint = spawnPoints[ i ].transform;
-
-			// AVATAR
-			// Spawn it's world avatar
-			GameObject avatar = PlayerPool.Spawn( "Avatar" );
-			avatar.transform.position = spawnPoint.position;
-			avatar.transform.rotation = spawnPoint.rotation;
-			avatar.transform.parent = player.transform;
-
-			// Setup avatar input wrapper
-			InputWrapper avatarInputScript = avatar.GetComponent<InputWrapper>();
-			avatarInputScript.LocalPlayerIndex = Players.IndexOf( player );
-			avatarInputScript.Init();
-
-			// Reenable and reset the appropriate overlay
-			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
-			overlay.gameObject.SetActive( true );
-			ResetPlayerOverlay( PlayerOverlays[ playerIndex ], Players[ playerIndex ] );
-
-			// Setup avatar movement script
-			MarbleMovement movementScript = avatar.GetComponent<MarbleMovement>();
-			movementScript.Camera = player.transform.Find( "Camera" );
-
-			// CAMERA
-			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
-			AvatarGUI cameraGui = player.transform.Find( "Camera" ).GetComponent<AvatarGUI>();
-
-			// Tell the camera to follow the avatar
-			cameraScript.Target = avatar.transform.Find( "Marble" );
-			cameraGui.DeathCam = false;
-		}
 	}
 }
