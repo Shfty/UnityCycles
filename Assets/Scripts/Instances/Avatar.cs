@@ -97,7 +97,7 @@ public class Avatar : MonoBehaviour
 				Drones.RemoveAt( i );
 				if( Drones.Count > 0 && ActiveDroneIndex >= Drones.Count - 1 )
 				{
-					ActiveDroneIndex = Drones.Count - 1;
+					SwitchDrone( false );
 				}
 				--i;
 				continue;

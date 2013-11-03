@@ -11,7 +11,6 @@ public class AvatarCamera : MonoBehaviour
 	float xAngle = 0f;
 	float yAngle = 0f;
 	float followDistance;
-	float prevRespawn = 0f;
 	GameObject[] mapCameraAnchors;
 
 	int terrainMask;
@@ -27,7 +26,6 @@ public class AvatarCamera : MonoBehaviour
 	public float PositionLerpFactor = 12f;
 	public float CameraRadius = .5f;
 	public float SmallValue = .01f;
-	public bool DeathCam = false;
 	public int RenderLayer;
 	
 	// Unity Methods
@@ -126,16 +124,6 @@ public class AvatarCamera : MonoBehaviour
 				followDistance += SmallValue;
 			}
 		} while( canReverse );
-
-		// Check respawn
-		if( DeathCam )
-		{
-			if( inputWrapper.Fire == 1f && prevRespawn == 0f )
-			{
-				GameControl.Instance.Respawn( transform.parent.gameObject );
-			}
-		}
-		prevRespawn = inputWrapper.Fire;
 
 		// Apply transform changes
 		transform.position = Vector3.Lerp( transform.position, targetPosition, PositionLerpFactor * Time.deltaTime );

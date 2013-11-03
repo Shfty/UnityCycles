@@ -28,6 +28,8 @@ public class MarbleMovement : MonoBehaviour
 	public float DownJetForce = 1000f;
 	public float DashForce = 7f;
 
+	public float ForceRumbleDivisor = 50f;
+
 	// Read by WheelOrientation
 	public Vector3 Right;
 	public Vector3 Up;
@@ -105,11 +107,13 @@ public class MarbleMovement : MonoBehaviour
 			{
 				// If the jump jets are ready, apply jump force and set jumpFired flag
 				Marble.rigidbody.AddForce( jumpVector * JumpForce, ForceMode.Impulse );
+				inputWrapper.WeakRumbleForce += JumpForce / ForceRumbleDivisor;
 			}
 			else
 			{
 				// Otherwise, apply hover force
 				Marble.rigidbody.AddForce( jumpVector * HoverForce * Time.deltaTime, ForceMode.Force );
+				inputWrapper.WeakRumbleBaseForce = HoverForce / ForceRumbleDivisor;
 			}
 			JumpFired = true;
 		}
@@ -122,15 +126,23 @@ public class MarbleMovement : MonoBehaviour
 			{
 				// If the drop jets are ready, apply drop force and set dropFired flag
 				Marble.rigidbody.AddForce( Up * -DownBurstForce, ForceMode.Impulse );
+				inputWrapper.WeakRumbleForce += DownBurstForce / ForceRumbleDivisor;
 			}
 			else
 			{
 				// Otherwise, apply downward accelleration
 				Marble.rigidbody.AddForce( Vector3.up * -DownJetForce * Time.deltaTime, ForceMode.Force );
+				inputWrapper.WeakRumbleBaseForce = DownJetForce / ForceRumbleDivisor;
 			}
 			DropFired = true;
 		}
 		prevDrop = inputWrapper.Drop;
+
+		// Disable jet rumble in the air if needed
+		if( inputWrapper.Jump == 0f && inputWrapper.Drop == 0f && !Grounded )
+		{
+			inputWrapper.WeakRumbleBaseForce = 0f;
+		}
 
 		// Dash
 		if( inputWrapper.Dash == 1f && GetComponent<Avatar>().Dash > 0f )
@@ -143,6 +155,7 @@ public class MarbleMovement : MonoBehaviour
 			GetComponent<WheelParticles>().DashBurst();
 			dash -= force;
 			GetComponent<Avatar>().Dash = dash;
+			inputWrapper.WeakRumbleForce += ( ( force * DashForce ) * ( force * DashForce ) ) / ForceRumbleDivisor;
 		}
 
 		// Surface normal dot up - Make sure player isn't wall riding
@@ -174,16 +187,19 @@ public class MarbleMovement : MonoBehaviour
 
 	public void OnCollisionEnter( Collision col )
 	{
+		inputWrapper.StrongRumbleForce = col.relativeVelocity.magnitude / ForceRumbleDivisor;
 		CalculateSurfaceNormal( col );
 	}
 
 	public void OnCollisionStay( Collision col )
 	{
+		inputWrapper.WeakRumbleBaseForce = col.relativeVelocity.magnitude / ForceRumbleDivisor;
 		CalculateSurfaceNormal( col );
 	}
 
 	public void OnCollisionExit()
 	{
+		inputWrapper.WeakRumbleBaseForce = 0f;
 		ResetSurfaceNormal();
 	}
 

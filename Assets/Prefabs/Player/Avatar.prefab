@@ -1277,6 +1277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c65a5e3df41943f4b923c13754554644, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ActiveDroneIndex: 0
   Drones: []
   DroneAnchors:
   - {fileID: 400018}
@@ -1286,6 +1287,7 @@ MonoBehaviour:
   MaxHealth: 100
   Dash: 0
   MaxDash: 1.5
+  Kills: 0
   DashRechargeVelocityFactor: .0149999997
   DashRechargeSpinFactor: .0799999982
 --- !u!114 &11400006
@@ -1310,11 +1312,13 @@ MonoBehaviour:
   DownBurstForce: 15
   DownJetForce: 1000
   DashForce: 25
+  ForceRumbleDivisor: 50
   Right: {x: .999990404, y: .00438693864, z: -1.12884945e-05}
   Up: {x: -.00438689208, y: .999966562, z: -.00514629763}
   Forward: {x: -1.12884945e-05, y: .00514635211, z: .999986768}
   Grounded: 1
   GroundPoint: {x: 0, y: 0, z: 0}
+  ObtuseAngle: 0
   JumpFired: 0
   DropFired: 0
   Velocity: {x: 5.25499217e-07, y: -1.86264526e-06, z: -1.05100435e-06}
@@ -1329,6 +1333,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0c41129fa35d9248a8ebecd53ab4111, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  StrongRumbleBaseForce: 0
+  StrongRumbleForce: 0
+  StrongRumbleDecayRate: 12
+  WeakRumbleBaseForce: 0
+  WeakRumbleForce: 0
+  WeakRumbleDecayRate: 20
   LocalPlayerIndex: 0
   LeftStick: {x: 0, y: 0}
   RightStick: {x: 0, y: 0}

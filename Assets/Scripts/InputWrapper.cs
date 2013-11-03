@@ -10,6 +10,14 @@ public class InputWrapper : MonoBehaviour
 	InputType type = InputType.None;
 	string typeSuffix;
 
+	// Left = Strong Motor, Right = Weak Motor
+	public float StrongRumbleBaseForce = 0f;
+	public float StrongRumbleForce = 0f;
+	public float StrongRumbleDecayRate = 1.0f;
+	public float WeakRumbleBaseForce = 0f;
+	public float WeakRumbleForce = 0f;
+	public float WeakRumbleDecayRate = 1.0f;
+
 	// Enums
 	public enum InputType
 	{
@@ -51,6 +59,7 @@ public class InputWrapper : MonoBehaviour
 						// Set the appropriate type and instantiate the XInput pad index
 						type = InputType.XboxPad;
 						xboxPadIndex = (PlayerIndex)LocalPlayerIndex;
+						GamePad.SetVibration( xboxPadIndex, 0f, 0f );
 					}
 					else
 					{
@@ -104,6 +113,13 @@ public class InputWrapper : MonoBehaviour
 				Fire = Input.GetAxis( "Fire" + typeSuffix );
 				SwitchLeft = Input.GetAxis( "Switch Left" + typeSuffix );
 				SwitchRight = Input.GetAxis( "Switch Right" + typeSuffix );
+				if( typeSuffix == " (Keyboard)" )
+				{
+					SwitchLeft += Input.GetAxis( "Switch (Mouse)" ) < 0f ? 1f : 0f;
+					SwitchRight += Input.GetAxis( "Switch (Mouse)" ) > 0f ? 1f : 0f;
+				}
+				SwitchLeft = Mathf.Min( SwitchLeft, 1f );
+				SwitchRight = Mathf.Min( SwitchRight, 1f );
 				break;
 			case InputType.XboxPad:
 				xboxPadState = GamePad.GetState( xboxPadIndex );
@@ -131,6 +147,31 @@ public class InputWrapper : MonoBehaviour
 		else
 		{
 			CheckKeyDashInput();
+		}
+
+		// Vibration
+		if( StrongRumbleForce > StrongRumbleBaseForce )
+		{
+			StrongRumbleForce = Mathf.Lerp( StrongRumbleForce, StrongRumbleBaseForce, StrongRumbleDecayRate * Time.deltaTime );
+		}
+		else
+		{
+			StrongRumbleForce = StrongRumbleBaseForce;
+		}
+
+		if( WeakRumbleForce > WeakRumbleBaseForce )
+		{
+			WeakRumbleForce = Mathf.Lerp( WeakRumbleForce, WeakRumbleBaseForce, WeakRumbleDecayRate * Time.deltaTime );
+		}
+		else
+		{
+			WeakRumbleForce = WeakRumbleBaseForce;
+		}
+
+		// Set rumble
+		if( type == InputType.XboxPad )
+		{
+			GamePad.SetVibration( xboxPadIndex, StrongRumbleForce, WeakRumbleForce );
 		}
 	}
 

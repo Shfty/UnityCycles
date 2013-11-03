@@ -13,8 +13,8 @@ public class GameControl : MonoBehaviour
 
 	// Properties
 	public int LocalPlayerCount = 1;
-	int MaxPickups = 15;
-	float PickupTimeout = 2f;
+	public int MaxPickups = 15;
+	public float PickupTimeout = 2f;
 	public List<Material> OverlayMaterials;
 	public List<GameObject> Players;
 	public List<GameObject> Pickups;
@@ -169,7 +169,6 @@ public class GameControl : MonoBehaviour
 		// Instantiate a new player container
 		GameObject player = new GameObject( "Player" );
 		player.transform.parent = playerContainer.transform;
-		player.AddComponent<Player>();
 
 		// AVATAR
 		// Spawn it's world avatar
@@ -396,8 +395,10 @@ public class GameControl : MonoBehaviour
 			}
 			playerScript.Drones.Clear();
 
+			
 			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
-			cameraScript.DeathCam = true;
+			AvatarGUI guiScript = player.transform.Find( "Camera" ).GetComponent<AvatarGUI>();
+			guiScript.DeathCam = true;
 
 			// If killed by another player, target the camera at them
 			if( killedBy != go.transform.parent.gameObject )
@@ -464,8 +465,6 @@ public class GameControl : MonoBehaviour
 			int i = Random.Range( 0, spawnPoints.Length );
 			Transform spawnPoint = spawnPoints[ i ].transform;
 
-			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
-
 			// AVATAR
 			// Spawn it's world avatar
 			GameObject avatar = PlayerPool.Spawn( "Avatar" );
@@ -488,9 +487,12 @@ public class GameControl : MonoBehaviour
 			movementScript.Camera = player.transform.Find( "Camera" );
 
 			// CAMERA
+			AvatarCamera cameraScript = player.transform.Find( "Camera" ).GetComponent<AvatarCamera>();
+			AvatarGUI cameraGui = player.transform.Find( "Camera" ).GetComponent<AvatarGUI>();
+
 			// Tell the camera to follow the avatar
 			cameraScript.Target = avatar.transform.Find( "Marble" );
-			cameraScript.DeathCam = false;
+			cameraGui.DeathCam = false;
 		}
 	}
 }

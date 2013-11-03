@@ -14,16 +14,24 @@ public class AvatarGUI : MonoBehaviour
 	int healthTarget;
 	float dash = 0;
 	float dashTarget;
+	float prevRespawn = 0f;
+	float scaleFactor;
+	InputWrapper inputWrapper;
 
 	// Properties
+	public GUISkin Skin;
 	public Texture CrosshairTexture;
 	public List<Texture> DroneIconTextures;
 	public float IconLerpFactor = 5f;
 	public float BarLerpFactor = 5f;
 
+	public bool DeathCam = false;
+
 	// Unity Methods
 	void Awake()
 	{
+		inputWrapper = GetComponent<InputWrapper>();
+
 		droneIconPositions = new List<Vector2>();
 		droneIconTargets = new List<Vector2>();
 		Vector2 droneStartPos = new Vector2( Screen.width * .5f, Screen.height * 2f );
@@ -34,26 +42,50 @@ public class AvatarGUI : MonoBehaviour
 		}
 	}
 	
-	void Start()
+	void Update()
 	{
-	
+		// Check respawn
+		if( DeathCam )
+		{
+			if( inputWrapper.Fire == 1f && prevRespawn == 0f )
+			{
+				GameControl.Instance.Respawn( transform.parent.gameObject );
+			}
+		}
+		prevRespawn = inputWrapper.Fire;
 	}
 	
 	void OnGUI()
 	{
-		Transform target = GetComponent<AvatarCamera>().Target;
+		// Setup skin
+		scaleFactor = camera.pixelHeight / GUIInfo.Player.OptimalViewHeight;
+		GUI.skin = Skin;
+		GUI.skin.label.fontSize = GUI.skin.GetStyle( "healthtext" ).fontSize = GUI.skin.GetStyle( "dashtext" ).fontSize = (int)( GUIInfo.Player.OptimalFontSize * scaleFactor );
+		if( GUI.skin.label.fontSize < 18 )
+		{
+			GUI.skin.label.fontStyle = GUI.skin.GetStyle( "healthtext" ).fontStyle = GUI.skin.GetStyle( "dashtext" ).fontStyle = FontStyle.Bold;
+		}
+		else
+		{
+			GUI.skin.label.fontStyle = GUI.skin.GetStyle( "healthtext" ).fontStyle = GUI.skin.GetStyle( "dashtext" ).fontStyle = FontStyle.Normal;
+		}
+		GUI.skin.horizontalSlider.fixedHeight = GUI.skin.horizontalSliderThumb.fixedWidth = GUI.skin.horizontalSliderThumb.fixedHeight = GUIInfo.Player.OptimalBarSize * scaleFactor;
+		// Get viewport metrics
+		float pixWidth = camera.pixelWidth;
+		float pixHeight = camera.pixelHeight;
+		float halfWidth = pixWidth * .5f;
+		float halfHeight = pixHeight * .5f;
+		gridSize = 64f * scaleFactor;
 
+		// Get viewport center
+		Vector2 centerPt = camera.pixelRect.center;
+		// Convert from viewport space to screen space
+		centerPt.y = Screen.height - centerPt.y;
+
+		Transform target = GetComponent<AvatarCamera>().Target;
 		if( target != null )
 		{
-			float pixWidth = camera.pixelWidth;
-			float pixHeight = camera.pixelHeight;
-			float halfWidth = pixWidth * .5f;
-			float halfHeight = pixHeight * .5f;
-			gridSize = 64f * camera.pixelHeight / Screen.height;
-
-			Vector2 centerPt = new Vector2( camera.pixelWidth * .5f, camera.pixelHeight * .5f );
-			centerPt.y = Screen.height - centerPt.y;
-
+			// Target stat readout
 			if( target.name == "Marble" )
 			{
 				Avatar avatar = target.parent.GetComponent<Avatar>();
@@ -61,38 +93,49 @@ public class AvatarGUI : MonoBehaviour
 				activeDroneIndex = avatar.ActiveDroneIndex;
 
 				// Crosshair
-				float minSize = Mathf.Min( pixWidth, pixHeight );
-				float size = minSize * .005f;
-				float halfSize = size * .5f;
-				GUI.DrawTexture( new Rect( centerPt.x - halfSize, centerPt.y - halfSize, size, size ), CrosshairTexture );
+				if( !DeathCam )
+				{
+					float minSize = Mathf.Min( pixWidth, pixHeight );
+					float size = minSize * .005f;
+					float halfSize = size * .5f;
+					GUI.DrawTexture( new Rect( centerPt.x - halfSize, centerPt.y - halfSize, size, size ), CrosshairTexture );
+				}
 
 				// Health
 				int healthTarget = target.parent.GetComponent<Avatar>().Health;
 				health = (int)Mathf.Lerp( health, healthTarget, BarLerpFactor * Time.deltaTime );
-				GUIContent healthText = new GUIContent( "Health: " + health.ToString() );
+				GUIContent healthText = new GUIContent( "Health" );
+				GUIContent healthNumber = new GUIContent( health.ToString() );
 
-				Vector2 healthTextBounds = GUIStyle.none.CalcSize( healthText );
+				Vector2 healthTextBounds = GUI.skin.GetStyle( "healthtext" ).CalcSize( healthText );
+				Vector2 healthNumberBounds = GUI.skin.GetStyle( "healthtext" ).CalcSize( healthNumber );
 				Vector2 healthBarBounds = new Vector2( 100, healthTextBounds.y * 1.2f );
 
-				Rect healthTextRect = new Rect( centerPt.x - gridSize - healthBarBounds.x, centerPt.y + gridSize * 4f - healthBarBounds.y, healthTextBounds.x, healthTextBounds.y * 2f );
+				Rect healthTextRect = new Rect( centerPt.x - gridSize - healthBarBounds.x, centerPt.y + gridSize * 4f - healthTextBounds.y - healthNumberBounds.y, healthTextBounds.x, healthTextBounds.y * 2f );
+				Rect healthNumberRect = new Rect( centerPt.x - gridSize - healthBarBounds.x, centerPt.y + gridSize * 4f - healthNumberBounds.y, healthNumberBounds.x, healthNumberBounds.y * 2f );
 				Rect healthBarRect = new Rect( centerPt.x - gridSize - healthBarBounds.x, centerPt.y + gridSize * 4f, healthBarBounds.x, healthBarBounds.y * 2f );
 
-				GUI.Label( healthTextRect, healthText );
+				GUI.Label( healthTextRect, healthText, "healthtext" );
+				GUI.Label( healthNumberRect, healthNumber, "healthtext" );
 				GUI.HorizontalSlider( healthBarRect, health, 0, 100 );
 
 				// Dash
 				dashTarget = target.parent.GetComponent<Avatar>().Dash;
 				dash = Mathf.Lerp( dash, dashTarget, BarLerpFactor * Time.deltaTime );
 				float maxDash = target.parent.GetComponent<Avatar>().MaxDash;
-				GUIContent dashText = new GUIContent( "Dash: " + dash.ToString( "p2" ) );
+				GUIContent dashText = new GUIContent( "Dash" );
+				GUIContent dashNumber = new GUIContent( dash.ToString( "p2" ) );
 
-				Vector2 dashTextBounds = GUIStyle.none.CalcSize( new GUIContent( dashText ) );
+				Vector2 dashTextBounds = GUI.skin.GetStyle( "dashtext" ).CalcSize( dashText );
+				Vector2 dashNumberBounds = GUI.skin.GetStyle( "dashtext" ).CalcSize( dashNumber );
 				Vector2 dashBarBounds = new Vector2( 100, dashTextBounds.y * 1.2f );
 
-				Rect dashTextRect = new Rect( centerPt.x + gridSize, centerPt.y + gridSize * 4f - dashBarBounds.y, dashTextBounds.x, dashTextBounds.y * 2f );
-				Rect dashBarRect = new Rect( centerPt.x + gridSize, centerPt.y + gridSize * 4f, dashBarBounds.x, dashBarBounds.y * 2f );
+				Rect dashTextRect = new Rect( centerPt.x + gridSize, centerPt.y + gridSize * 4f - dashTextBounds.y - dashNumberBounds.y, dashTextBounds.x, dashTextBounds.y );
+				Rect dashNumberRect = new Rect( centerPt.x + gridSize, centerPt.y + gridSize * 4f - dashNumberBounds.y, dashNumberBounds.x, dashNumberBounds.y );
+				Rect dashBarRect = new Rect( centerPt.x + gridSize, centerPt.y + gridSize * 4f, dashBarBounds.x, dashBarBounds.y );
 
-				GUI.Label( dashTextRect, dashText );
+				GUI.Label( dashTextRect, dashText, "dashtext" );
+				GUI.Label( dashNumberRect, dashNumber, "dashtext" );
 				GUI.HorizontalSlider( dashBarRect, dash, 0f, maxDash );
 
 				// Drones
@@ -123,10 +166,25 @@ public class AvatarGUI : MonoBehaviour
 				}
 			}
 
-			// Score
-			string scoreText = "Score: " + transform.parent.GetComponent<Player>().Score.ToString();
-			Vector2 scoreTextBounds = GUIStyle.none.CalcSize( new GUIContent( scoreText ) );
+			// Fire to Respawn prompt
+			if( DeathCam )
+			{
+				GUIContent respawnText = new GUIContent( "Fire to Respawn" );
+				Vector2 respawnTextBounds = GUI.skin.label.CalcSize( respawnText );
+				Rect respawnTextRect = new Rect( centerPt.x - respawnTextBounds.x * .5f, centerPt.y - respawnTextBounds.y, respawnTextBounds.x, respawnTextBounds.y * 2f );
+				GUI.Label( respawnTextRect, respawnText );
+			}
+
+			// Camera parent's score
+			string scoreText = "Score";
+			int playerScoresIndex = GameControl.Instance.Players.IndexOf( transform.parent.gameObject );
+			string scoreNumber = GameRules.Instance.PlayerScores[ playerScoresIndex ].ToString();
+
+			Vector2 scoreTextBounds = GUI.skin.label.CalcSize( new GUIContent( scoreText ) );
+			Vector2 scoreNumberBounds = GUI.skin.label.CalcSize( new GUIContent( scoreNumber ) );
+
 			GUI.Label( new Rect( centerPt.x - scoreTextBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f, scoreTextBounds.x, scoreTextBounds.y * 2f ), scoreText );
+			GUI.Label( new Rect( centerPt.x - scoreNumberBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f + scoreTextBounds.y, scoreNumberBounds.x, scoreNumberBounds.y * 2f ), scoreNumber );
 		}
 	}
 
@@ -159,7 +217,7 @@ public class AvatarGUI : MonoBehaviour
 
 		GUI.DrawTexture( new Rect( pt.x - gridSize * .5f, pt.y - gridSize * .5f, gridSize, gridSize ), GetDroneIcon( drone ) );
 		string ammoString = drone.Ammo.ToString();
-		Vector2 ammoLabelBounds = GUIStyle.none.CalcSize( new GUIContent( ammoString ) );
+		Vector2 ammoLabelBounds = GUI.skin.label.CalcSize( new GUIContent( ammoString ) );
 		GUI.Label( new Rect( pt.x - ( ammoLabelBounds.x * .5f ), pt.y + gridSize * .5f, ammoLabelBounds.x, ammoLabelBounds.y * 2f ), ammoString );
 	}
 }

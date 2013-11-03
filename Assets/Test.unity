@@ -177,7 +177,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameElements: 00000000
-  ScoreLimit: 2
+  RankPerElement: 1
+  PlayerScores: 
+  ScoreLimit: 5000
+  BaseScoreMultiplier: 100
+  PlayerKills: 
+  KillLimit: 10
+  KillScoreMultiplier: 1
 --- !u!1 &222061843
 GameObject:
   m_ObjectHideFlags: 0
@@ -357,7 +363,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab5d48f2d185f04bab2650d34d3bb83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalPlayerCount: 1
+  LocalPlayerCount: 4
+  MaxPickups: 15
+  PickupTimeout: 2
   OverlayMaterials:
   - {fileID: 2100000, guid: 9edc96c1e0c5cb145bd1ad1bd91caf49, type: 2}
   - {fileID: 2100000, guid: f4517f0404c235e4c86b15b609af44fb, type: 2}
@@ -400,7 +408,7 @@ Light:
   m_Shadows:
     m_Type: 1
     m_Resolution: -1
-    m_Strength: .5
+    m_Strength: .800000012
     m_Bias: .0500000007
     m_Softness: 4
     m_SoftnessFade: 1
@@ -424,7 +432,7 @@ Transform:
   m_PrefabParentObject: {fileID: 400000, guid: d4f5ffb51113b6b4e9b53023a08e7d69, type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 521612185}
-  m_LocalRotation: {x: .496731818, y: .409575999, z: -.286788255, w: .709406435}
+  m_LocalRotation: {x: .707106829, y: 0, z: 0, w: .707106829}
   m_LocalPosition: {x: 0, y: 25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
