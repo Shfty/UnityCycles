@@ -44,7 +44,7 @@ MonoBehaviour:
   Threaded: 0
   RegenerateOnLoad: 1
   GridDivisions: {x: 5, y: 5}
-  MaxPointsPerCell: 10
+  MaxPointsPerCell: 5
   DistanceMetric: 4
   MinkowskiNumber: 3
   FValue: 1
@@ -87,8 +87,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2fea21b8923a84898652b56f7ba283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BoundaryThickness: 20
-  BoundaryExtraHeight: 40
+  Sides: 4
+  LipSize: 5
+  BoundaryThickness: 50
+  InvisibleWallHeight: 40
+  InfinitePlanes: 1
+  PlaneMaterial: {fileID: 2100000, guid: 7253bfee4abdd7c44855f5a52c266643, type: 2}
 --- !u!154 &15400000
 TerrainCollider:
   m_ObjectHideFlags: 1

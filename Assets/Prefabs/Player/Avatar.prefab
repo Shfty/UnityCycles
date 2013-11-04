@@ -1313,7 +1313,7 @@ MonoBehaviour:
   DownJetForce: 1000
   DashForce: 25
   WeakRumbleForceFactor: .0149999997
-  StrongRumbleForceFactor: .0399999991
+  StrongRumbleForceFactor: .0299999993
   Right: {x: .999990404, y: .00438693864, z: -1.12884945e-05}
   Up: {x: -.00438689208, y: .999966562, z: -.00514629763}
   Forward: {x: -1.12884945e-05, y: .00514635211, z: .999986768}

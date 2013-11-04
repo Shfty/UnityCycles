@@ -10,10 +10,15 @@ public class TerrainBoundary : MonoBehaviour
 	GameObject rightBoundary;
 	GameObject frontBoundary;
 	GameObject backBoundary;
+	int wallLayer;
 
 	// Properties
+	public int Sides = 4;
+	public float LipSize;
 	public float BoundaryThickness = 20f;
-	public float BoundaryExtraHeight = 20f;
+	public float InvisibleWallHeight = 20f;
+	public bool InfinitePlanes = true;
+	public Material PlaneMaterial;
 
 	// Unity Methods
 	void Awake()
@@ -27,31 +32,100 @@ public class TerrainBoundary : MonoBehaviour
 		// Store relevant variables
 		terrain = GetComponent<Terrain>();
 		Vector3 bounds = terrain.terrainData.size;
-		int wallLayer = LayerMask.NameToLayer( "Walls" );
+		wallLayer = LayerMask.NameToLayer( "Walls" );
+		
+		// Calculate side length
+		float inradius = bounds.z * .5f + BoundaryThickness;
+		float sideLength = 2f * inradius * Mathf.Tan( ( 180f * Mathf.Deg2Rad ) / Sides );
 
-		// Generate terrain side boundaries
-		leftBoundary = GameObject.CreatePrimitive( PrimitiveType.Cube );
-		leftBoundary.transform.parent = container.transform;
-		leftBoundary.layer = wallLayer;
-		leftBoundary.transform.localScale = new Vector3( BoundaryThickness, bounds.y + BoundaryExtraHeight, bounds.z + BoundaryThickness * 2f );
-		leftBoundary.transform.position = new Vector3( -bounds.x * .5f - BoundaryThickness * .5f, ( bounds.y + BoundaryExtraHeight ) * .5f, 0f );
+		// Base boundary transform
+		Vector3 boundaryPosition = new Vector3( 0f, bounds.y * .5f, inradius - BoundaryThickness * .5f );
+		Quaternion boundaryRotation = Quaternion.identity;
+		Vector3 boundaryScale = new Vector3( sideLength, bounds.y + LipSize, BoundaryThickness );
 
-		rightBoundary = GameObject.CreatePrimitive( PrimitiveType.Cube );
-		rightBoundary.transform.parent = container.transform;
-		rightBoundary.layer = wallLayer;
-		rightBoundary.transform.localScale = new Vector3( BoundaryThickness, bounds.y + BoundaryExtraHeight, bounds.z + BoundaryThickness * 2f );
-		rightBoundary.transform.position = new Vector3( bounds.x * .5f + BoundaryThickness * .5f, ( bounds.y + BoundaryExtraHeight ) * .5f, 0f );
+		float angle = 360f / Sides;
+		for( int i = 0; i < Sides; ++i )
+		{
+			GameObject boundary = CreateBoundary(
+				boundaryPosition + new Vector3( 0f, LipSize, 0f ) * .5f,
+				boundaryRotation,
+				boundaryScale
+			);
+			boundary.GetComponent<MeshRenderer>().castShadows = false;
+			boundary.GetComponent<MeshRenderer>().receiveShadows = false;
+			boundary.layer = wallLayer;
+			Quaternion rotation = Quaternion.AngleAxis( angle, Vector3.up );
+			boundaryPosition = rotation * boundaryPosition;
+			boundaryRotation *= rotation;
+		}
 
-		frontBoundary = GameObject.CreatePrimitive( PrimitiveType.Cube );
-		frontBoundary.transform.parent = container.transform;
-		frontBoundary.layer = wallLayer;
-		frontBoundary.transform.localScale = new Vector3( bounds.z + BoundaryThickness * 2f, bounds.y + BoundaryExtraHeight, BoundaryThickness );
-		frontBoundary.transform.position = new Vector3( 0f, ( bounds.y + BoundaryExtraHeight ) * .5f, -bounds.z * .5f - BoundaryThickness * .5f );
+		if( InvisibleWallHeight > 0f )
+		{
+			boundaryPosition = new Vector3( 0f, bounds.y * .5f, bounds.z * .5f + BoundaryThickness * .5f );
+			boundaryRotation = Quaternion.identity;
+			boundaryScale = new Vector3( sideLength, InvisibleWallHeight, BoundaryThickness );
 
-		backBoundary = GameObject.CreatePrimitive( PrimitiveType.Cube );
-		backBoundary.transform.parent = container.transform;
-		backBoundary.layer = wallLayer;
-		backBoundary.transform.localScale = new Vector3( bounds.z + BoundaryThickness * 2f, bounds.y + BoundaryExtraHeight, BoundaryThickness );
-		backBoundary.transform.position = new Vector3( 0f, ( bounds.y + BoundaryExtraHeight ) * .5f, bounds.z * .5f + BoundaryThickness * .5f );
+			for( int i = 0; i < Sides; ++i )
+			{
+				GameObject boundary = CreateBoundary(
+					boundaryPosition + new Vector3( 0f, bounds.y * .5f + InvisibleWallHeight * .5f, 0f ) + new Vector3( 0f, LipSize, 0f ),
+					boundaryRotation,
+					boundaryScale
+				);
+				boundary.GetComponent<MeshRenderer>().castShadows = false;
+				boundary.GetComponent<MeshRenderer>().receiveShadows = false;
+				boundary.GetComponent<MeshRenderer>().enabled = false;
+				Quaternion rotation = Quaternion.AngleAxis( angle, Vector3.up );
+				boundaryPosition = rotation * boundaryPosition;
+				boundaryRotation *= rotation;
+			}
+		}
+
+		if( InfinitePlanes )
+		{
+			float farPlane = 1000f;
+
+			boundaryPosition = new Vector3( 0f, bounds.y * .5f, bounds.z * .5f + BoundaryThickness + farPlane * .5f );
+			boundaryRotation = Quaternion.identity;
+			boundaryScale = new Vector3( sideLength, 1f, farPlane * .1f );
+
+			for( int i = 0; i < Sides; ++i )
+			{
+				GameObject boundary = CreatePlane(
+					boundaryPosition + new Vector3( 0f, bounds.y * .5f, 0f ) + new Vector3( 0f, LipSize, 0f ),
+					boundaryRotation,
+					boundaryScale
+				);
+				boundary.GetComponent<MeshRenderer>().castShadows = false;
+				boundary.GetComponent<MeshRenderer>().receiveShadows = false;
+				Quaternion rotation = Quaternion.AngleAxis( angle, Vector3.up );
+				boundaryPosition = rotation * boundaryPosition;
+				boundaryPosition += new Vector3( 0f, 0.01f, 0f );
+				boundaryRotation *= rotation;
+			}
+		}
+	}
+
+	// Utility Methods
+	GameObject CreateBoundary( Vector3 position, Quaternion rotation, Vector3 scale )
+	{
+		GameObject boundary = GameObject.CreatePrimitive( PrimitiveType.Cube );
+		boundary.transform.parent = container.transform;
+		boundary.transform.position = position;
+		boundary.transform.rotation = rotation;
+		boundary.transform.localScale = scale;
+		boundary.GetComponent<MeshRenderer>().material = PlaneMaterial;
+		return boundary;
+	}
+
+	GameObject CreatePlane( Vector3 position, Quaternion rotation, Vector3 scale )
+	{
+		GameObject plane = GameObject.CreatePrimitive( PrimitiveType.Plane );
+		plane.transform.parent = container.transform;
+		plane.transform.position = position;
+		plane.transform.rotation = rotation;
+		plane.transform.localScale = scale;
+		plane.GetComponent<MeshRenderer>().material = PlaneMaterial;
+		return plane;
 	}
 }

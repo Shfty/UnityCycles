@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Wheel Material
-  m_Shader: {fileID: 7, guid: 0000000000000000f000000000000000, type: 0}
+  m_Name: Plane Material
+  m_Shader: {fileID: 4800000, guid: c91faffcbb5aacf4e88075161e694c2f, type: 3}
   m_ShaderKeywords: []
   m_SavedProperties:
     serializedVersion: 2
@@ -16,9 +16,9 @@ Material:
         first:
           name: _MainTex
         second:
-          m_Texture: {fileID: 2800000, guid: 4201fe47a51108d46bb53bd919c3c683, type: 3}
-          m_Scale: {x: .200000003, y: 0}
-          m_Offset: {x: 0, y: .300000012}
+          m_Texture: {fileID: 2800000, guid: f424871326ada1d42b3d5d87393a7217, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 1, y: 0}
       data:
         first:
           name: _DecalTex
@@ -51,7 +51,7 @@ Material:
       data:
         first:
           name: _Scale
-        second: 0
+        second: .00999999978
     m_Colors:
       data:
         first:

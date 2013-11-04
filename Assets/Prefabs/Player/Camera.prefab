@@ -52,7 +52,7 @@ Camera:
     height: 1
   near clip plane: .300000012
   far clip plane: 1000
-  field of view: 90
+  field of view: 70
   orthographic: 0
   orthographic size: 100
   m_Depth: 0
@@ -106,7 +106,6 @@ MonoBehaviour:
   PositionLerpFactor: 12
   CameraRadius: .5
   SmallValue: .00999999978
-  RenderLayer: 0
 --- !u!114 &11400006
 MonoBehaviour:
   m_ObjectHideFlags: 1
