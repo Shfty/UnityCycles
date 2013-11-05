@@ -12,12 +12,12 @@ public class WheelParticles : MonoBehaviour
 	int terrainMask;
 	float prevJump = 0f;
 	float prevDrop = 0f;
+	bool gameActive = true;
 
 	// Public
 	public Transform DustParticles;
-	public Transform ChargeParticles;
 	public float ParticleStickDeadzone = .25f;
-	public float ChargeEmissionVelocityFactor = 2f;
+	public float ChargeEmissionFactor = 10f;
 	public List<Transform> JumpJets;
 	public List<Transform> DropJets;
 	public List<Transform> JumpBursts;
@@ -40,31 +40,44 @@ public class WheelParticles : MonoBehaviour
 	
 	void LateUpdate()
 	{
-		// Ground Particles
-		if( marbleScript.Grounded )
+		if( gameActive )
 		{
-			// Raycast UV and get texture colour
-			Ray colorRay = new Ray( transform.position, Vector3.Normalize( marbleScript.GroundPoint - transform.position ) );
-			RaycastHit rayHit;
-			Color dustColor = Color.black;
-			if( Physics.Raycast( colorRay, out rayHit, 5000.0f, terrainMask ) )
-			{
-				Texture2D terrainTexture = Terrain.activeTerrain.terrainData.splatPrototypes[ 0 ].texture;
-				dustColor = terrainTexture.GetPixelBilinear( rayHit.textureCoord.x, rayHit.textureCoord.y );
-				dustColor *= .5f;
-				dustColor.a = 1f;
-			}
-
 			// Dust Particles
-			Vector3 heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
-			DustParticles.particleSystem.startSpeed = heading.magnitude * 5f;
-			DustParticles.particleSystem.startColor = dustColor;
-
-			if( heading.magnitude > ParticleStickDeadzone )
+			if( marbleScript.Grounded )
 			{
-				if( !DustParticles.particleSystem.isPlaying )
+				// Raycast UV and get texture colour
+				Ray colorRay = new Ray( transform.position, Vector3.Normalize( marbleScript.GroundPoint - transform.position ) );
+				RaycastHit rayHit;
+				Color dustColor = Color.black;
+				if( Physics.Raycast( colorRay, out rayHit, 5000.0f, terrainMask ) )
 				{
-					DustParticles.particleSystem.Play();
+					Material terrainMaterial = Terrain.activeTerrain.materialTemplate;
+					Texture2D terrainTexture = (Texture2D)terrainMaterial.GetTexture( "_Base" );
+					Vector2 scale = terrainMaterial.GetTextureScale( "_Base" );
+					Vector2 offset = terrainMaterial.GetTextureOffset( "_Base" );
+					dustColor = terrainTexture.GetPixelBilinear( rayHit.textureCoord.x * scale.x + offset.x, rayHit.textureCoord.y * scale.y + offset.y );
+					dustColor *= .75f;
+					dustColor.a = 1f;
+				}
+
+				// Dust Particles
+				Vector3 heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
+				DustParticles.particleSystem.startSpeed = heading.magnitude * 5f;
+				DustParticles.particleSystem.startColor = dustColor;
+
+				if( heading.magnitude > ParticleStickDeadzone )
+				{
+					if( !DustParticles.particleSystem.isPlaying )
+					{
+						DustParticles.particleSystem.Play();
+					}
+				}
+				else
+				{
+					if( DustParticles.particleSystem.isPlaying )
+					{
+						DustParticles.particleSystem.Stop();
+					}
 				}
 			}
 			else
@@ -75,93 +88,68 @@ public class WheelParticles : MonoBehaviour
 				}
 			}
 
-			// Charge particles
-			if( transform.Find( "Marble" ).rigidbody.angularVelocity.magnitude > 0f )
+			// Dash jets
+			foreach( Transform jet in DashJets )
 			{
-				if( !ChargeParticles.particleSystem.isPlaying )
+				float df = GetComponent<Avatar>().Dash / GetComponent<Avatar>().MaxDash;
+				jet.particleSystem.emissionRate = df * 100;
+				jet.particleSystem.startSize = df * .4f;
+			}
+
+			// Enable the jump jets if the button is pressed
+			if( InputWrapper.Jump == 1f )
+			{
+				if( !JumpJetsEnabled )
 				{
-					ChargeParticles.particleSystem.Play();
+					SetJetsEnabled( true, true );
 				}
-				float dashFactor = GetComponent<Avatar>().Dash / GetComponent<Avatar>().MaxDash;
-				ChargeParticles.particleSystem.emissionRate = transform.Find( "Marble" ).rigidbody.angularVelocity.magnitude * ChargeEmissionVelocityFactor * dashFactor;
+
+				if( marbleScript.JumpFired == false && prevJump == 0f )
+				{
+					ParticleBurst( true );
+				}
 			}
 			else
 			{
-				if( ChargeParticles.particleSystem.isPlaying )
+				// Otherwise, deactivate them
+				if( JumpJetsEnabled )
 				{
-					ChargeParticles.particleSystem.Stop();
+					SetJetsEnabled( true, false );
 				}
 			}
-		}
-		else
-		{
-			if( DustParticles.particleSystem.isPlaying )
-			{
-				DustParticles.particleSystem.Stop();
-			}
+			prevJump = InputWrapper.Jump;
 
-			if( ChargeParticles.particleSystem.isPlaying )
+			// Enable the drop jets if the button is pressed
+			if( InputWrapper.Drop == 1f )
 			{
-				ChargeParticles.particleSystem.Stop();
-			}
-		}
+				if( !DropJetsEnabled )
+				{
+					SetJetsEnabled( false, true );
+				}
 
-		// Dash jets
-		foreach( Transform jet in DashJets )
-		{
-			float dashFactor = GetComponent<Avatar>().Dash / GetComponent<Avatar>().MaxDash;
-			jet.particleSystem.emissionRate = dashFactor * 100;
-			jet.particleSystem.startSize = dashFactor * .3f;
+				if( marbleScript.DropFired == false && prevDrop == 0f )
+				{
+					ParticleBurst( false );
+				}
+			}
+			else
+			{
+				// Otherwise, deactivate them
+				if( DropJetsEnabled )
+				{
+					SetJetsEnabled( false, false );
+				}
+			}
+			prevDrop = InputWrapper.Drop;
 		}
-
-		// Enable the jump jets if the button is pressed
-		if( InputWrapper.Jump == 1f )
-		{
-			if( !JumpJetsEnabled )
-			{
-				SetJetsEnabled( true, true );
-			}
-
-			if( marbleScript.JumpFired == false && prevJump == 0f )
-			{
-				ParticleBurst( true );
-			}
-		}
-		else
-		{
-			// Otherwise, deactivate them
-			if( JumpJetsEnabled )
-			{
-				SetJetsEnabled( true, false );
-			}
-		}
-		prevJump = InputWrapper.Jump;
-
-		// Enable the drop jets if the button is pressed
-		if( InputWrapper.Drop == 1f )
-		{
-			if( !DropJetsEnabled )
-			{
-				SetJetsEnabled( false, true );
-			}
-
-			if( marbleScript.DropFired == false && prevDrop == 0f )
-			{
-				ParticleBurst( false );
-			}
-		}
-		else
-		{
-			// Otherwise, deactivate them
-			if( DropJetsEnabled )
-			{
-				SetJetsEnabled( false, false );
-			}
-		}
-		prevDrop = InputWrapper.Drop;
 	}
 
 	// Utility Methods
+	public void GameOver()
+	{
+		gameActive = false;
+	}
+
 	public void SetJetsEnabled( bool jump, bool enabled )
 	{
 		List<Transform> jets;

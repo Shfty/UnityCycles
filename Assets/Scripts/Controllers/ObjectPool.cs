@@ -148,30 +148,52 @@ public class ObjectPool : MonoBehaviour
 
 	public bool Despawn( GameObject go )
 	{
-		GameObject prefab = go.GetComponent<PooledObject>().Prefab;
-
-		// Make sure this prefab is pooled
-		if( !activeObjects.ContainsKey( prefab ) )
+		if( go != null )
 		{
-			Debug.LogWarning( "Could not despawn " + prefab + ": not present in Object Pool" );
-			return false;
+			GameObject prefab = go.GetComponent<PooledObject>().Prefab;
+
+			// Make sure this prefab is pooled
+			if( !activeObjects.ContainsKey( prefab ) )
+			{
+				Debug.LogWarning( "Could not despawn " + prefab + ": not present in Object Pool" );
+				return false;
+			}
+
+			// Check if prefab is present in the active list
+			if( activeObjects[ prefab ].Contains( go ) )
+			{
+				// If so, move it to the inactive list, re-parent it and deactivate it
+				activeObjects[ prefab ].Remove( go );
+				inactiveObjects[ prefab ].Add( go );
+				go.transform.parent = containerObjects[ prefab ].transform;
+				go.SetActive( false );
+				return true;
+			}
+			else
+			{
+				// Otherwise, log a warning message and return false
+				Debug.LogWarning( gameObject.name + ": Cannot despawn " + go + ": not present in active pool." );
+				return false;
+			}
 		}
 
-		// Check if prefab is present in the active list
-		if( activeObjects[prefab].Contains( go ) )
+		return false;
+	}
+
+	public void DespawnAll()
+	{
+		List<GameObject> objects = new List<GameObject>();
+		foreach( KeyValuePair<GameObject, List<GameObject>> kvp in activeObjects )
 		{
-			// If so, move it to the inactive list, re-parent it and deactivate it
-			activeObjects[prefab].Remove( go );
-			inactiveObjects[ prefab ].Add( go );
-			go.transform.parent = containerObjects[ prefab ].transform;
-			go.SetActive( false );
-			return true;
+			foreach( GameObject go in kvp.Value )
+			{
+				objects.Add( go );
+			}
 		}
-		else
+
+		for( int i = 0; i < objects.Count; ++i )
 		{
-			// Otherwise, log a warning message and return false
-			Debug.LogWarning( gameObject.name + ": Cannot despawn " + go + ": not present in active pool." );
-			return false;
+			Despawn( objects[ i ] );
 		}
 	}
 }

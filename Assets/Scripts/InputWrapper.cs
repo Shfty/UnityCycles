@@ -9,6 +9,7 @@ public class InputWrapper : MonoBehaviour
 	PlayerIndex xboxPadIndex;
 	InputType type = InputType.None;
 	string typeSuffix;
+	bool gameActive = true;
 
 	// Left = Strong Motor, Right = Weak Motor
 	public float StrongRumbleBaseForce = 0f;
@@ -171,11 +172,29 @@ public class InputWrapper : MonoBehaviour
 		// Set rumble
 		if( type == InputType.XboxPad )
 		{
-			GamePad.SetVibration( xboxPadIndex, StrongRumbleForce, WeakRumbleForce );
+			if( gameActive )
+			{
+				GamePad.SetVibration( xboxPadIndex, StrongRumbleForce, WeakRumbleForce );
+			}
+			else
+			{
+				KillVibration();
+			}
 		}
 	}
 
 	void OnApplicationQuit()
+	{
+		KillVibration();
+	}
+
+	// Utility Methods
+	public void GameOver()
+	{
+		gameActive = false;
+	}
+
+	public void KillVibration()
 	{
 		if( type == InputType.XboxPad )
 		{
@@ -183,7 +202,6 @@ public class InputWrapper : MonoBehaviour
 		}
 	}
 
-	// Utility Methods
 	/* Dash states:
 	 * 0 - Stick outside outer zone
 	 * 1 - Stick within inner zone

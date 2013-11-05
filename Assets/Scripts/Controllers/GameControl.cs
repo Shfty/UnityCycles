@@ -10,11 +10,17 @@ public class GameControl : MonoBehaviour
 	GameObject[] spawnPoints;
 	float pickupTimer = 0f;
 	Vector3 mapBounds;
+	float prevTimeSinceStart;
+	float independentDeltaTime;
+	float targetTimeScale;
 
 	// Properties
 	public int LocalPlayerCount = 1;
 	public int MaxPickups = 15;
 	public float PickupTimeout = 2f;
+	public GameObject MapCamera;
+	public bool GameActive = true;
+	public float TimeLerpFactor = 3f;
 	public List<Material> OverlayMaterials;
 	public List<GameObject> Players;
 	public List<GameObject> Pickups;
@@ -56,13 +62,100 @@ public class GameControl : MonoBehaviour
 		Players = new List<GameObject>();
 
 		// Make sure the local player count is valid
-		LocalPlayerCount = Mathf.Clamp( LocalPlayerCount, 1, 4 );
+		LocalPlayerCount = Mathf.Clamp( LocalPlayerCount, 0, 4 );
 	}
 
 	void Start()
 	{
+		// Begin with time frozen
+		Time.timeScale = 0f;
+		targetTimeScale = 0f;
+
+		// Setup and start the game
+		ResetGame();
+		StartGame();
+	}
+
+	void Update()
+	{
+		// Track delta time independently of Time class
+		independentDeltaTime = Time.realtimeSinceStartup - prevTimeSinceStart;
+
+		// Grab the cursor when the window is clicked
+		bool mouseInWindowX = Input.mousePosition.x > 0 && Input.mousePosition.x < Screen.width;
+		bool mouseInWindowY = Input.mousePosition.y > 0 && Input.mousePosition.y < Screen.height;
+		if( !Screen.lockCursor && mouseInWindowX && mouseInWindowY && Input.GetMouseButtonDown( 0 ) )
+		{
+			Screen.lockCursor = true;
+		}
+
+		// Un-grab it when escape is pressed
+		if( Screen.lockCursor && Input.GetKeyDown( "escape" ) )
+		{
+			Screen.lockCursor = false;
+		}
+
+		// Check for any deactivated pickups
+		for( int i = 0; i < Pickups.Count; ++i )
+		{
+			if( !Pickups[ i ].activeSelf )
+			{
+				BillboardPool.Despawn( PickupOverlays[ i ] );
+				Pickups.RemoveAt( i );
+				PickupOverlays.RemoveAt( i );
+			}
+		}
+
+		if( GameActive )
+		{
+			// Increment the pickup timer if there are less pickups than the limit
+			if( Pickups.Count < MaxPickups )
+			{
+				pickupTimer += Time.deltaTime;
+				if( pickupTimer >= PickupTimeout )
+				{
+					// Spawn random pickup
+					int randomPickup = Random.Range( 1, Enum.GetNames( typeof( PickupInfo.Type ) ).Length );
+					Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
+					Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
+					SpawnPickup( (PickupInfo.Type)randomPickup, randomPosition, randomRotation );
+
+					pickupTimer = 0f;
+				}
+			}
+		}
+
+		// Lerp timeScale
+		Time.timeScale = Mathf.Lerp( Time.timeScale, targetTimeScale, TimeLerpFactor * independentDeltaTime );
+
+		// Track previous time
+		prevTimeSinceStart = Time.realtimeSinceStartup;
+	}
+
+	// Utility Methods
+	public void ResetGame()
+	{
 		// Get spawn points and map camera anchors
 		spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" );
+
+		// Despawn all objects
+		BillboardPool.DespawnAll();
+		DronePool.DespawnAll();
+		MiscPool.DespawnAll();
+		PickupPool.DespawnAll();
+		PlayerPool.DespawnAll();
+		ProjectilePool.DespawnAll();
+		SharedPool.DespawnAll();
+
+		// Clear references
+		foreach( GameObject player in Players )
+		{
+			Destroy( player );
+		}
+		Players.Clear();
+		Pickups.Clear();
+		PlayerOverlays.Clear();
+		PickupOverlays.Clear();
 
 		// Spawn players
 		for( int i = 0; i < LocalPlayerCount; ++i )
@@ -104,66 +197,33 @@ public class GameControl : MonoBehaviour
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
 			SpawnPickup( PickupInfo.Type.Seeker, randomPosition, randomRotation );
 		}
-
-		// Spawn pickup overlays
-		for( int i = 0; i < Pickups.Count; ++i )
-		{
-			GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
-			ResetPickupOverlay( pickupOverlay, Pickups[ i ] );
-			PickupOverlays.Add( pickupOverlay );
-		}
 	}
 
-	void Update()
+	public void StartGame()
 	{
-		// Grab the cursor when the window is clicked
-		bool mouseInWindowX = Input.mousePosition.x > 0 && Input.mousePosition.x < Screen.width;
-		bool mouseInWindowY = Input.mousePosition.y > 0 && Input.mousePosition.y < Screen.height;
-		if( !Screen.lockCursor && mouseInWindowX && mouseInWindowY && Input.GetMouseButtonDown( 0 ) )
-		{
-			Screen.lockCursor = true;
-		}
-
-		// Un-grab it when escape is pressed
-		if( Screen.lockCursor && Input.GetKeyDown( "escape" ) )
-		{
-			Screen.lockCursor = false;
-		}
-
-		// Check for any deactivated pickups
-		for( int i = 0; i < Pickups.Count; ++i )
-		{
-			if( !Pickups[ i ].activeSelf )
-			{
-				BillboardPool.Despawn( PickupOverlays[ i ] );
-				Pickups.RemoveAt( i );
-				PickupOverlays.RemoveAt( i );
-			}
-		}
-
-		// Increment the pickup timer if there are less pickups than the limit
-		if( Pickups.Count < MaxPickups )
-		{
-			pickupTimer += Time.deltaTime;
-			if( pickupTimer >= PickupTimeout )
-			{
-				// Spawn random pickup
-				int randomPickup = Random.Range( 1, Enum.GetNames( typeof( PickupInfo.Type ) ).Length );
-				Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
-				Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
-				SpawnPickup( ( PickupInfo.Type )randomPickup, randomPosition, randomRotation );
-
-				// Attach overlay
-				GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
-				ResetPickupOverlay( pickupOverlay, Pickups[ Pickups.Count - 1 ] );
-				PickupOverlays.Add( pickupOverlay );
-
-				pickupTimer = 0f;
-			}
-		}
+		targetTimeScale = 1f;
 	}
 
-	// Utility Methods
+	public void EndGame( GameObject winner )
+	{
+		foreach( GameObject player in Players )
+		{
+			player.SendMessage( "GameOver", winner, SendMessageOptions.DontRequireReceiver );
+			Transform avatarTransform = player.transform.Find( "Avatar" );
+			if( avatarTransform != null )
+			{
+				avatarTransform.SendMessage( "GameOver", winner, SendMessageOptions.DontRequireReceiver );
+			}
+			player.transform.Find( "Camera" ).SendMessage( "GameOver", winner, SendMessageOptions.DontRequireReceiver );
+		}
+
+		GameObject.Find( "Overlay Camera" ).SendMessage( "GameOver", winner, SendMessageOptions.DontRequireReceiver );
+
+		GameActive = false;
+
+		targetTimeScale = 0f;
+	}
+
 	// PLAYERS
 	GameObject SpawnPooledAvatar( Transform spawnPoint, GameObject player )
 	{
@@ -430,6 +490,11 @@ public class GameControl : MonoBehaviour
 
 		// Add to pickup list
 		Pickups.Add( pickup );
+
+		// Spawn and attach overlay
+		GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
+		ResetPickupOverlay( pickupOverlay, pickup );
+		PickupOverlays.Add( pickupOverlay );
 	}
 
 	public void PickupGrabbed( PickupInstance pickup, Avatar player )

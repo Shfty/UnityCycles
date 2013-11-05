@@ -14,8 +14,8 @@ public class AvatarGUI : MonoBehaviour
 	int activeDroneIndex = 0;
 	List<Vector2> droneIconPositions;
 	List<Vector2> droneIconTargets;
-	int health = 0;
-	int healthTarget;
+	float health = 0;
+	float healthTarget;
 	float dash = 0;
 	float dashTarget;
 	float prevRespawn = 0f;
@@ -103,8 +103,8 @@ public class AvatarGUI : MonoBehaviour
 				}
 
 				// Health
-				int healthTarget = target.parent.GetComponent<Avatar>().Health;
-				health = (int)Mathf.Lerp( health, healthTarget, BarLerpFactor * Time.deltaTime );
+				float healthTarget = target.parent.GetComponent<Avatar>().Health;
+				health = Mathf.Lerp( health, healthTarget, BarLerpFactor * Time.deltaTime );
 				GUIContent healthText = new GUIContent( "Health" );
 				GUIContent healthNumber = new GUIContent( health.ToString() );
 

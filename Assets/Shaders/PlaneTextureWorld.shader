@@ -28,7 +28,7 @@ void surf(Input IN, inout SurfaceOutput o)
 {
 	float2 uv = TRANSFORM_TEX( IN.worldPos.xz, _MainTex );
 	fixed4 c = tex2D( _MainTex, uv * _Scale );
-    o.Albedo = c.rgb * _Color;
+    o.Albedo = c.rgb * _Color * 2; // Double lighting as per unity standard
 }
 
 ENDCG

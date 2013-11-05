@@ -14,6 +14,7 @@ public class WheelOrientation : MonoBehaviour
 	Quaternion targetRotation;
 	float turnAngle;
 	float spinRate = 0f;
+	bool gameActive = true;
 
 	// Public
 	public GameObject Wheel;
@@ -38,9 +39,13 @@ public class WheelOrientation : MonoBehaviour
 	
 	void Update()
 	{
-		// Update the heading based on impulse direction
-		Vector3 heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
-		
+		Vector3 heading = Vector3.zero;
+		if( gameActive )
+		{
+			// Update the heading based on impulse direction
+			heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
+		}
+
 		// Update the turn angle if the stick is pressed far enough
 		if( heading.magnitude > TurnStickDeadzone )
 		{
@@ -76,5 +81,11 @@ public class WheelOrientation : MonoBehaviour
 
 		// Interpolate the wheel's rotation toward the target rotation
 		Wheel.transform.rotation = Quaternion.Lerp( Wheel.transform.rotation, targetRotation, RotationLerpFactor * Time.deltaTime );
+	}
+
+	// Utility Methods
+	public void GameOver()
+	{
+		gameActive = false;
 	}
 }

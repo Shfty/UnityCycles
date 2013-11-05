@@ -5,7 +5,9 @@ using System.Collections.Generic;
 public class GameRules : MonoBehaviour
 {
 	// Fields
+	GameObject gameControl;
 	List<GameObject> players;
+	bool playerWon = false;
 
 	// Enums
 	public enum GameElement
@@ -35,7 +37,8 @@ public class GameRules : MonoBehaviour
 	
 	void Start()
 	{
-		players = GameObject.Find( "Game Control" ).GetComponent<GameControl>().Players;
+		gameControl = GameObject.Find( "Game Control" );
+		players = gameControl.GetComponent<GameControl>().Players;
 	}
 	
 	void Update()
@@ -50,30 +53,33 @@ public class GameRules : MonoBehaviour
 			PlayerKills.Add( 0 );
 		}
 
-		for( int i = 0; i < players.Count; ++i )
+		if( !playerWon )
 		{
-			if( RankPerElement )
+			for( int i = 0; i < players.Count; ++i )
 			{
-				if( GameElements.Contains( GameElement.Deathmatch ) && PlayerKills[ i ] > KillLimit )
+				if( RankPerElement )
 				{
-					print( "Player " + ( i + 1 ) + " Wins!" );
+					if( GameElements.Contains( GameElement.Deathmatch ) && PlayerKills[ i ] >= KillLimit )
+					{
+						PlayerWins( players[ i ] );
+					}
 				}
-			}
-			else
-			{
-				// Average score from individual game elements
-				PlayerScores[ i ] = 0;
-				if( GameElements.Contains( GameElement.Deathmatch ) )
+				else
 				{
-					PlayerScores[ i ] += PlayerKills[ i ] * KillScoreMultiplier;
-				}
-				PlayerScores[ i ] /= GameElements.Count;
-				PlayerScores[ i ] *= BaseScoreMultiplier;
+					// Average score from individual game elements
+					PlayerScores[ i ] = 0;
+					if( GameElements.Contains( GameElement.Deathmatch ) )
+					{
+						PlayerScores[ i ] += PlayerKills[ i ] * KillScoreMultiplier;
+					}
+					PlayerScores[ i ] /= GameElements.Count;
+					PlayerScores[ i ] *= BaseScoreMultiplier;
 
-				// Check to see if anyone has won
-				if( PlayerScores[ i ] >= ScoreLimit )
-				{
-					print( "Player " + ( i + 1 ) + " Wins!" );
+					// Check to see if anyone has won
+					if( PlayerScores[ i ] >= ScoreLimit )
+					{
+						PlayerWins( players[ i ] );
+					}
 				}
 			}
 		}
@@ -86,5 +92,11 @@ public class GameRules : MonoBehaviour
 		{
 			PlayerKills[ players.IndexOf( killedBy ) ] += KillScoreMultiplier;
 		}
+	}
+
+	public void PlayerWins( GameObject winner )
+	{
+		gameControl.GetComponent<GameControl>().EndGame( winner );
+		playerWon = true;
 	}
 }

@@ -13,6 +13,7 @@ public class Avatar : MonoBehaviour
 	float prevSwitchLeft;
 	float prevSwitchRight;
 	int initHealth;
+	bool gameActive = true;
 	
 	// Public
 	public int ActiveDroneIndex = 0;
@@ -48,41 +49,45 @@ public class Avatar : MonoBehaviour
 			Dash = Mathf.Min( Dash + ( rb.angularVelocity.magnitude * DashRechargeSpinFactor * rb.velocity.magnitude * DashRechargeVelocityFactor * Time.deltaTime ), MaxDash );
 		}
 
-		// If an active drone is present
-		if( Drones.Count > 0 )
+		// If game is active, take input
+		if( gameActive )
 		{
-			if( Drones[ ActiveDroneIndex ].activeSelf )
+			// If an active drone is present
+			if( Drones.Count > 0 )
 			{
-				// Set the drone's Aim property
-				Drone droneScript = Drones[ ActiveDroneIndex ].GetComponent<Drone>();
-				if( InputWrapper.Aim == 1f )
+				if( Drones[ ActiveDroneIndex ].activeSelf )
 				{
-					droneScript.Aim = true;
-				}
-				else
-				{
-					droneScript.Aim = false;
-				}
+					// Set the drone's Aim property
+					Drone droneScript = Drones[ ActiveDroneIndex ].GetComponent<Drone>();
+					if( InputWrapper.Aim == 1f )
+					{
+						droneScript.Aim = true;
+					}
+					else
+					{
+						droneScript.Aim = false;
+					}
 
-				// Relay fire events
-				if( InputWrapper.Fire == 1f && prevFire == 0f )
-				{
-					droneScript.Fire();
-				}
-				prevFire = InputWrapper.Fire;
+					// Relay fire events
+					if( InputWrapper.Fire == 1f && prevFire == 0f )
+					{
+						droneScript.Fire();
+					}
+					prevFire = InputWrapper.Fire;
 
-				// Switch drones
-				if( InputWrapper.SwitchRight == 1f && prevSwitchRight == 0f )
-				{
-					SwitchDrone( true );
-				}
-				prevSwitchRight = InputWrapper.SwitchRight;
+					// Switch drones
+					if( InputWrapper.SwitchRight == 1f && prevSwitchRight == 0f )
+					{
+						SwitchDrone( true );
+					}
+					prevSwitchRight = InputWrapper.SwitchRight;
 
-				if( InputWrapper.SwitchLeft == 1f && prevSwitchLeft == 0f )
-				{
-					SwitchDrone( false );
+					if( InputWrapper.SwitchLeft == 1f && prevSwitchLeft == 0f )
+					{
+						SwitchDrone( false );
+					}
+					prevSwitchLeft = InputWrapper.SwitchLeft;
 				}
-				prevSwitchLeft = InputWrapper.SwitchLeft;
 			}
 		}
 
@@ -137,6 +142,11 @@ public class Avatar : MonoBehaviour
 	}
 
 	// Utility Methods
+	public void GameOver()
+	{
+		gameActive = false;
+	}
+
 	public int WrapIndex( int idx, int maxIdx )
 	{
 		if( idx < 0 )
@@ -168,7 +178,13 @@ public class Avatar : MonoBehaviour
 		GameObject owner = (GameObject)args[ 1 ];
 
 		Health -= damage;
-		InputWrapper.StrongRumbleForce += damage * DamageRumbleFactor;
+
+		// Only apply rumble if the game is in progress
+		if( gameActive )
+		{
+			InputWrapper.StrongRumbleForce += damage * DamageRumbleFactor;
+		}
+
 		if( Health <= 0 )
 		{
 			// Spawn Explosion
