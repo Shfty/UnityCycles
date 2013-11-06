@@ -5957,7 +5957,7 @@ ParticleSystem:
           rgba: 4294967295
         key1:
           serializedVersion: 2
-          rgba: 4292637555
+          rgba: 4291348680
         key2:
           serializedVersion: 2
           rgba: 0
@@ -7696,7 +7696,7 @@ ParticleSystem:
   InitialModule:
     enabled: 1
     startLifetime:
-      scalar: .25
+      scalar: .150000006
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -7729,7 +7729,7 @@ ParticleSystem:
         m_PostInfinity: 2
       minMaxState: 0
     startSpeed:
-      scalar: 1
+      scalar: 0
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -8061,7 +8061,7 @@ ParticleSystem:
           rgba: 4294967295
         key1:
           serializedVersion: 2
-          rgba: 4292637555
+          rgba: 4291348680
         key2:
           serializedVersion: 2
           rgba: 0
@@ -11217,7 +11217,7 @@ ParticleSystem:
           rgba: 4294967295
         key1:
           serializedVersion: 2
-          rgba: 4292637555
+          rgba: 4291348680
         key2:
           serializedVersion: 2
           rgba: 0
@@ -14008,7 +14008,7 @@ ParticleSystem:
   InitialModule:
     enabled: 1
     startLifetime:
-      scalar: .25
+      scalar: .150000006
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -14041,7 +14041,7 @@ ParticleSystem:
         m_PostInfinity: 2
       minMaxState: 0
     startSpeed:
-      scalar: 1
+      scalar: 0
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -14373,7 +14373,7 @@ ParticleSystem:
           rgba: 4294967295
         key1:
           serializedVersion: 2
-          rgba: 4292637555
+          rgba: 4291348680
         key2:
           serializedVersion: 2
           rgba: 0

@@ -12,7 +12,7 @@ public class GameControl : MonoBehaviour
 	Vector3 mapBounds;
 	float prevTimeSinceStart;
 	float independentDeltaTime;
-	float targetTimeScale;
+	float targetTimeScale = 0f;
 
 	// Properties
 	public int LocalPlayerCount = 1;
@@ -69,7 +69,9 @@ public class GameControl : MonoBehaviour
 	{
 		// Begin with time frozen
 		Time.timeScale = 0f;
-		targetTimeScale = 0f;
+
+		// Get spawn points and map camera anchors
+		spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" );
 
 		// Setup and start the game
 		ResetGame();
@@ -135,9 +137,6 @@ public class GameControl : MonoBehaviour
 	// Utility Methods
 	public void ResetGame()
 	{
-		// Get spawn points and map camera anchors
-		spawnPoints = GameObject.FindGameObjectsWithTag( "PlayerSpawn" );
-
 		// Despawn all objects
 		BillboardPool.DespawnAll();
 		DronePool.DespawnAll();
@@ -156,6 +155,9 @@ public class GameControl : MonoBehaviour
 		Pickups.Clear();
 		PlayerOverlays.Clear();
 		PickupOverlays.Clear();
+
+		// Reset GameRules
+		GameRules.Instance.Reset();
 
 		// Spawn players
 		for( int i = 0; i < LocalPlayerCount; ++i )
@@ -563,6 +565,7 @@ public class GameControl : MonoBehaviour
 	void ResetPickupOverlay( GameObject pickupOverlay, GameObject pickup )
 	{
 		pickupOverlay.GetComponent<KinematicHover>().Target = pickup.transform;
+
 		Billboard billboardScript = pickupOverlay.GetComponent<Billboard>();
 		// Setup material
 		switch( pickup.GetComponent<PickupInstance>().Type )

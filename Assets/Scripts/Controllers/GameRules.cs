@@ -99,4 +99,10 @@ public class GameRules : MonoBehaviour
 		gameControl.GetComponent<GameControl>().EndGame( winner );
 		playerWon = true;
 	}
+
+	public void Reset()
+	{
+		PlayerScores.Clear();
+		PlayerKills.Clear();
+	}
 }

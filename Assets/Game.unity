@@ -301,14 +301,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15485ba27c85b1f4c8b1d8bea8c60fc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  overlayOpacity: 0
   Skin: {fileID: 11400000, guid: 8cde3c115c7dbb942bea3836d6f599c5, type: 2}
   OverlayTexture: {fileID: 2800000, guid: b93347012cb1dad409e26312c9f06f05, type: 3}
-  OverlayOpacity: -30
-  TargetOverlayOpacity: .800000012
-  OverlayLerpFactor: 2
-  TextOpacity: 0
-  TargetTextOpacity: .800000012
-  TextLerpFactor: 24
+  OverlayFadeTime: 1
 --- !u!1 &318694497
 GameObject:
   m_ObjectHideFlags: 0
@@ -626,7 +622,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -100
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: m_LocalPosition.y
@@ -634,7 +630,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: m_LocalPosition.z
-      value: -100
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: m_LocalRotation.x
@@ -654,6 +650,22 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: DistanceMetric
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
+      propertyPath: GridDivisions.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
+      propertyPath: GridDivisions.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
+      propertyPath: MaxPointsPerCell
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
+      propertyPath: Threaded
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -728,7 +740,7 @@ Transform:
   m_PrefabInternal: {fileID: 780841491}
   m_GameObject: {fileID: 908908914}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -100, y: 0, z: -100}
+  m_LocalPosition: {x: -50, y: 0, z: -50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -744,11 +756,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85218d2978ccd5d41bf57a4aee04a80d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Threaded: 0
+  Threaded: 1
   RegenerateOnLoad: 1
   GridDivisions: {x: 5, y: 5}
-  MaxPointsPerCell: 5
-  DistanceMetric: 1
+  MaxPointsPerCell: 10
+  DistanceMetric: 4
   MinkowskiNumber: 3
   FValue: 1
   UseRandomSeed: 0

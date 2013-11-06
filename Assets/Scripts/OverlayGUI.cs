@@ -4,7 +4,12 @@ using System.Collections;
 public class OverlayGUI : MonoBehaviour
 {
 	// Variables
+	float independentDeltaTime;
 	float prevTimeSinceStart;
+	string winnerText = "";
+	string rematchText = "Aim to restart match";
+	string backToMenuText = "Fire to return to Menu";
+	float prevAim = 0f;
 	/* Fade states
 	 * 0 - Fully transparent
 	 * 1 - Partial transparency following game over
@@ -12,69 +17,54 @@ public class OverlayGUI : MonoBehaviour
 	 * 3 - Waiting on reset
 	 */
 	int fadeState = 0;
-	string winnerText = "";
-	string rematchText = "Aim to restart match";
-	string backToMenuText = "Fire to return to Menu";
-	float prevAim = 0f;
+	public float overlayOpacity = 0f;
+
+	delegate void FinishCallback();
 
 	public GUISkin Skin;
 	public Texture OverlayTexture;
-
-	public float OverlayOpacity = 1f;
-	public float TargetOverlayOpacity = 0f;
-	public float OverlayLerpFactor = .1f;
-
-	public float TextOpacity = 0f;
-	public float TargetTextOpacity = 0f;
-	public float TextLerpFactor = .1f;
+	public float OverlayFadeTime = 2f;
 
 	// Unity Methods
+	void Start()
+	{
+		overlayOpacity = 1f;
+		SetOverlayAnimationParameters( 1f, 0f, OverlayFadeTime );
+		StartCoroutine( PauseAndStartAnimation( 1f ) );
+	}
+
 	void Update()
 	{
 		// Track delta time independently of Time class
-		float independentDeltaTime = Time.realtimeSinceStartup - prevTimeSinceStart;
-
-		float targetOverlayAlpha = 0f;
-		float targetTextAlpha = 0f;
-		switch( fadeState )
-		{
-			case 0:
-				targetOverlayAlpha = 0f;
-				targetTextAlpha = 0f;
-				break;
-			case 1:
-				targetOverlayAlpha = TargetOverlayOpacity;
-				targetTextAlpha = TargetTextOpacity;
-				break;
-			case 2:
-			case 3:
-				targetOverlayAlpha = 1f;
-				targetTextAlpha = TargetTextOpacity;
-				break;
-			default:
-				break;
-		}
-
-		OverlayOpacity = Mathf.Lerp( OverlayOpacity, targetOverlayAlpha, OverlayLerpFactor * independentDeltaTime );
-		TextOpacity = Mathf.Lerp( TextOpacity, targetTextAlpha, OverlayLerpFactor * independentDeltaTime );
+		independentDeltaTime = Time.realtimeSinceStartup - prevTimeSinceStart;
 
 		if( GameControl.Instance.Players.Count > 0 )
 		{
 			InputWrapper inputWrapper = GameControl.Instance.Players[ 0 ].GetComponent<InputWrapper>();
-			if( fadeState == 1 && inputWrapper.Aim == 1f && prevAim == 0f )
+			if( fadeState == 1 && animationFinished && inputWrapper.Aim == 1f && prevAim == 0f )
 			{
 				fadeState = 2;
+				SetOverlayAnimationParameters( overlayOpacity, 1f, OverlayFadeTime );
+				StartOverlayAnimation();
 			}
 			prevAim = inputWrapper.Aim;
 		}
 
-		if( fadeState == 2 && OverlayOpacity >= targetOverlayAlpha - .005f )
+		if( fadeState == 2 && animationFinished )
 		{
 			GameControl.Instance.ResetGame();
-			GameControl.Instance.StartGame();
-			fadeState = 0;
-			TargetTextOpacity = 0f;
+			fadeState = 3;
+			SetOverlayAnimationParameters( overlayOpacity, 0f, OverlayFadeTime );
+			StartCoroutine( PauseAndStartAnimation( 1f ) );
 		}
+
+		if( fadeState == 3 && animationFinished )
+		{
+			fadeState = 0;
+			StartCoroutine( PauseAndStartGame( 2f ) );
+		}
+
+		StartCoroutine( AnimateOverlay( OverlayAnimationFinished ) );
 
 		// Track previous time
 		prevTimeSinceStart = Time.realtimeSinceStartup;
@@ -83,10 +73,10 @@ public class OverlayGUI : MonoBehaviour
 	void OnGUI()
 	{
 		GUI.skin = Skin;
-		GUI.color = new Color( 1f, 1f, 1f, OverlayOpacity );
+		GUI.color = new Color( 1f, 1f, 1f, overlayOpacity );
 		GUI.DrawTexture( camera.pixelRect, OverlayTexture );
 
-		GUI.color = new Color( 1f, 1f, 1f, TextOpacity );
+		GUI.color = new Color( 1f, 1f, 1f, overlayOpacity );
 
 		GUIContent winnerContent = new GUIContent( winnerText );
 		Vector2 winnerBounds = Skin.label.CalcSize( winnerContent );
@@ -109,5 +99,85 @@ public class OverlayGUI : MonoBehaviour
 	{
 		winnerText = "Player " + ( GameControl.Instance.Players.IndexOf( winner ) + 1 ) + " Wins";
 		fadeState = 1;
+		SetOverlayAnimationParameters( 0f, .8f, OverlayFadeTime );
+		StartCoroutine( PauseAndStartAnimation( 2f ) );
+	}
+
+	float from;
+	float to;
+	float duration;
+	float dist;
+	void SetOverlayAnimationParameters( float f, float t, float d )
+	{
+		from = f;
+		to = t;
+		duration = d;
+		dist = to - from;
+	}
+
+	bool animating = false;
+	bool animationFinished = false;
+	void StartOverlayAnimation()
+	{
+		animating = true;
+		animationFinished = false;
+	}
+
+	void StopOverlayAnimation()
+	{
+		animating = false;
+		animationFinished = true;
+	}
+
+	void OverlayAnimationFinished()
+	{
+		animating = false;
+		animationFinished = true;
+	}
+
+	IEnumerator AnimateOverlay( FinishCallback callback )
+	{
+		if( animating )
+		{
+			if( dist > 0 )
+			{
+				for( float i = from; i < to; i += ( dist / duration ) * independentDeltaTime )
+				{
+					overlayOpacity = i;
+					yield return null;
+				}
+			}
+			else
+			{
+				for( float i = from; i > to; i += ( dist / duration ) * independentDeltaTime )
+				{
+					overlayOpacity = i;
+					yield return null;
+				}
+			}
+			callback();
+		}
+
+		yield break;
+	}
+
+	IEnumerator PauseAndStartAnimation( float duration )
+	{
+		float startTime = Time.realtimeSinceStartup;
+		while( Time.realtimeSinceStartup < startTime + duration )
+		{
+			yield return null;
+		}
+		StartOverlayAnimation();
+	}
+
+	IEnumerator PauseAndStartGame( float duration )
+	{
+		float startTime = Time.realtimeSinceStartup;
+		while( Time.realtimeSinceStartup < startTime + duration )
+		{
+			yield return null;
+		}
+		GameControl.Instance.StartGame();
 	}
 }

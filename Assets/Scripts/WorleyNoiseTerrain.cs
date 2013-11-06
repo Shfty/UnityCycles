@@ -15,6 +15,8 @@ public class WorleyNoiseTerrain : MonoBehaviour
 	static DistMetric distanceMetric;
 	static float minkowskiNumber;
 	static int fValue;
+	int cores;
+	static int threadsFinished;
 
 	// Enums
 	public enum DistMetric
@@ -27,18 +29,22 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		Minkowski = 5
 	}
 
-	// Thread data class
-	public class ThreadData
-	{
-		public int startX;
-		public int endX;
-		public int y;
+	delegate void ThreadCallback();
 
-		public ThreadData( int sX, int eX, int inY )
+	// Thread data class
+	class ThreadData
+	{
+		public int startY;
+		public int endY;
+		public int rowWidth;
+		public ThreadCallback callback;
+
+		public ThreadData( int s, int e, int rw, ThreadCallback c )
 		{
-			startX = sX;
-			endX = eX;
-			y = inY;
+			startY = s;
+			endY = e;
+			rowWidth = rw;
+			callback = c;
 		}
 	}
 
@@ -81,42 +87,47 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		// Terrain
 		FlattenTerrain( t.terrainData );
 
-		int cores = Mathf.Min( SystemInfo.processorCount, t.terrainData.heightmapWidth );
-		int slice = t.terrainData.heightmapWidth / cores;
+		cores = Mathf.Min( SystemInfo.processorCount - 1, t.terrainData.heightmapHeight );
+		int slice = t.terrainData.heightmapHeight / cores;
 
-		for( int y = 0; y < t.terrainData.heightmapHeight; ++y )
+		if( cores > 1 && Threaded )
 		{
-			if( cores > 1 && Threaded )
+			int i;
+			ThreadData threadData;
+			List<Thread> threads = new List<Thread>();
+			for( i = 0; i < cores; ++i )
 			{
-				int i;
-				ThreadData threadData;
-				List<Thread> threads = new List<Thread>();
-				for( i = 0; i < cores - 1; ++i )
-				{
-					threadData = new ThreadData( slice * i, slice * ( i + 1 ), y );
-					Thread thread = new Thread( () => NoiseRow( threadData ) );
-					threads.Add( thread );
-					thread.Start();
-				}
-				threadData = new ThreadData( slice * i, slice * ( i + 1 ), y );
-				NoiseRow( threadData );
-
-				foreach( Thread thread in threads )
-				{
-					thread.Join();
-				}
-			}
-			else
-			{
-				ThreadData threadData = new ThreadData( 0, t.terrainData.heightmapWidth, y );
-				NoiseRow( threadData );
+				threadData = new ThreadData( slice * i, slice * ( i + 1 ), t.terrainData.heightmapWidth, ThreadFinished );
+				Thread thread = new Thread( () => NoiseRows( threadData ) );
+				thread.IsBackground = true;
+				threads.Add( thread );
+				thread.Start();
+				Thread.Sleep( 10 ); // Don't know why this is needed, random failures otherwise
 			}
 		}
+		else
+		{
+			ThreadData threadData = new ThreadData( 0, t.terrainData.heightmapHeight, t.terrainData.heightmapWidth, ThreadFinished );
+			NoiseRows( threadData );
+			t.terrainData.SetHeights( 0, 0, heights );
+		}
+	}
 
-		t.terrainData.SetHeights( 0, 0, heights );
+	void Update()
+	{
+		if( threadsFinished == cores && Threaded )
+		{
+			t.terrainData.SetHeights( 0, 0, heights );
+			threadsFinished = 0;
+		}
 	}
 
 	// Utility Methods
+	void ThreadFinished()
+	{
+		Interlocked.Increment( ref threadsFinished );
+	}
+
 	void SetupCells()
 	{
 		cellSize = new Vector2( bounds.x / GridDivisions.x,	bounds.y / GridDivisions.y );
@@ -262,12 +273,16 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		td.SetHeights( 0, 0, heights );
 	}
 
-	public void NoiseRow( ThreadData threadData )
+	void NoiseRows( ThreadData threadData )
 	{
-		for( int x = threadData.startX; x < threadData.endX; ++x )
+		for( int y = threadData.startY; y < threadData.endY; ++y )
 		{
-			float height = Noise2D( new Vector2( x, threadData.y ) );
-			heights[ x, threadData.y ] = height;
+			for( int x = 0; x < threadData.rowWidth; ++x )
+			{
+				float height = Noise2D( new Vector2( x, y ) );
+				heights[ x, y ] = height;
+			}
 		}
+		threadData.callback();
 	}
 }
