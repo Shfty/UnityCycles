@@ -30,6 +30,11 @@ public class WheelOrientation : MonoBehaviour
 		baseOrientation = Wheel.transform.rotation;
 	}
 
+    void OnEnable()
+    {
+        gameActive = true;
+    }
+
 	void Start()
 	{
 		// Find and store the marble movement script, wheel mesh and input wrapper

@@ -59,6 +59,7 @@ public class MarbleMovement : MonoBehaviour
 		initVelocity = Marble.rigidbody.velocity;
 		initAngularVelocity = Marble.rigidbody.angularVelocity;
 		ResetSurfaceNormal();
+        gameActive = true;
 	}
 
 	void OnDisable()

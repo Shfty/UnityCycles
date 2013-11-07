@@ -458,7 +458,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab5d48f2d185f04bab2650d34d3bb83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalPlayerCount: 2
+  LocalPlayerCount: 4
   MaxPickups: 15
   PickupTimeout: 2
   MapCamera: {fileID: 239389358}
@@ -1017,6 +1017,7 @@ MonoBehaviour:
   - {fileID: 100000, guid: 954b7ba4147dc4b49bbd35cdc5cb368a, type: 2}
   - {fileID: 100000, guid: 6df619aef6eb4fc4eb9a399a0e7ad9f5, type: 2}
   - {fileID: 100000, guid: 67909dbb794e83e4b9b9339aaebb26da, type: 2}
+  - {fileID: 100000, guid: 6f690bef836552c43adf5f670d220288, type: 2}
   Preallocate: 1
   PreallocateCount: 10
   Limit: 1

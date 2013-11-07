@@ -99,7 +99,7 @@ public class ObjectPool : MonoBehaviour
 		}
 		else
 		{
-			Debug.LogWarning( "Could not spawn " + prefab + ": not present in Object Pool" );
+			Debug.LogWarning( this + " could not spawn " + prefab + ": not present in Object Pool" );
 			return null;
 		}
 	}

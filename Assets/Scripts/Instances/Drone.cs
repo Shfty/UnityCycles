@@ -370,8 +370,11 @@ public class Drone : MonoBehaviour
 	public void Deactivate()
 	{
 		// Spawn Explosion
-		GameObject explosion = GameControl.DronePool.Spawn( "Drone Explosion" );
-		explosion.transform.position = transform.position;
+		GameObject explosion = GameControl.ProjectilePool.Spawn( "Drone Explosion" );
+        if( explosion != null )
+        {
+            explosion.transform.position = transform.position;
+        }
 
 		// Deactivate spawned children
 		GameControl.MiscPool.Despawn( aimingLine.gameObject );

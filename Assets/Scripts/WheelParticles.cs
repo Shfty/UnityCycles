@@ -34,8 +34,9 @@ public class WheelParticles : MonoBehaviour
 		terrainMask = 1 << LayerMask.NameToLayer( "Terrain" );
 	}
 	
-	void Start()
-	{
+	void OnEnable()
+    {
+        gameActive = true;
 	}
 	
 	void LateUpdate()

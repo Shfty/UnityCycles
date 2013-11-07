@@ -21,7 +21,8 @@ public class Rocket : Projectile
 		// Create an explosion and wait until the particle system is finished before deactivating
 		GameObject explosion = GameControl.ProjectilePool.Spawn( "Rocket Explosion" );
 		explosion.transform.position = transform.position;
-		explosion.GetComponent<Explosion>().Owner = Owner;
+        explosion.GetComponent<Explosion>().Owner = Owner;
+        explosion.GetComponent<Explosion>().LateStart();
 
 		ParticleSystem ps = transform.Find( "Exhaust" ).GetComponent<ParticleSystem>();
 		StartCoroutine( WaitForParticles( ps ) );

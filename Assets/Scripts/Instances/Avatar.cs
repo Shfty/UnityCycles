@@ -37,7 +37,8 @@ public class Avatar : MonoBehaviour
 
 	public void OnEnable()
 	{
-		Health = initHealth;
+        Health = initHealth;
+        gameActive = true;
 	}
 
 	void Update()

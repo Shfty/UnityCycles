@@ -36,7 +36,8 @@ public class MortarShell : Projectile
 			// Create an explosion prefab
 			GameObject explosion = GameControl.ProjectilePool.Spawn( "Rocket Explosion" );
 			explosion.transform.position = transform.position;
-			explosion.GetComponent<Explosion>().Owner = Owner;
+            explosion.GetComponent<Explosion>().Owner = Owner;
+            explosion.GetComponent<Explosion>().LateStart();
 
 			// Release mortar 6 bombs downward
 			float angleSlice = 360f / Bombs;

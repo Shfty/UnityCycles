@@ -16,6 +16,7 @@ public class MortarBomb : Projectile
 		GameObject explosion = GameControl.ProjectilePool.Spawn( "Mortar Bomb Explosion" );
 		explosion.transform.position = transform.position;
 		explosion.GetComponent<Explosion>().Owner = Owner;
+        explosion.GetComponent<Explosion>().LateStart();
 
 		GameControl.ProjectilePool.Despawn( gameObject );
 	}

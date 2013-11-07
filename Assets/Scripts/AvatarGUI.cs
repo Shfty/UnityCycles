@@ -178,14 +178,20 @@ public class AvatarGUI : MonoBehaviour
 
 			// Camera parent's score
 			string scoreText = "Score";
-			int playerScoresIndex = GameControl.Instance.Players.IndexOf( transform.parent.gameObject );
-			string scoreNumber = GameRules.Instance.PlayerScores[ playerScoresIndex ].ToString();
+            if( GameControl.Instance.Players.Contains( transform.parent.gameObject ) )
+            {
+			    int playerScoresIndex = GameControl.Instance.Players.IndexOf( transform.parent.gameObject );
+                if( playerScoresIndex < GameRules.Instance.PlayerScores.Count )
+                {
+                    string scoreNumber = GameRules.Instance.PlayerScores[playerScoresIndex].ToString();
 
-			Vector2 scoreTextBounds = GUI.skin.label.CalcSize( new GUIContent( scoreText ) );
-			Vector2 scoreNumberBounds = GUI.skin.label.CalcSize( new GUIContent( scoreNumber ) );
+                    Vector2 scoreTextBounds = GUI.skin.label.CalcSize( new GUIContent( scoreText ) );
+                    Vector2 scoreNumberBounds = GUI.skin.label.CalcSize( new GUIContent( scoreNumber ) );
 
-			GUI.Label( new Rect( centerPt.x - scoreTextBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f, scoreTextBounds.x, scoreTextBounds.y * 2f ), scoreText );
-			GUI.Label( new Rect( centerPt.x - scoreNumberBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f + scoreTextBounds.y, scoreNumberBounds.x, scoreNumberBounds.y * 2f ), scoreNumber );
+                    GUI.Label( new Rect( centerPt.x - scoreTextBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f, scoreTextBounds.x, scoreTextBounds.y * 2f ), scoreText );
+                    GUI.Label( new Rect( centerPt.x - scoreNumberBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f + scoreTextBounds.y, scoreNumberBounds.x, scoreNumberBounds.y * 2f ), scoreNumber );
+                }
+            }
 		}
 	}
 
