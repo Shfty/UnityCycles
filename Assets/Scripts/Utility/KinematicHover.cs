@@ -3,17 +3,16 @@ using System.Collections;
 
 public class KinematicHover : MonoBehaviour
 {
-	// Fields
+    // Enums
+    public enum LerpMode
+    {
+        Linear,
+        Spherical
+    }
+
+	// Variables
 	Vector3 targetPosition;
 
-	// Enums
-	public enum LerpMode
-	{
-		Linear,
-		Spherical
-	}
-
-	// Properties
 	public Transform Target;
 	public Vector3 Offset;
 	public bool Lerp = false;
@@ -21,14 +20,6 @@ public class KinematicHover : MonoBehaviour
 	public float LerpFactor = .2f;
 
 	// Unity Methods
-	void OnEnable()
-	{
-		if( Target == null )
-		{
-			Debug.LogWarning( gameObject + " KinematicHover Target is not set" );
-		}
-	}
-
 	void Update()
 	{
 		if( Target != null )

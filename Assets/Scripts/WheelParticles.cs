@@ -98,7 +98,7 @@ public class WheelParticles : MonoBehaviour
 			}
 
 			// Enable the jump jets if the button is pressed
-			if( InputWrapper.Jump == 1f )
+			if( InputWrapper.Jump > 0f )
 			{
 				if( !JumpJetsEnabled )
 				{
@@ -121,7 +121,7 @@ public class WheelParticles : MonoBehaviour
 			prevJump = InputWrapper.Jump;
 
 			// Enable the drop jets if the button is pressed
-			if( InputWrapper.Drop == 1f )
+			if( InputWrapper.Drop > 0f )
 			{
 				if( !DropJetsEnabled )
 				{

@@ -334,7 +334,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Prefabs:
   - {fileID: 100000, guid: 56713d5f26d60994f97d3a3b60bbf808, type: 2}
-  - {fileID: 100000, guid: 403bea3c063589743aae4c1edcbdd6df, type: 2}
   Preallocate: 1
   PreallocateCount: 10
   Limit: 1
@@ -1017,6 +1016,7 @@ MonoBehaviour:
   - {fileID: 100000, guid: 954b7ba4147dc4b49bbd35cdc5cb368a, type: 2}
   - {fileID: 100000, guid: 6df619aef6eb4fc4eb9a399a0e7ad9f5, type: 2}
   - {fileID: 100000, guid: 67909dbb794e83e4b9b9339aaebb26da, type: 2}
+  - {fileID: 100000, guid: 403bea3c063589743aae4c1edcbdd6df, type: 2}
   - {fileID: 100000, guid: 6f690bef836552c43adf5f670d220288, type: 2}
   Preallocate: 1
   PreallocateCount: 10

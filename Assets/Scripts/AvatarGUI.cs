@@ -33,6 +33,7 @@ public class AvatarGUI : MonoBehaviour
 	// Unity Methods
 	void Awake()
 	{
+		// Init drone position containers
 		droneIconPositions = new List<Vector2>();
 		droneIconTargets = new List<Vector2>();
 		Vector2 droneStartPos = new Vector2( Screen.width * .5f, Screen.height * 2f );
@@ -42,13 +43,19 @@ public class AvatarGUI : MonoBehaviour
 			droneIconTargets.Add( droneStartPos );
 		}
 	}
+
+	void OnEnable()
+	{
+		// Restore init state
+		DeathCam = false;
+	}
 	
 	void Update()
 	{
 		// Check respawn
 		if( DeathCam )
 		{
-			if( InputWrapper.Fire == 1f && prevRespawn == 0f )
+			if( InputWrapper.Fire > 0f && prevRespawn == 0f )
 			{
 				GameControl.Instance.RespawnPlayer( transform.parent.gameObject );
 			}

@@ -36,11 +36,6 @@ public class Billboard : MonoBehaviour
 		if( cameras != null )
 		{
 			cameras.Clear();
-
-			foreach( GameObject billboard in billboards )
-			{
-				GameControl.BillboardPool.Despawn( billboard );
-			}
 			billboards.Clear();
 
 			// Check the player count, create a billboard for each camera and set it to the respective layer

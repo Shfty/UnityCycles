@@ -41,7 +41,7 @@ public class OverlayGUI : MonoBehaviour
 		if( GameControl.Instance.Players.Count > 0 )
 		{
 			InputWrapper inputWrapper = GameControl.Instance.Players[ 0 ].GetComponent<InputWrapper>();
-			if( fadeState == 1 && animationFinished && inputWrapper.Aim == 1f && prevAim == 0f )
+			if( fadeState == 1 && animationFinished && inputWrapper.Aim > 0f && prevAim == 0f )
 			{
 				fadeState = 2;
 				SetOverlayAnimationParameters( overlayOpacity, 1f, OverlayFadeTime );

@@ -60,7 +60,7 @@ public class Avatar : MonoBehaviour
 				{
 					// Set the drone's Aim property
 					Drone droneScript = Drones[ ActiveDroneIndex ].GetComponent<Drone>();
-					if( InputWrapper.Aim == 1f )
+					if( InputWrapper.Aim > 0 )
 					{
 						droneScript.Aim = true;
 					}
@@ -70,20 +70,20 @@ public class Avatar : MonoBehaviour
 					}
 
 					// Relay fire events
-					if( InputWrapper.Fire == 1f && prevFire == 0f )
+					if( InputWrapper.Fire > 0 && prevFire == 0f )
 					{
 						droneScript.Fire();
 					}
 					prevFire = InputWrapper.Fire;
 
 					// Switch drones
-					if( InputWrapper.SwitchRight == 1f && prevSwitchRight == 0f )
+					if( InputWrapper.SwitchRight > 0 && prevSwitchRight == 0f )
 					{
 						SwitchDrone( true );
 					}
 					prevSwitchRight = InputWrapper.SwitchRight;
 
-					if( InputWrapper.SwitchLeft == 1f && prevSwitchLeft == 0f )
+					if( InputWrapper.SwitchLeft > 0 && prevSwitchLeft == 0f )
 					{
 						SwitchDrone( false );
 					}

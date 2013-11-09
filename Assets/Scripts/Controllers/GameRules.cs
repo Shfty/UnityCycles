@@ -104,5 +104,6 @@ public class GameRules : MonoBehaviour
 	{
 		PlayerScores.Clear();
 		PlayerKills.Clear();
+		playerWon = false;
 	}
 }

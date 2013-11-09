@@ -30,7 +30,7 @@ public class Drone : MonoBehaviour
 	// Unity Methods
 	public void Awake()
 	{
-		// Store initial droid-related state
+		// Store initial drone-related state
 		initPlayer = Player;
 		initType = Type;
 		initAmmo = Ammo;
@@ -41,7 +41,7 @@ public class Drone : MonoBehaviour
 
 	public void OnEnable()
 	{
-		// Restore initial droid-related state
+		// Restore initial drone-related state
 		Player = initPlayer;
 		Type = initType;
 		Ammo = initAmmo;

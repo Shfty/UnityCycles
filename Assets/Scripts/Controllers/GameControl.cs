@@ -168,9 +168,11 @@ public class GameControl : MonoBehaviour
 		// Spawn player overlays
 		for( int i = 0; i < Players.Count; ++i )
 		{
-			GameObject playerOverlay = BillboardPool.Spawn( "Player Overlay" );
+			GameObject playerOverlay = BillboardPool.Spawn( "Player Overlay", false );
 			ResetPlayerOverlay( playerOverlay, Players[ i ] );
 			PlayerOverlays.Add( playerOverlay );
+			playerOverlay.SetActive( true );
+			playerOverlay.GetComponent<PlayerOverlay>().LateStart();
 		}
 
 		// Spawn pickups
@@ -384,7 +386,6 @@ public class GameControl : MonoBehaviour
 
 			// Disable billboard
 			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
-			overlay.gameObject.SetActive( false );
 
 			PlayerPool.Despawn( go );
 		}
@@ -394,7 +395,6 @@ public class GameControl : MonoBehaviour
 	{
 		playerOverlay.GetComponent<KinematicHover>().Target = player.transform.Find( "Avatar/Marble" );
 		playerOverlay.GetComponent<PlayerOverlay>().Player = player;
-		playerOverlay.GetComponent<PlayerOverlay>().LateStart();
 	}
 
 	Rect CalculateViewport( int idx )
@@ -494,9 +494,11 @@ public class GameControl : MonoBehaviour
 		Pickups.Add( pickup );
 
 		// Spawn and attach overlay
-		GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
+		GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay", false );
 		ResetPickupOverlay( pickupOverlay, pickup );
 		PickupOverlays.Add( pickupOverlay );
+		pickupOverlay.SetActive( true );
+		pickupOverlay.GetComponent<Billboard>().LateStart();
 	}
 
 	public void PickupGrabbed( PickupInstance pickup, Avatar player )
@@ -582,6 +584,5 @@ public class GameControl : MonoBehaviour
 			default:
 				break;
 		}
-		pickupOverlay.GetComponent<Billboard>().LateStart();
 	}
 }

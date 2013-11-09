@@ -74,15 +74,14 @@ public class ObjectPool : MonoBehaviour
 		return go;
 	}
 
-	void activate( GameObject prefab, GameObject go )
+	void MakeActive( GameObject prefab, GameObject go )
 	{
 		// Move the gameobject from the inactive to active list and set active
 		inactiveObjects[ prefab ].Remove( go );
 		activeObjects[ prefab ].Add( go );
-		go.SetActive( true );
 	}
 
-	public GameObject Spawn( string prefabName )
+	public GameObject Spawn( string prefabName, bool active = true )
 	{
 		GameObject prefab = null;
 		foreach( KeyValuePair<GameObject, List<GameObject>> pair in inactiveObjects )
@@ -95,7 +94,7 @@ public class ObjectPool : MonoBehaviour
 
 		if( prefab != null )
 		{
-			return Spawn( prefab );
+			return Spawn( prefab, active );
 		}
 		else
 		{
@@ -104,13 +103,17 @@ public class ObjectPool : MonoBehaviour
 		}
 	}
 
-	public GameObject Spawn( GameObject prefab )
+	public GameObject Spawn( GameObject prefab, bool active = true )
 	{
 		// If there are any objects of the type requested, activate one and return it
 		if( inactiveObjects[prefab].Count > 0 )
 		{
 			GameObject go = inactiveObjects[ prefab ][ 0 ];
-			activate( prefab, go );
+			MakeActive( prefab, go );
+            if( active )
+            {
+                go.SetActive( true );
+            }
 
 			return go;
 		}
@@ -121,7 +124,11 @@ public class ObjectPool : MonoBehaviour
 			{
 				// If not, create a new instance, activate and return it
 				GameObject go = instantiate( prefab, containerObjects[prefab].transform );
-				activate( prefab, go );
+				MakeActive( prefab, go );
+                if( active )
+                {
+                    go.SetActive( true );
+                }
 
 				return go;
 			}
@@ -132,14 +139,18 @@ public class ObjectPool : MonoBehaviour
 				{
 					// If not, create a new instance, activate and return it
 					GameObject go = instantiate( prefab, containerObjects[prefab].transform );
-					activate( prefab, go );
+					MakeActive( prefab, go );
+                    if( active )
+                    {
+                        go.SetActive( true );
+                    }
 
 					return go;
 				}
 				else
 				{
 					// If so, log a warning message and return null
-					Debug.LogWarning( "Cannot spawn GameObject: pool full." );
+					Debug.LogWarning( this + " cannot spawn GameObject: pool full." );
 					return null;
 				}
 			}
@@ -155,7 +166,7 @@ public class ObjectPool : MonoBehaviour
 			// Make sure this prefab is pooled
 			if( !activeObjects.ContainsKey( prefab ) )
 			{
-				Debug.LogWarning( "Could not despawn " + prefab + ": not present in Object Pool" );
+				Debug.LogWarning( this + " could not despawn object of type " + prefab + ": not present in Object Pool" );
 				return false;
 			}
 
@@ -172,7 +183,7 @@ public class ObjectPool : MonoBehaviour
 			else
 			{
 				// Otherwise, log a warning message and return false
-				Debug.LogWarning( gameObject.name + ": Cannot despawn " + go + ": not present in active pool." );
+				Debug.LogWarning( this + " cannot despawn " + go + ": not present in active pool." );
 				return false;
 			}
 		}

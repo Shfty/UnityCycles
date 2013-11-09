@@ -83,7 +83,7 @@ public class InputWrapper : MonoBehaviour
 		else
 		{
 			// If there are no joysticks left and the keyboard is taken, log a warning message
-			Debug.LogWarning( "InputWrapper #" + LocalPlayerIndex + " unable to bind joystick" );
+			Debug.LogWarning( "InputWrapper " + LocalPlayerIndex + " unable to bind joystick" );
 		}
 	}
 

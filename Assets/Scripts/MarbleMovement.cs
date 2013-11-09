@@ -106,7 +106,7 @@ public class MarbleMovement : MonoBehaviour
 
 			// Calculate jump vector as halfway between the surface and world up
 			Vector3 jumpVector = Vector3.Lerp( Vector3.up, Up, .5f );
-			if( InputWrapper.Jump == 1f )
+			if( InputWrapper.Jump > 0f )
 			{
 				if( JumpFired == false && prevJump == 0f )
 				{
@@ -125,7 +125,7 @@ public class MarbleMovement : MonoBehaviour
 			prevJump = InputWrapper.Jump;
 
 			// Drop
-			if( InputWrapper.Drop == 1f )
+			if( InputWrapper.Drop > 0 )
 			{
 				if( DropFired == false && prevDrop == 0f )
 				{
@@ -150,7 +150,7 @@ public class MarbleMovement : MonoBehaviour
 			}
 
 			// Dash
-			if( InputWrapper.Dash == 1f && GetComponent<Avatar>().Dash > 0f )
+			if( InputWrapper.Dash > 0f && GetComponent<Avatar>().Dash > 0f )
 			{
 				float dash = GetComponent<Avatar>().Dash;
 				float force = Mathf.Min( dash, 1f );
