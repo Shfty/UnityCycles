@@ -9,7 +9,7 @@ public class OverlayGUI : MonoBehaviour
 	string winnerText = "";
 	string rematchText = "Aim to restart match";
 	string backToMenuText = "Fire to return to Menu";
-	float prevAim = 0f;
+	float prevRematch = 0f;
 	/* Fade states
 	 * 0 - Fully transparent
 	 * 1 - Partial transparency following game over
@@ -40,14 +40,21 @@ public class OverlayGUI : MonoBehaviour
 
 		if( GameControl.Instance.Players.Count > 0 )
 		{
-			InputWrapper inputWrapper = GameControl.Instance.Players[ 0 ].GetComponent<InputWrapper>();
-			if( fadeState == 1 && animationFinished && inputWrapper.Aim > 0f && prevAim == 0f )
+			float rematch = 0f;
+			foreach( GameObject player in GameControl.Instance.Players )
+			{
+				InputWrapper ir = player.GetComponent<InputWrapper>();
+				rematch += ir.Rematch;
+			}
+			rematch = Mathf.Clamp( rematch, 0f, 1f );
+
+			if( fadeState == 1 && animationFinished && rematch > 0f && prevRematch == 0f )
 			{
 				fadeState = 2;
 				SetOverlayAnimationParameters( overlayOpacity, 1f, OverlayFadeTime );
 				StartOverlayAnimation();
 			}
-			prevAim = inputWrapper.Aim;
+			prevRematch = rematch;
 		}
 
 		if( fadeState == 2 && animationFinished )

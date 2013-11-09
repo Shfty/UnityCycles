@@ -81,8 +81,6 @@ public class AvatarGUI : MonoBehaviour
 		// Get viewport metrics
 		float pixWidth = camera.pixelWidth;
 		float pixHeight = camera.pixelHeight;
-		float halfWidth = pixWidth * .5f;
-		float halfHeight = pixHeight * .5f;
 		gridSize = 64f * scaleFactor;
 
 		// Get viewport center
@@ -113,7 +111,7 @@ public class AvatarGUI : MonoBehaviour
 				float healthTarget = target.parent.GetComponent<Avatar>().Health;
 				health = Mathf.Lerp( health, healthTarget, BarLerpFactor * Time.deltaTime );
 				GUIContent healthText = new GUIContent( "Health" );
-				GUIContent healthNumber = new GUIContent( health.ToString() );
+				GUIContent healthNumber = new GUIContent( Mathf.Round( health ).ToString() );
 
 				Vector2 healthTextBounds = GUI.skin.GetStyle( "healthtext" ).CalcSize( healthText );
 				Vector2 healthNumberBounds = GUI.skin.GetStyle( "healthtext" ).CalcSize( healthNumber );
@@ -195,8 +193,8 @@ public class AvatarGUI : MonoBehaviour
                     Vector2 scoreTextBounds = GUI.skin.label.CalcSize( new GUIContent( scoreText ) );
                     Vector2 scoreNumberBounds = GUI.skin.label.CalcSize( new GUIContent( scoreNumber ) );
 
-                    GUI.Label( new Rect( centerPt.x - scoreTextBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f, scoreTextBounds.x, scoreTextBounds.y * 2f ), scoreText );
-                    GUI.Label( new Rect( centerPt.x - scoreNumberBounds.x * .5f, centerPt.y - halfHeight + gridSize * .5f + scoreTextBounds.y, scoreNumberBounds.x, scoreNumberBounds.y * 2f ), scoreNumber );
+                    GUI.Label( new Rect( centerPt.x - scoreTextBounds.x * .5f, centerPt.y - pixHeight * .5f + gridSize * .5f, scoreTextBounds.x, scoreTextBounds.y * 2f ), scoreText );
+					GUI.Label( new Rect( centerPt.x - scoreNumberBounds.x * .5f, centerPt.y - pixHeight * .5f + gridSize * .5f + scoreTextBounds.y, scoreNumberBounds.x, scoreNumberBounds.y * 2f ), scoreNumber );
                 }
             }
 		}
@@ -225,10 +223,6 @@ public class AvatarGUI : MonoBehaviour
 
 	void DrawDroneIcon( Drone drone, Vector2 pt )
 	{
-		float pixWidth = camera.pixelWidth;
-		float pixHeight = camera.pixelHeight;
-		float minScreenDimension = Mathf.Min( pixWidth, pixHeight );
-
 		GUI.DrawTexture( new Rect( pt.x - gridSize * .5f, pt.y - gridSize * .5f, gridSize, gridSize ), GetDroneIcon( drone ) );
 		string ammoString = drone.Ammo.ToString();
 		Vector2 ammoLabelBounds = GUI.skin.label.CalcSize( new GUIContent( ammoString ) );

@@ -97,17 +97,6 @@ public class GameControl : MonoBehaviour
 			Screen.lockCursor = false;
 		}
 
-		// Check for any deactivated pickups
-		for( int i = 0; i < Pickups.Count; ++i )
-		{
-			if( !Pickups[ i ].activeSelf )
-			{
-				BillboardPool.Despawn( PickupOverlays[ i ] );
-				Pickups.RemoveAt( i );
-				PickupOverlays.RemoveAt( i );
-			}
-		}
-
 		if( GameActive )
 		{
 			// Increment the pickup timer if there are less pickups than the limit
@@ -138,7 +127,16 @@ public class GameControl : MonoBehaviour
 	public void ResetGame()
 	{
 		// Despawn all objects
-		BillboardPool.DespawnAll();
+		foreach( GameObject playerOverlay in PlayerOverlays )
+		{
+			playerOverlay.GetComponent<PlayerOverlay>().DespawnSelf();
+		}
+
+		foreach( GameObject pickupOverlay in PickupOverlays )
+		{
+			pickupOverlay.GetComponent<Billboard>().DespawnSelf();
+		}
+
 		DronePool.DespawnAll();
 		MiscPool.DespawnAll();
 		PickupPool.DespawnAll();
@@ -168,10 +166,9 @@ public class GameControl : MonoBehaviour
 		// Spawn player overlays
 		for( int i = 0; i < Players.Count; ++i )
 		{
-			GameObject playerOverlay = BillboardPool.Spawn( "Player Overlay", false );
+			GameObject playerOverlay = BillboardPool.Spawn( "Player Overlay" );
 			ResetPlayerOverlay( playerOverlay, Players[ i ] );
 			PlayerOverlays.Add( playerOverlay );
-			playerOverlay.SetActive( true );
 			playerOverlay.GetComponent<PlayerOverlay>().LateStart();
 		}
 
@@ -206,6 +203,7 @@ public class GameControl : MonoBehaviour
 	public void StartGame()
 	{
 		targetTimeScale = 1f;
+		GameActive = true;
 	}
 
 	public void EndGame( GameObject winner )
@@ -329,11 +327,11 @@ public class GameControl : MonoBehaviour
 
 			// AVATAR
 			// Spawn it's world avatar
-			GameObject avatar = SpawnPooledAvatar( spawnPoint, player );
+			SpawnPooledAvatar( spawnPoint, player );
 
 			// Reenable and reset the appropriate overlay
 			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
-			overlay.gameObject.SetActive( true );
+			overlay.SetInvisible( false );
 			ResetPlayerOverlay( PlayerOverlays[ playerIndex ], Players[ playerIndex ] );
 
 			// Connect the player and it's children
@@ -386,6 +384,7 @@ public class GameControl : MonoBehaviour
 
 			// Disable billboard
 			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
+			overlay.SetInvisible( true );
 
 			PlayerPool.Despawn( go );
 		}
@@ -494,10 +493,9 @@ public class GameControl : MonoBehaviour
 		Pickups.Add( pickup );
 
 		// Spawn and attach overlay
-		GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay", false );
+		GameObject pickupOverlay = BillboardPool.Spawn( "Pickup Overlay" );
 		ResetPickupOverlay( pickupOverlay, pickup );
 		PickupOverlays.Add( pickupOverlay );
-		pickupOverlay.SetActive( true );
 		pickupOverlay.GetComponent<Billboard>().LateStart();
 	}
 
@@ -555,12 +553,17 @@ public class GameControl : MonoBehaviour
 					break;
 			}
 
-			// Despawn drone graphics
+			// Despawn pickup graphics
 			foreach( Transform child in pickup.transform )
 			{
 				SharedPool.Despawn( child.gameObject );
 			}
+
+			int pickupIdx = Pickups.IndexOf( pickup.gameObject );
+			PickupOverlays[ pickupIdx ].GetComponent<Billboard>().DespawnSelf();
 			PickupPool.Despawn( pickup.gameObject );
+			PickupOverlays.RemoveAt( pickupIdx );
+			Pickups.RemoveAt( pickupIdx );
 		}
 	}
 

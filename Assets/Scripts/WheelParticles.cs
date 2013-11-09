@@ -16,8 +16,8 @@ public class WheelParticles : MonoBehaviour
 
 	// Public
 	public Transform DustParticles;
-	public float ParticleStickDeadzone = .25f;
-	public float ChargeEmissionFactor = 10f;
+	public float SpinSpeedFactor = .2f;
+	public float ParticleSpinDeadzone = .25f;
 	public List<Transform> JumpJets;
 	public List<Transform> DropJets;
 	public List<Transform> JumpBursts;
@@ -62,11 +62,10 @@ public class WheelParticles : MonoBehaviour
 				}
 
 				// Dust Particles
-				Vector3 heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
-				DustParticles.particleSystem.startSpeed = heading.magnitude * 5f;
+				DustParticles.particleSystem.startSpeed = marbleScript.Marble.rigidbody.angularVelocity.magnitude * SpinSpeedFactor;
 				DustParticles.particleSystem.startColor = dustColor;
 
-				if( heading.magnitude > ParticleStickDeadzone )
+				if( marbleScript.Marble.rigidbody.angularVelocity.magnitude > ParticleSpinDeadzone )
 				{
 					if( !DustParticles.particleSystem.isPlaying )
 					{

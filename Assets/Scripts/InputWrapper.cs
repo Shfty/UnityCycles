@@ -41,6 +41,9 @@ public class InputWrapper : MonoBehaviour
 	public float Dash;
 	public Vector2 DashVector;
 
+	public float Rematch;
+	public float BackToMenu;
+
 	// Startup function to be called manually by instantiator
 	public void Init()
 	{
@@ -88,7 +91,7 @@ public class InputWrapper : MonoBehaviour
 	}
 
 	// Unity Methods
-	void Update()
+	void FixedUpdate()
 	{
 		// Set values from Unity/XInput based on the appropriate axis + suffix
 		switch( type )
@@ -108,16 +111,16 @@ public class InputWrapper : MonoBehaviour
 					RightStick.y = Input.GetAxisRaw( "Camera Vertical" + typeSuffix );
 				}
 
-				Jump = Input.GetAxis( "Jump" + typeSuffix );
-				Drop = Input.GetAxis( "Drop" + typeSuffix );
-				Aim = Input.GetAxis( "Aim" + typeSuffix );
-				Fire = Input.GetAxis( "Fire" + typeSuffix );
-				SwitchLeft = Input.GetAxis( "Switch Left" + typeSuffix );
-				SwitchRight = Input.GetAxis( "Switch Right" + typeSuffix );
+				Jump = Input.GetAxisRaw( "Jump" + typeSuffix );
+				Drop = Input.GetAxisRaw( "Drop" + typeSuffix );
+				Aim = Input.GetAxisRaw( "Aim" + typeSuffix );
+				Fire = Input.GetAxisRaw( "Fire" + typeSuffix );
+				SwitchLeft = Input.GetAxisRaw( "Switch Left" + typeSuffix );
+				SwitchRight = Input.GetAxisRaw( "Switch Right" + typeSuffix );
 				if( typeSuffix == " (Keyboard)" )
 				{
-					SwitchLeft += Input.GetAxis( "Switch (Mouse)" ) < 0f ? 1f : 0f;
-					SwitchRight += Input.GetAxis( "Switch (Mouse)" ) > 0f ? 1f : 0f;
+					SwitchLeft += Input.GetAxisRaw( "Switch (Mouse)" ) < 0f ? 1f : 0f;
+					SwitchRight += Input.GetAxisRaw( "Switch (Mouse)" ) > 0f ? 1f : 0f;
 				}
 				SwitchLeft = Mathf.Min( SwitchLeft, 1f );
 				SwitchRight = Mathf.Min( SwitchRight, 1f );
@@ -138,16 +141,6 @@ public class InputWrapper : MonoBehaviour
 				SwitchLeft = ( xboxPadState.Buttons.X == ButtonState.Pressed ? 1f : 0f );
 				SwitchRight = ( xboxPadState.Buttons.B == ButtonState.Pressed ? 1f : 0f );
 				break;
-		}
-
-		// Dash detection
-		if( typeSuffix != " (Keyboard)" )
-		{
-			CheckJoyDashInput();
-		}
-		else
-		{
-			CheckKeyDashInput();
 		}
 
 		// Vibration
@@ -180,6 +173,35 @@ public class InputWrapper : MonoBehaviour
 			{
 				KillVibration();
 			}
+		}
+	}
+
+	void Update()
+	{
+		// Set values from Unity/XInput based on the appropriate axis + suffix
+		switch( type )
+		{
+			case InputType.UnityPad:
+				Rematch = Input.GetAxisRaw( "Aim" + typeSuffix );
+				BackToMenu = Input.GetAxisRaw( "Fire" + typeSuffix );
+				break;
+			case InputType.XboxPad:
+				xboxPadState = GamePad.GetState( xboxPadIndex );
+				Rematch = ( xboxPadState.Triggers.Left >= .25f ? 1f : 0f );
+				BackToMenu = ( xboxPadState.Triggers.Right >= .25f ? 1f : 0f );
+				break;
+			default:
+				break;
+		}
+
+		// Dash detection
+		if( typeSuffix != " (Keyboard)" )
+		{
+			CheckJoyDashInput();
+		}
+		else
+		{
+			CheckKeyDashInput();
 		}
 	}
 

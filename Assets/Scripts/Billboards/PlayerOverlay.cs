@@ -12,9 +12,6 @@ public class PlayerOverlay : Billboard
 	{
 		if( cameras != null )
 		{
-			cameras.Clear();
-			billboards.Clear();
-
 			// Check the player count, create a billboard for each camera and set it to the respective layer
 			for( int i = 0; i < GameControl.Instance.Players.Count; ++i )
 			{

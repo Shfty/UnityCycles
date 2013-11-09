@@ -13,6 +13,12 @@ public class Explosion : MonoBehaviour
 	public GameObject Owner;
 
 	// Unity Methods
+	public void OnEnable()
+	{
+		firstFrame = true;
+		applyDamage = true;
+	}
+
     public void LateStart()
     {
         GameObject flash = GameControl.ProjectilePool.Spawn( "Explosion Flash" );
@@ -23,7 +29,7 @@ public class Explosion : MonoBehaviour
             SphereCollider sc = GetComponent<SphereCollider>();
             if( sc )
             {
-                float r = sc.radius;
+                float r = sc.radius * 2;
                 flash.transform.localScale = new Vector3( r, r, r );
             }
         }

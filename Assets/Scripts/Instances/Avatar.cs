@@ -189,7 +189,7 @@ public class Avatar : MonoBehaviour
 		if( Health <= 0 )
 		{
 			// Spawn Explosion
-			GameObject explosion = GameControl.PlayerPool.Spawn( "Avatar Explosion" );
+			GameObject explosion = GameControl.ProjectilePool.Spawn( "Avatar Explosion" );
 			explosion.transform.position = transform.Find( "Marble" ).position;
 
 			GameControl.Instance.PlayerDeath( gameObject, owner );

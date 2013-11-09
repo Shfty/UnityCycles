@@ -48,6 +48,8 @@ public class Drone : MonoBehaviour
 		Aim = initAim;
 		AimVector = initAimVector;
 		AimPoint = initAimPoint;
+
+		aimingHolo = null;
 	}
 
 	public void PooledStart()

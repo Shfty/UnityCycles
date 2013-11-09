@@ -13,7 +13,6 @@ public class WheelOrientation : MonoBehaviour
 	Quaternion baseOrientation;
 	Quaternion targetRotation;
 	float turnAngle;
-	float spinRate = 0f;
 	bool gameActive = true;
 
 	// Public
@@ -70,19 +69,8 @@ public class WheelOrientation : MonoBehaviour
 		// Assemble the target rotation quaternion
 		targetRotation = surfaceRotation * Quaternion.AngleAxis( turnAngle, Vector3.up ) * cameraRotation * baseOrientation;
 
-		if( marbleScript.Grounded )
-		{
-			// Spin the wheel
-			spinRate = heading.magnitude * WheelSpinFactor;
-		}
-		else
-		{
-			// Slowly reduce the wheel's spin rate
-			spinRate = Mathf.Max( spinRate -= SpinDecayRate * Time.deltaTime, 0f );
-		}
-
 		// Apply rotation to the wheel mesh
-		wheelMesh.Rotate( Vector3.right, spinRate * Time.deltaTime );
+		wheelMesh.Rotate( Vector3.right, marbleScript.Marble.rigidbody.angularVelocity.magnitude * WheelSpinFactor * Time.deltaTime );
 
 		// Interpolate the wheel's rotation toward the target rotation
 		Wheel.transform.rotation = Quaternion.Lerp( Wheel.transform.rotation, targetRotation, RotationLerpFactor * Time.deltaTime );

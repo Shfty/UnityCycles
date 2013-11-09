@@ -76,7 +76,6 @@ public class MarbleMovement : MonoBehaviour
 		if( gameActive )
 		{
 			// Update properties
-			int playerMask = 1 << gameObject.layer;
 			Velocity = Marble.rigidbody.velocity;
 
 			// Rotation / Directional Force
@@ -170,6 +169,12 @@ public class MarbleMovement : MonoBehaviour
 				JumpFired = false;
 				DropFired = false;
 			}
+
+			// Ground rumble
+			if( Grounded )
+			{
+				InputWrapper.WeakRumbleBaseForce = Marble.rigidbody.angularVelocity.magnitude * WeakRumbleForceFactor;
+			}
 		}
 	}
 
@@ -202,10 +207,6 @@ public class MarbleMovement : MonoBehaviour
 
 	public void OnCollisionStay( Collision col )
 	{
-		if( gameActive )
-		{
-			InputWrapper.WeakRumbleBaseForce = col.relativeVelocity.magnitude * WeakRumbleForceFactor;
-		}
 		CalculateSurfaceNormal( col );
 	}
 

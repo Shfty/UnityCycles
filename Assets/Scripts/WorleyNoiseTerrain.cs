@@ -28,7 +28,7 @@ public class WorleyNoiseTerrain : MonoBehaviour
 		Quadratic = 4,
 		Minkowski = 5
 	}
-
+	
 	delegate void ThreadCallback();
 
 	// Thread data class
@@ -102,7 +102,7 @@ public class WorleyNoiseTerrain : MonoBehaviour
 				thread.IsBackground = true;
 				threads.Add( thread );
 				thread.Start();
-				Thread.Sleep( 10 ); // Don't know why this is needed, random failures otherwise
+				Thread.Sleep( 10 ); // Random failures to write without this...
 			}
 		}
 		else

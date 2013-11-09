@@ -12,7 +12,6 @@ public class TerrainTextureOffset : MonoBehaviour
 	public void Randomize()
 	{
 		Material terrainMaterial = Terrain.activeTerrain.materialTemplate;
-		Texture2D terrainTexture = (Texture2D)terrainMaterial.GetTexture( "_Base" );
 		Vector2 scale = terrainMaterial.GetTextureScale( "_Base" );
 
 		Vector2 offset = Vector2.zero;

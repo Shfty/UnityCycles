@@ -78,6 +78,13 @@ public class Seeker : Projectile
 		rigidbody.isKinematic = false;
 		ps.enableEmission = true;
 
+
+		// Reset state
+		elapsedTime = 0f;
+		seeking = false;
+		SeekTarget = null;
+		SeekPoint = Vector3.zero;
+
 		GameControl.ProjectilePool.Despawn( gameObject );
 	}
 

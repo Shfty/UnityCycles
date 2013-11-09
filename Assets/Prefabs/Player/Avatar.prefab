@@ -543,8 +543,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: -6.57755317e-09, w: 1}
+  m_LocalPosition: {x: -2.20326832e-08, y: .479999989, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400002}
@@ -602,7 +602,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100010}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -2.20326832e-08, y: .479999989, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400020}
@@ -882,8 +882,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100056}
-  m_LocalRotation: {x: -.707106829, y: 0, z: 0, w: .707106829}
-  m_LocalPosition: {x: 0, y: -.5, z: -.25}
+  m_LocalRotation: {x: -.970295727, y: -5.2987712e-08, z: -5.29877155e-08, w: .241921857}
+  m_LocalPosition: {x: 0, y: -.449999988, z: -.200000003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400010}
@@ -1197,8 +1197,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DustParticles: {fileID: 400056}
-  ParticleStickDeadzone: .25
-  ChargeEmissionFactor: 100
+  SpinSpeedFactor: .25
+  ParticleSpinDeadzone: 2
   JumpJets:
   - {fileID: 400050}
   - {fileID: 400046}
@@ -1232,9 +1232,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Wheel: {fileID: 100010}
   RotationLerpFactor: 12
-  WheelSpinFactor: 1200
+  WheelSpinFactor: 31.4099998
   SpinDecayRate: 180
-  TurnStickDeadzone: .25
+  TurnStickDeadzone: .200000003
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1254,7 +1254,7 @@ MonoBehaviour:
   - {fileID: 400014}
   Health: 100
   MaxHealth: 100
-  Dash: 0
+  Dash: 6.1679126e-17
   MaxDash: 1.5
   Kills: 0
   DashRechargeVelocityFactor: .0149999997
@@ -1285,14 +1285,14 @@ MonoBehaviour:
   WeakRumbleForceFactor: .0149999997
   StrongRumbleForceFactor: .0299999993
   Right: {x: .999990404, y: .00438693864, z: -1.12884945e-05}
-  Up: {x: -.00438689208, y: .999966562, z: -.00514629763}
+  Up: {x: 5.96046448e-08, y: .99999994, z: 0}
   Forward: {x: -1.12884945e-05, y: .00514635211, z: .999986768}
   Grounded: 1
-  GroundPoint: {x: 0, y: 0, z: 0}
+  GroundPoint: {x: -2.20770939e-08, y: -.0200000107, z: 0}
   ObtuseAngle: 0
   JumpFired: 0
   DropFired: 0
-  Velocity: {x: 5.25499217e-07, y: -1.86264526e-06, z: -1.05100435e-06}
+  Velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &11400010
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7856,7 +7856,7 @@ ParticleSystem:
         rgba: 4294967295
       minMaxState: 0
     startSize:
-      scalar: .25
+      scalar: 1.64477668e-17
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -7941,7 +7941,7 @@ ParticleSystem:
     enabled: 1
     m_Type: 0
     rate:
-      scalar: 50
+      scalar: 4.11194177e-15
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -9833,7 +9833,7 @@ ParticleSystem:
         m_PostInfinity: 2
       minMaxState: 0
     startSpeed:
-      scalar: 1
+      scalar: 0
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -9957,7 +9957,7 @@ ParticleSystem:
         rgba: 4294967295
       maxColor:
         serializedVersion: 2
-        rgba: 4294967295
+        rgba: 4278190080
       minMaxState: 0
     startSize:
       scalar: .5
@@ -10025,7 +10025,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
       minMaxState: 0
-    gravityModifier: 0
+    gravityModifier: 1
     inheritVelocity: 0
     maxNumParticles: 1000
   ShapeModule:
@@ -10035,8 +10035,8 @@ ParticleSystem:
     radius: .300000012
     angle: 1
     length: 5
-    boxX: .200000003
-    boxY: .5
+    boxX: .300000012
+    boxY: .300000012
     boxZ: 0
     placementMode: 0
     m_Mesh: {fileID: 0}
@@ -14168,7 +14168,7 @@ ParticleSystem:
         rgba: 4294967295
       minMaxState: 0
     startSize:
-      scalar: .25
+      scalar: 1.64477668e-17
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -14253,7 +14253,7 @@ ParticleSystem:
     enabled: 1
     m_Type: 0
     rate:
-      scalar: 50
+      scalar: 4.11194177e-15
       maxCurve:
         serializedVersion: 2
         m_Curve:
