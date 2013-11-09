@@ -24,7 +24,6 @@ public class Avatar : MonoBehaviour
 	public float Dash = 0f;
 	public float MaxDash = 1f;
 	public int Kills = 0;
-	public float DashRechargeVelocityFactor = 0.01f;
 	public float DashRechargeSpinFactor = 0.01f;
 
 	public float DamageRumbleFactor = .02f;
@@ -47,7 +46,7 @@ public class Avatar : MonoBehaviour
 		if( Dash < MaxDash && GetComponent<MarbleMovement>().Grounded && !GetComponent<MarbleMovement>().ObtuseAngle )
 		{
 			Rigidbody rb = transform.Find( "Marble" ).rigidbody;
-			Dash = Mathf.Min( Dash + ( rb.angularVelocity.magnitude * DashRechargeSpinFactor * rb.velocity.magnitude * DashRechargeVelocityFactor * Time.deltaTime ), MaxDash );
+			Dash = Mathf.Min( Dash + ( rb.angularVelocity.magnitude * DashRechargeSpinFactor * Time.deltaTime ), MaxDash );
 		}
 
 		// If game is active, take input

@@ -97,7 +97,7 @@ public class WorleyNoiseTerrain : MonoBehaviour
 			List<Thread> threads = new List<Thread>();
 			for( i = 0; i < cores; ++i )
 			{
-				threadData = new ThreadData( slice * i, slice * ( i + 1 ), t.terrainData.heightmapWidth, ThreadFinished );
+				threadData = new ThreadData( slice * i, slice * ( i + 1 ) + ( i == cores - 1 && t.terrainData.heightmapHeight % 2 == 1 ? 2 : 0 ), t.terrainData.heightmapWidth, ThreadFinished );
 				Thread thread = new Thread( () => NoiseRows( threadData ) );
 				thread.IsBackground = true;
 				threads.Add( thread );

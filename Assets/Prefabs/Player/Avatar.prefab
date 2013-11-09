@@ -1257,8 +1257,7 @@ MonoBehaviour:
   Dash: 6.1679126e-17
   MaxDash: 1.5
   Kills: 0
-  DashRechargeVelocityFactor: .0149999997
-  DashRechargeSpinFactor: .0799999982
+  DashRechargeSpinFactor: .0299999993
   DamageRumbleFactor: .0199999996
 --- !u!114 &11400006
 MonoBehaviour:

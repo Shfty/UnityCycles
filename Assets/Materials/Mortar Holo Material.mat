@@ -37,7 +37,7 @@ Material:
         first:
           name: _ProjTex
         second:
-          m_Texture: {fileID: 2800000, guid: ef183b9292f2f4e45ba56a06039d50e2, type: 3}
+          m_Texture: {fileID: 2800000, guid: 4b459c40d3f415b47b8dbfdd560c7800, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -70,7 +70,7 @@ Material:
       data:
         first:
           name: _Color
-        second: {r: 1, g: 1, b: 0, a: .784313738}
+        second: {r: 1, g: 1, b: 1, a: .752941191}
       data:
         first:
           name: _TintColor
