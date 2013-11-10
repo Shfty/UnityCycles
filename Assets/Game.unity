@@ -649,7 +649,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: DistanceMetric
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: GridDivisions.x
@@ -666,6 +666,10 @@ Prefab:
     - target: {fileID: 11400000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: Threaded
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400004, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
+      propertyPath: Sides
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
@@ -759,7 +763,7 @@ MonoBehaviour:
   RegenerateOnLoad: 1
   GridDivisions: {x: 5, y: 5}
   MaxPointsPerCell: 10
-  DistanceMetric: 4
+  DistanceMetric: 5
   MinkowskiNumber: 3
   FValue: 1
   UseRandomSeed: 0
@@ -776,7 +780,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2fea21b8923a84898652b56f7ba283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Sides: 4
+  Sides: 8
   LipSize: 5
   BoundaryThickness: 50
   InvisibleWallHeight: 200

@@ -57,7 +57,7 @@ public class WheelParticles : MonoBehaviour
 					Vector2 scale = terrainMaterial.GetTextureScale( "_Base" );
 					Vector2 offset = terrainMaterial.GetTextureOffset( "_Base" );
 					dustColor = terrainTexture.GetPixelBilinear( rayHit.textureCoord.x * scale.x + offset.x, rayHit.textureCoord.y * scale.y + offset.y );
-					dustColor *= .75f;
+					dustColor = Color.Lerp( dustColor, new Color( 1, 1, 1 ), .25f );
 					dustColor.a = 1f;
 				}
 
