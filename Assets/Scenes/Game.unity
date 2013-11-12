@@ -393,7 +393,7 @@ MonoBehaviour:
   MapCamera: {fileID: 239389358}
   GameActive: 1
   TimeLerpFactor: 2
-  TerrainDetailFactor: 5.11999989
+  TerrainDetailFactor: 3.83999991
   OverlayMaterials:
   - {fileID: 2100000, guid: 9edc96c1e0c5cb145bd1ad1bd91caf49, type: 2}
   - {fileID: 2100000, guid: f4517f0404c235e4c86b15b609af44fb, type: 2}
@@ -754,7 +754,7 @@ Prefab:
       objectReference: {fileID: 2100000, guid: 9b4441b1f21029745b1189d224dd7561, type: 2}
     - target: {fileID: 11400002, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
       propertyPath: m_HeightmapPixelError
-      value: 5
+      value: 2.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3acbfd52e6d5e3f489c75b22842517dd, type: 2}
@@ -813,7 +813,7 @@ MonoBehaviour:
   m_TreeMaximumFullLODCount: 50
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
-  m_HeightmapPixelError: 5
+  m_HeightmapPixelError: 2.5
   m_SplatMapDistance: 1000
   m_HeightmapMaximumLOD: 0
   m_CastShadows: 0

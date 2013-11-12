@@ -1398,9 +1398,9 @@ MonoBehaviour:
   OptimumSize: 1080
   Skin: {fileID: 11400000, guid: a684e546a83a6c7438de4860b04319ce, type: 2}
   ScrollLerpFactor: .0149999997
-  ValueChangeStartTimeout: .5
-  ValueChangeMinTimeout: .0399999991
-  ValueChangeAccelleration: 1
+  StickRefireStartTimeout: .5
+  StickRefireMinTimeout: .0399999991
+  StickRefireAccelleration: 1
   RootMenuBoxPadding: 15
   GameParameters: {fileID: 1024025183}
 --- !u!114 &526701388
