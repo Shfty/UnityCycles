@@ -21,6 +21,7 @@ public class GameControl : MonoBehaviour
 	public GameObject MapCamera;
 	public bool GameActive = true;
 	public float TimeLerpFactor = 3f;
+	public float TerrainDetailFactor = 5.12f;
 	public List<Material> OverlayMaterials;
 	public List<GameObject> Players;
 	public List<GameObject> Pickups;
@@ -40,9 +41,6 @@ public class GameControl : MonoBehaviour
 	// Unity Methods
 	void Awake()
 	{
-		// Persist this object between scenes
-		GameObject.DontDestroyOnLoad( this );
-
 		// Set instance static
 		Instance = this;
 
@@ -60,13 +58,42 @@ public class GameControl : MonoBehaviour
 
 		// Instantiate player list
 		Players = new List<GameObject>();
-
-		// Make sure the local player count is valid
-		LocalPlayerCount = Mathf.Clamp( LocalPlayerCount, 0, 4 );
 	}
 
 	void Start()
 	{
+		// Check for Game Parameters
+		GameObject go = GameObject.Find( "Game Parameters" );
+		if( go != null )
+		{
+			GameParameters gameParameters = go.GetComponent<GameParameters>();
+			LocalPlayerCount = gameParameters.PlayerCount;
+			MaxPickups = gameParameters.MaxPickups;
+			PickupTimeout = gameParameters.PickupRespawnDelay;
+
+			GameRules gameRules = GameObject.Find( "Game Rules" ).GetComponent<GameRules>();
+			gameRules.ScoreLimit = gameParameters.ScoreLimit;
+
+			Terrain terrain = Terrain.activeTerrain;
+			terrain.terrainData.heightmapResolution = (int)( gameParameters.TerrainSize * TerrainDetailFactor );
+			terrain.terrainData.size = new Vector3( gameParameters.TerrainSize, gameParameters.TerrainHeight, gameParameters.TerrainSize );
+			terrain.transform.position = new Vector3( -gameParameters.TerrainSize * .5f, 0f, -gameParameters.TerrainSize * .5f );
+			terrain.Flush();
+			terrain.GetComponent<WorleyNoiseTerrain>().GridDivisions = new Vector2( gameParameters.TerrainNoiseSubdivisions, gameParameters.TerrainNoiseSubdivisions );
+			terrain.GetComponent<WorleyNoiseTerrain>().MaxPointsPerCell = gameParameters.TerrainTurbulence;
+			terrain.GetComponent<WorleyNoiseTerrain>().DistanceMetric = gameParameters.TerrainType;
+			terrain.GetComponent<TerrainTypeTexture>().Alternate = gameParameters.AltTerrain;
+			terrain.GetComponent<TerrainBoundary>().Sides = gameParameters.ArenaSides;
+			if( gameParameters.UseRandomSeed )
+			{
+				terrain.GetComponent<WorleyNoiseTerrain>().UseRandomSeed = true;
+				terrain.GetComponent<WorleyNoiseTerrain>().RandomSeed = gameParameters.RandomSeed;
+			}
+		}
+
+		// Make sure the local player count is valid
+		LocalPlayerCount = Mathf.Clamp( LocalPlayerCount, 0, 4 );
+
 		// Begin with time frozen
 		Time.timeScale = 0f;
 
@@ -107,7 +134,7 @@ public class GameControl : MonoBehaviour
 				{
 					// Spawn random pickup
 					int randomPickup = Random.Range( 1, Enum.GetNames( typeof( PickupInfo.Type ) ).Length );
-					Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
+					Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + mapBounds.y * .5f, Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 					Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
 					SpawnPickup( (PickupInfo.Type)randomPickup, randomPosition, randomRotation );
 
@@ -157,10 +184,12 @@ public class GameControl : MonoBehaviour
 		// Reset GameRules
 		GameRules.Instance.Reset();
 
+		mapBounds = Terrain.activeTerrain.terrainData.size;
 		// Spawn players
 		for( int i = 0; i < LocalPlayerCount; ++i )
 		{
-			SpawnLocalPlayer( spawnPoints[ i + 1 ].transform, i );
+			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f, Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
+			SpawnLocalPlayer( randomPosition, i );
 		}
 
 		// Spawn player overlays
@@ -173,8 +202,6 @@ public class GameControl : MonoBehaviour
 		}
 
 		// Spawn pickups
-		mapBounds = Terrain.activeTerrain.terrainData.size;
-
 		// Rocket Drones
 		for( int i = 0; i < 5; ++i )
 		{
@@ -227,22 +254,22 @@ public class GameControl : MonoBehaviour
 	}
 
 	// PLAYERS
-	GameObject SpawnPooledAvatar( Transform spawnPoint, GameObject player )
+	GameObject SpawnPooledAvatar( Vector3 position, Quaternion rotation, GameObject player )
 	{
 		// Spawn it's world avatar
 		GameObject avatar = PlayerPool.Spawn( "Avatar" );
 		avatar.transform.parent = player.transform;
-		avatar.transform.position = spawnPoint.position;
-		avatar.transform.rotation = spawnPoint.rotation;
+		avatar.transform.position = position;
+		avatar.transform.rotation = rotation;
 		return avatar;
 	}
 
-	GameObject SpawnPooledCamera( Transform target, GameObject player )
+	GameObject SpawnPooledCamera( Vector3 position, Quaternion rotation, GameObject player )
 	{
 		// Instantiate a new camera object
 		GameObject camera = PlayerPool.Spawn( "Camera" );
-		camera.transform.position = target.position;
-		camera.transform.rotation = target.rotation;
+		camera.transform.position = position;
+		camera.transform.rotation = rotation;
 		camera.transform.parent = player.transform;
 		return camera;
 	}
@@ -280,7 +307,7 @@ public class GameControl : MonoBehaviour
 		guiScript.InputWrapper = playerInput;
 	}
 
-	void SpawnLocalPlayer( Transform spawnPoint, int idx )
+	void SpawnLocalPlayer( Vector3 position, int idx )
 	{
 		// Instantiate a new player container
 		GameObject player = new GameObject( "Player" );
@@ -292,8 +319,8 @@ public class GameControl : MonoBehaviour
 		playerInput.Init();
 
 		// Spawn child objects
-		GameObject avatar = SpawnPooledAvatar( spawnPoint, player );
-		GameObject camera = SpawnPooledCamera( avatar.transform, player );
+		GameObject avatar = SpawnPooledAvatar( position, Quaternion.identity, player );
+		GameObject camera = SpawnPooledCamera( position, Quaternion.identity, player );
 
 		// Connect the player and it's children
 		BindPlayerMembers( player );
@@ -320,14 +347,12 @@ public class GameControl : MonoBehaviour
 	{
 		if( Players.Contains( player ) )
 		{
+			// AVATAR
 			int playerIndex = Players.IndexOf( player );
 
-			int i = Random.Range( 0, spawnPoints.Length );
-			Transform spawnPoint = spawnPoints[ i ].transform;
-
-			// AVATAR
 			// Spawn it's world avatar
-			SpawnPooledAvatar( spawnPoint, player );
+			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + mapBounds.y * .5f, Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
+			SpawnPooledAvatar( randomPosition, Quaternion.identity, player );
 
 			// Reenable and reset the appropriate overlay
 			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();

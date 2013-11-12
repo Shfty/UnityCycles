@@ -4,11 +4,8 @@ using System.Collections.Generic;
 
 public class TerrainTypeTexture : MonoBehaviour
 {
-	// Fields
-	
-	// Properties
-
 	// Variables
+	public bool Alternate;
 	public List<Material> Materials;
 	
 	// Unity Methods
@@ -25,7 +22,14 @@ public class TerrainTypeTexture : MonoBehaviour
 				terrain.materialTemplate = Materials.Find( item => item.name == "Blasted Canyon Terrain" );
 				break;
 			case WorleyNoiseTerrain.DistMetric.Manhattan:
-				terrain.materialTemplate = Materials.Find( item => item.name == "Glacier Terrain" );
+				if( !Alternate )
+				{
+					terrain.materialTemplate = Materials.Find( item => item.name == "Pyramid Terrain" );
+				}
+				else
+				{
+					terrain.materialTemplate = Materials.Find( item => item.name == "Glacier Terrain" );
+				}
 				break;
 			case WorleyNoiseTerrain.DistMetric.Chebyshev:
 				terrain.materialTemplate = Materials.Find( item => item.name == "Tech World Terrain" );

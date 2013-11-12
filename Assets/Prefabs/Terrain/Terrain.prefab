@@ -28,7 +28,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -100, y: 0, z: -100}
+  m_LocalPosition: {x: -50, y: 0, z: -50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -43,11 +43,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85218d2978ccd5d41bf57a4aee04a80d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Threaded: 0
+  Threaded: 1
   RegenerateOnLoad: 1
   GridDivisions: {x: 5, y: 5}
-  MaxPointsPerCell: 5
-  DistanceMetric: 0
+  MaxPointsPerCell: 10
+  DistanceMetric: 2
   MinkowskiNumber: 3
   FValue: 1
   UseRandomSeed: 0
@@ -89,7 +89,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2fea21b8923a84898652b56f7ba283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Sides: 4
+  Sides: 8
   LipSize: 5
   BoundaryThickness: 50
   InvisibleWallHeight: 200
@@ -106,10 +106,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7268802761b98644a85270afc4b6a80c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Alternate: 1
   Materials:
   - {fileID: 2100000, guid: 3fd9df3425e8fa144bfdff0a0fd47327, type: 2}
   - {fileID: 2100000, guid: 28753714c42466441b5940551500317f, type: 2}
   - {fileID: 2100000, guid: a2421013dd96ea04a9ea112fb69a2027, type: 2}
+  - {fileID: 2100000, guid: 9badaf4a958840547a5a5d569c2a280b, type: 2}
   - {fileID: 2100000, guid: 72cb07ff5141de944b271461d50601ed, type: 2}
   - {fileID: 2100000, guid: 9b4441b1f21029745b1189d224dd7561, type: 2}
 --- !u!114 &11400008

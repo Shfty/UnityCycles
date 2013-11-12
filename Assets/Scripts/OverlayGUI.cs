@@ -10,6 +10,7 @@ public class OverlayGUI : MonoBehaviour
 	string rematchText = "Aim to restart match";
 	string backToMenuText = "Fire to return to Menu";
 	float prevRematch = 0f;
+	float prevMenu = 0f;
 	/* Fade states
 	 * 0 - Fully transparent
 	 * 1 - Partial transparency following game over
@@ -17,6 +18,7 @@ public class OverlayGUI : MonoBehaviour
 	 * 3 - Waiting on reset
 	 */
 	int fadeState = 0;
+	int fadeDestination = -1;
 	public float overlayOpacity = 0f;
 
 	delegate void FinishCallback();
@@ -26,13 +28,6 @@ public class OverlayGUI : MonoBehaviour
 	public float OverlayFadeTime = 2f;
 
 	// Unity Methods
-	void Start()
-	{
-		overlayOpacity = 1f;
-		SetOverlayAnimationParameters( 1f, 0f, OverlayFadeTime );
-		StartCoroutine( PauseAndStartAnimation( 1f ) );
-	}
-
 	void Update()
 	{
 		// Track delta time independently of Time class
@@ -48,21 +43,47 @@ public class OverlayGUI : MonoBehaviour
 			}
 			rematch = Mathf.Clamp( rematch, 0f, 1f );
 
+			float menu = 0f;
+			foreach( GameObject player in GameControl.Instance.Players )
+			{
+				InputWrapper ir = player.GetComponent<InputWrapper>();
+				menu += ir.BackToMenu;
+			}
+			menu = Mathf.Clamp( menu, 0f, 1f );
+
 			if( fadeState == 1 && animationFinished && rematch > 0f && prevRematch == 0f )
 			{
+				fadeDestination = 0;
 				fadeState = 2;
 				SetOverlayAnimationParameters( overlayOpacity, 1f, OverlayFadeTime );
 				StartOverlayAnimation();
 			}
 			prevRematch = rematch;
+
+			if( fadeState == 1 && animationFinished && menu > 0f && prevMenu == 0f )
+			{
+				fadeDestination = 1;
+				fadeState = 2;
+				SetOverlayAnimationParameters( overlayOpacity, 1f, OverlayFadeTime );
+				StartOverlayAnimation();
+			}
+			prevMenu = menu;
 		}
 
 		if( fadeState == 2 && animationFinished )
 		{
-			GameControl.Instance.ResetGame();
-			fadeState = 3;
-			SetOverlayAnimationParameters( overlayOpacity, 0f, OverlayFadeTime );
-			StartCoroutine( PauseAndStartAnimation( 1f ) );
+			if( fadeDestination == 0 )
+			{
+				GameControl.Instance.ResetGame();
+				fadeState = 3;
+				SetOverlayAnimationParameters( overlayOpacity, 0f, OverlayFadeTime );
+				StartCoroutine( PauseAndStartAnimation( 2f ) );
+			}
+			else if( fadeDestination == 1 )
+			{
+				StartCoroutine( PauseAndReturnToMenu( 1f ) );
+			}
+			fadeDestination = -1;
 		}
 
 		if( fadeState == 3 && animationFinished )
@@ -186,5 +207,15 @@ public class OverlayGUI : MonoBehaviour
 			yield return null;
 		}
 		GameControl.Instance.StartGame();
+	}
+
+	IEnumerator PauseAndReturnToMenu( float duration )
+	{
+		float startTime = Time.realtimeSinceStartup;
+		while( Time.realtimeSinceStartup < startTime + duration )
+		{
+			yield return null;
+		}
+		Application.LoadLevel( "Menu" );
 	}
 }

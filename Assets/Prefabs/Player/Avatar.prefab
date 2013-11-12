@@ -1272,8 +1272,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Marble: {fileID: 100000}
   Camera: {fileID: 0}
-  GroundForceFactor: 10
-  AirForceFactor: 10
+  GroundForceFactor: 12
+  AirForceFactor: 12
   GroundTorqueFactor: 15
   AirTorqueFactor: 15
   JumpForce: 7
@@ -1282,7 +1282,7 @@ MonoBehaviour:
   DownJetForce: 1000
   DashForce: 25
   WeakRumbleForceFactor: .0149999997
-  StrongRumbleForceFactor: .0299999993
+  StrongRumbleForceFactor: .0799999982
   Right: {x: .999990404, y: .00438693864, z: -1.12884945e-05}
   Up: {x: 5.96046448e-08, y: .99999994, z: 0}
   Forward: {x: -1.12884945e-05, y: .00514635211, z: .999986768}

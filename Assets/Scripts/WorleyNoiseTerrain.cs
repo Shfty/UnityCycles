@@ -57,24 +57,21 @@ public class WorleyNoiseTerrain : MonoBehaviour
 	public float MinkowskiNumber;
 	public int FValue;
 	public bool UseRandomSeed;
-	public int Seed;
+	public int RandomSeed;
 
 	// Unity Methods
-	void Awake()
+	void Start() // Use this for initialization
 	{
 		gridDivisions = GridDivisions;
 		distanceMetric = DistanceMetric;
 		minkowskiNumber = MinkowskiNumber;
 		fValue = FValue;
-	}
 
-	void Start() // Use this for initialization
-	{
 		if( RegenerateOnLoad == false ) return;
 
 		if( UseRandomSeed )
 		{
-			Random.seed = Seed;
+			Random.seed = RandomSeed;
 		}
 		t = Terrain.activeTerrain;
 		bounds = new Vector2( t.terrainData.heightmapWidth, t.terrainData.heightmapHeight );
