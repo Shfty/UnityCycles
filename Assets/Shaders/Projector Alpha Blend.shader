@@ -5,7 +5,10 @@ Shader "Projector/Alpha Blend" {
 	}
 
 	Subshader {
-		Tags { "RenderType"="Transparent-1" }
+		Tags {
+			"RenderType"="Transparent-1"
+			"PreviewType"="Plane"
+		}
 		Pass {
 			ZWrite Off
 			AlphaTest Greater 0

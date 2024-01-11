@@ -6,7 +6,10 @@ Properties {
 }
 SubShader {
 
-Tags { "RenderType"="Opaque" }
+Tags {
+	"RenderType"="Opaque"
+	"PreviewType"="Plane"
+}
 
 CGPROGRAM
 #pragma surface surf Lambert

@@ -7,7 +7,12 @@ Properties {
 }
 
 SubShader {
-	Tags {"Queue"="Overlay" "IgnoreProjector"="True" "RenderType"="Overlay"}
+	Tags {
+		"Queue"="Overlay"
+		"IgnoreProjector"="True"
+		"RenderType"="Overlay"
+		"PreviewType"="Plane"
+	}
 	
 	ZWrite Off
 	Blend SrcAlpha OneMinusSrcAlpha 

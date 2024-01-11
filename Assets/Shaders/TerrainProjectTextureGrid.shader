@@ -9,7 +9,10 @@ Properties {
     _GridTex ("Grid Texture", 2D) = "black" {}
 }
 SubShader {
-    Tags { "RenderType" = "Opaque" }
+    Tags {
+	"RenderType" = "Opaque"
+	"PreviewType"="Plane"
+	}
     CGPROGRAM
     #pragma surface surf Lambert
     struct Input {

@@ -38,9 +38,12 @@ public class Explosion : MonoBehaviour
 	void FixedUpdate()
 	{
 		// Destroy the game object when the particle system finishes running
-		if( particleSystem.isStopped )
+		if( GetComponent<ParticleSystem>() != null )
 		{
-			GameControl.ProjectilePool.Despawn( gameObject );
+			if( GetComponent<ParticleSystem>().isStopped )
+			{
+				GameControl.ProjectilePool.Despawn( gameObject );
+			}
 		}
 
 		if( firstFrame )
@@ -55,14 +58,14 @@ public class Explosion : MonoBehaviour
 
 	void OnTriggerEnter( Collider col )
 	{
-		if( applyDamage && collider != null )
+		if( applyDamage && GetComponent<Collider>() != null )
 		{
 			// If coming into contact with a rigidbody collider, blast it away
-			SphereCollider sc = (SphereCollider)collider;
+			SphereCollider sc = (SphereCollider)GetComponent<Collider>();
 
-			if( col.rigidbody != null )
+			if( col.GetComponent<Rigidbody>() != null )
 			{
-				col.rigidbody.AddExplosionForce( Force, transform.position, sc.radius );
+				col.GetComponent<Rigidbody>().AddExplosionForce( Force, transform.position, sc.radius );
 				object[] args = { Damage, Owner };
 				col.gameObject.SendMessageUpwards( "ApplyDamage", args, SendMessageOptions.DontRequireReceiver );
 			}

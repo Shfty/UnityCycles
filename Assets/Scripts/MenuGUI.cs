@@ -32,10 +32,10 @@ public class MenuGUI : MonoBehaviour
 			switch( _state )
 			{
 				case MenuState.Root:
-					targetScrollPosition = new Vector2( camera.pixelWidth, 0 );
+					targetScrollPosition = new Vector2( GetComponent<Camera>().pixelWidth, 0 );
 					break;
 				case MenuState.GameMenu:
-					targetScrollPosition = new Vector2( camera.pixelWidth * 2f, 0 );
+					targetScrollPosition = new Vector2( GetComponent<Camera>().pixelWidth * 2f, 0 );
 					break;
 				case MenuState.Options:
 					targetScrollPosition = new Vector2( 0, 0 );
@@ -95,9 +95,8 @@ public class MenuGUI : MonoBehaviour
 	int menuIndex = 0;
 	bool prevUp = false;
 	bool prevDown = false;
-	bool prevSide = false;
-	bool prevSelect = false;
-	bool prevBack = false;
+	bool prevSideStick = false;
+	bool prevSidePad = false;
 	float stickRefireTimer = 0f;
 	float stickRefireTimeout = 0f;
 
@@ -115,7 +114,7 @@ public class MenuGUI : MonoBehaviour
 	// Unity Methods
 	void Awake()
 	{
-		targetScrollPosition = new Vector2( camera.pixelWidth, 0 );
+		targetScrollPosition = new Vector2( GetComponent<Camera>().pixelWidth, 0 );
 		scrollPosition = targetScrollPosition;
 		Time.timeScale = 1f;
 		inputWrapper = GetComponent<InputWrapper>();
@@ -142,7 +141,7 @@ public class MenuGUI : MonoBehaviour
 		optionsMenuItems.Add( new MenuButton( "Nothing to see here", null ) );
 		optionsMenuItems.Add( new MenuButton( "Back", () => { State = MenuState.Root; } ) );
 
-		float barWidth = camera.pixelWidth * .5f;
+		float barWidth = GetComponent<Camera>().pixelWidth * .5f;
 		gameMenuItems.Add( new MenuSlider(
 			"Players", playerCount, 1f, 4f, barWidth, "f0",
 			null,
@@ -221,7 +220,7 @@ public class MenuGUI : MonoBehaviour
 		scrollPosition = Vector2.Lerp( scrollPosition, targetScrollPosition, ScrollLerpFactor );
 
 		// Left Stick Refire
-		if( inputWrapper.LeftStick.magnitude > .25f )
+		if( inputWrapper.LeftStick.Value.magnitude > .25f )
 		{
 			stickRefireTimer -= Time.deltaTime;
 			stickRefireTimeout -= StickRefireAccelleration * Time.deltaTime;
@@ -252,7 +251,8 @@ public class MenuGUI : MonoBehaviour
 
 
 		// Up
-		bool up = inputWrapper.LeftStick.y < -.25f && Mathf.Abs( inputWrapper.LeftStick.x ) < .5f;
+		bool up = ( inputWrapper.LeftStick.Value.y < -.25f && Mathf.Abs( inputWrapper.LeftStick.Value.x ) < .5f )
+			   || ( inputWrapper.DPad.Value.y < 0 );
 		if(  up && !prevUp )
 		{
 			menuIndex++;
@@ -271,7 +271,8 @@ public class MenuGUI : MonoBehaviour
 		}
 
 		// Down
-		bool down = inputWrapper.LeftStick.y > .25f && Mathf.Abs( inputWrapper.LeftStick.x ) < .5f;
+		bool down = inputWrapper.LeftStick.Value.y > .25f && Mathf.Abs( inputWrapper.LeftStick.Value.x ) < .5f
+			   || ( inputWrapper.DPad.Value.y > 0 );
 		if( down && !prevDown )
 		{
 			menuIndex--;
@@ -289,29 +290,46 @@ public class MenuGUI : MonoBehaviour
 			prevDown = false;
 		}
 
-		// Side
-		bool side = ( inputWrapper.LeftStick.x < -.25f || inputWrapper.LeftStick.x > .25f ) && Mathf.Abs( inputWrapper.LeftStick.y ) < .5f;
-		if( side )
+		// Side (Stick)
+		bool sideStick = ( inputWrapper.LeftStick.Value.x < -.25f || inputWrapper.LeftStick.Value.x > .25f ) && Mathf.Abs( inputWrapper.LeftStick.Value.y ) < .5f;
+		if( sideStick )
 		{
-			if( !prevSide )
+			if( !prevSideStick )
 			{
 				if( State == MenuState.GameMenu )
 				{
 					if( gameMenuItems[ menuIndex ].ValueChangeCallback != null )
 					{
-						gameMenuItems[ menuIndex ].ValueChangeCallback( (int)Mathf.Sign( inputWrapper.LeftStick.x ) );
+						gameMenuItems[ menuIndex ].ValueChangeCallback( (int)Mathf.Sign( inputWrapper.LeftStick.Value.x ) );
 					}
 				}
 			}
 		}
 		if( stickRefireTimer > 0f )
 		{
-			prevSide = side;
+			prevSideStick = sideStick;
 		}
 		else
 		{
-			prevSide = false;
+			prevSideStick = false;
 		}
+
+		// Side (Pad)
+		bool sidePad = ( inputWrapper.DPad.Value.x != 0f );
+		if( sidePad )
+		{
+			if( !prevSidePad )
+			{
+				if( State == MenuState.GameMenu )
+				{
+					if( gameMenuItems[ menuIndex ].ValueChangeCallback != null )
+					{
+						gameMenuItems[ menuIndex ].ValueChangeCallback( (int)Mathf.Sign( inputWrapper.DPad.Value.x ) );
+					}
+				}
+			}
+		}
+		prevSidePad = sidePad;
 
 		// Reset refire timer
 		if( stickRefireTimer <= 0f )
@@ -320,7 +338,7 @@ public class MenuGUI : MonoBehaviour
 		}
 
 		// Select
-		if( inputWrapper.Jump > .0f && !prevSelect )
+		if( inputWrapper.Jump.Pressed )
 		{
 			switch( State )
 			{
@@ -346,14 +364,12 @@ public class MenuGUI : MonoBehaviour
 					break;
 			}
 		}
-		prevSelect = inputWrapper.Jump > .0f ? true : false;
 
 		// Back
-		if( inputWrapper.Drop > .0f && !prevBack )
+		if( inputWrapper.Drop.Pressed )
 		{
 			State = MenuState.Root;
 		}
-		prevBack = inputWrapper.Drop > .0f ? true : false;
 	}
 
 	void OnGUI()
@@ -363,7 +379,7 @@ public class MenuGUI : MonoBehaviour
 		//float sf = Mathf.Min( camera.pixelWidth, camera.pixelHeight ) / OptimumSize;
 
 		// "Page" wrapper
-		GUILayout.BeginArea( new Rect( 0, 0, camera.pixelWidth, camera.pixelHeight ) );
+		GUILayout.BeginArea( new Rect( 0, 0, GetComponent<Camera>().pixelWidth, GetComponent<Camera>().pixelHeight ) );
 		{
 			// Header area
 			GUILayout.BeginVertical();
@@ -391,7 +407,7 @@ public class MenuGUI : MonoBehaviour
 				GUILayout.BeginHorizontal( GUILayout.ExpandHeight( true ) );
 				{
 					// Left ( Options Menu )
-					GUILayout.BeginVertical( Skin.GetStyle( "contentsubbox" ), GUILayout.Width( camera.pixelWidth ), GUILayout.ExpandHeight( true ) );
+					GUILayout.BeginVertical( Skin.GetStyle( "contentsubbox" ), GUILayout.Width( GetComponent<Camera>().pixelWidth ), GUILayout.ExpandHeight( true ) );
 					{
 						GUILayout.FlexibleSpace();
 
@@ -418,7 +434,7 @@ public class MenuGUI : MonoBehaviour
 					GUILayout.EndVertical();
 
 					// Center ( Root Menu )
-					GUILayout.BeginVertical( Skin.GetStyle( "contentsubbox" ), GUILayout.Width( camera.pixelWidth ), GUILayout.ExpandHeight( true ) );
+					GUILayout.BeginVertical( Skin.GetStyle( "contentsubbox" ), GUILayout.Width( GetComponent<Camera>().pixelWidth ), GUILayout.ExpandHeight( true ) );
 					{
 						GUILayout.FlexibleSpace();
 
@@ -445,7 +461,7 @@ public class MenuGUI : MonoBehaviour
 					GUILayout.EndVertical();
 
 					// Right ( Game Menu )
-					GUILayout.BeginVertical( Skin.GetStyle( "contentsubbox" ), GUILayout.Width( camera.pixelWidth ), GUILayout.ExpandHeight( true ) );
+					GUILayout.BeginVertical( Skin.GetStyle( "contentsubbox" ), GUILayout.Width( GetComponent<Camera>().pixelWidth ), GUILayout.ExpandHeight( true ) );
 					{
 						GUILayout.FlexibleSpace();
 

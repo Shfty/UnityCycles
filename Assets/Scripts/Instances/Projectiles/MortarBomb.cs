@@ -7,7 +7,7 @@ public class MortarBomb : Projectile
 	public void PooledStart()
 	{
 		// Add the projectile's initial force
-		rigidbody.AddForce( transform.forward * ProjectileInfo.Properties.MortarBomb.InitialForce, ForceMode.Impulse );
+		GetComponent<Rigidbody>().AddForce( transform.forward * ProjectileInfo.Properties.MortarBomb.InitialForce, ForceMode.Impulse );
 	}
 
 	public virtual void OnCollisionEnter()

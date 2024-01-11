@@ -10,8 +10,6 @@ public class WheelParticles : MonoBehaviour
 	// Private
 	MarbleMovement marbleScript;
 	int terrainMask;
-	float prevJump = 0f;
-	float prevDrop = 0f;
 	bool gameActive = true;
 
 	// Public
@@ -39,7 +37,7 @@ public class WheelParticles : MonoBehaviour
         gameActive = true;
 	}
 	
-	void LateUpdate()
+	void Update()
 	{
 		if( gameActive )
 		{
@@ -62,29 +60,29 @@ public class WheelParticles : MonoBehaviour
 				}
 
 				// Dust Particles
-				DustParticles.particleSystem.startSpeed = marbleScript.Marble.rigidbody.angularVelocity.magnitude * SpinSpeedFactor;
-				DustParticles.particleSystem.startColor = dustColor;
+				DustParticles.GetComponent<ParticleSystem>().startSpeed = marbleScript.Marble.GetComponent<Rigidbody>().angularVelocity.magnitude * SpinSpeedFactor;
+				DustParticles.GetComponent<ParticleSystem>().startColor = dustColor;
 
-				if( marbleScript.Marble.rigidbody.angularVelocity.magnitude > ParticleSpinDeadzone )
+				if( marbleScript.Marble.GetComponent<Rigidbody>().angularVelocity.magnitude > ParticleSpinDeadzone )
 				{
-					if( !DustParticles.particleSystem.isPlaying )
+					if( !DustParticles.GetComponent<ParticleSystem>().isPlaying )
 					{
-						DustParticles.particleSystem.Play();
+						DustParticles.GetComponent<ParticleSystem>().Play();
 					}
 				}
 				else
 				{
-					if( DustParticles.particleSystem.isPlaying )
+					if( DustParticles.GetComponent<ParticleSystem>().isPlaying )
 					{
-						DustParticles.particleSystem.Stop();
+						DustParticles.GetComponent<ParticleSystem>().Stop();
 					}
 				}
 			}
 			else
 			{
-				if( DustParticles.particleSystem.isPlaying )
+				if( DustParticles.GetComponent<ParticleSystem>().isPlaying )
 				{
-					DustParticles.particleSystem.Stop();
+					DustParticles.GetComponent<ParticleSystem>().Stop();
 				}
 			}
 
@@ -92,55 +90,42 @@ public class WheelParticles : MonoBehaviour
 			foreach( Transform jet in DashJets )
 			{
 				float df = GetComponent<Avatar>().Dash / GetComponent<Avatar>().MaxDash;
-				jet.particleSystem.emissionRate = df * 100;
-				jet.particleSystem.startSize = df * .4f;
+				jet.GetComponent<ParticleSystem>().emissionRate = df * 100;
+				jet.GetComponent<ParticleSystem>().startSize = df * .4f;
 			}
 
 			// Enable the jump jets if the button is pressed
-			if( InputWrapper.Jump > 0f )
+			if( InputWrapper.Jump.Pressed && marbleScript.JumpFired == false )
 			{
-				if( !JumpJetsEnabled )
-				{
-					SetJetsEnabled( true, true );
-				}
-
-				if( marbleScript.JumpFired == false && prevJump == 0f )
-				{
-					ParticleBurst( true );
-				}
+				ParticleBurst( true );
 			}
-			else
+
+			if( InputWrapper.Jump.Down && !JumpJetsEnabled )
+			{
+				SetJetsEnabled( true, true );
+			}
+
+			if( !InputWrapper.Jump.Down && JumpJetsEnabled )
 			{
 				// Otherwise, deactivate them
-				if( JumpJetsEnabled )
-				{
-					SetJetsEnabled( true, false );
-				}
+				SetJetsEnabled( true, false );
 			}
-			prevJump = InputWrapper.Jump;
 
 			// Enable the drop jets if the button is pressed
-			if( InputWrapper.Drop > 0f )
+			if( InputWrapper.Drop.Pressed && marbleScript.DropFired == false )
 			{
-				if( !DropJetsEnabled )
-				{
-					SetJetsEnabled( false, true );
-				}
+				ParticleBurst( false );
+			}
 
-				if( marbleScript.DropFired == false && prevDrop == 0f )
-				{
-					ParticleBurst( false );
-				}
-			}
-			else
+			if( InputWrapper.Drop.Down && !DropJetsEnabled )
 			{
-				// Otherwise, deactivate them
-				if( DropJetsEnabled )
-				{
-					SetJetsEnabled( false, false );
-				}
+				SetJetsEnabled( false, true );
 			}
-			prevDrop = InputWrapper.Drop;
+			
+			if( !InputWrapper.Drop.Down && DropJetsEnabled )
+			{
+				SetJetsEnabled( false, false );
+			}
 		}
 	}
 
@@ -168,11 +153,11 @@ public class WheelParticles : MonoBehaviour
 		{
 			if( enabled )
 			{
-				jet.particleSystem.Play();
+				jet.GetComponent<ParticleSystem>().Play();
 			}
 			else
 			{
-				jet.particleSystem.Stop();
+				jet.GetComponent<ParticleSystem>().Stop();
 			}
 		}
 	}
@@ -191,7 +176,7 @@ public class WheelParticles : MonoBehaviour
 
 		foreach( Transform burst in bursts )
 		{
-			burst.particleSystem.Play();
+			burst.GetComponent<ParticleSystem>().Play();
 		}
 	}
 
@@ -199,7 +184,7 @@ public class WheelParticles : MonoBehaviour
 	{
 		foreach( Transform burst in DashBursts )
 		{
-			burst.particleSystem.Play();
+			burst.GetComponent<ParticleSystem>().Play();
 		}
 	}
 }

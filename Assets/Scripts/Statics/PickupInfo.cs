@@ -5,7 +5,9 @@
 		None = 0,
 		Rocket = 1,
 		Mortar = 2,
-		Seeker = 3
+		Seeker = 3,
+		ShotgunStorm = 4,
+		SlagCannon = 5
 	}
 
 	static class Properties

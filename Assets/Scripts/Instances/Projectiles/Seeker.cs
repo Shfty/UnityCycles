@@ -15,8 +15,8 @@ public class Seeker : Projectile
 	public void PooledStart()
 	{
 		// Add initial force and torque
-		rigidbody.AddForce( transform.forward * ProjectileInfo.Properties.Seeker.InitialForce, ForceMode.VelocityChange );
-		rigidbody.AddTorque( transform.right * 5f, ForceMode.Impulse );
+		GetComponent<Rigidbody>().AddForce( transform.forward * ProjectileInfo.Properties.Seeker.InitialForce, ForceMode.VelocityChange );
+		GetComponent<Rigidbody>().AddTorque( transform.right * 5f, ForceMode.Impulse );
 	}
 
 	public void Update()
@@ -36,10 +36,10 @@ public class Seeker : Projectile
 		{
 			// If so, set the seeking flag and stop the missile
 			seeking = true;
-			if( !rigidbody.isKinematic )
+			if( !GetComponent<Rigidbody>().isKinematic )
 			{
-				rigidbody.velocity = Vector3.zero;
-				rigidbody.angularVelocity = Vector3.zero;
+				GetComponent<Rigidbody>().velocity = Vector3.zero;
+				GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
 			}
 
 			// Update orientation
@@ -49,7 +49,7 @@ public class Seeker : Projectile
 		// If the missile is seeking, accellerate in it's facing direction
 		if( seeking )
 		{
-			rigidbody.AddForce( transform.forward * ProjectileInfo.Properties.Seeker.Accelleration, ForceMode.VelocityChange );
+			GetComponent<Rigidbody>().AddForce( transform.forward * ProjectileInfo.Properties.Seeker.Accelleration, ForceMode.VelocityChange );
 		}
 	}
 
@@ -69,13 +69,13 @@ public class Seeker : Projectile
 	IEnumerator WaitForParticles( ParticleSystem ps )
 	{
 		// Turn off rocket physics, rendering and particle emission
-		rigidbody.isKinematic = true;
+		GetComponent<Rigidbody>().isKinematic = true;
 		ps.enableEmission = false;
 
 		yield return new WaitForSeconds( ps.startLifetime );
 
 		// Reverse changes and disable rocket
-		rigidbody.isKinematic = false;
+		GetComponent<Rigidbody>().isKinematic = false;
 		ps.enableEmission = true;
 
 
@@ -93,11 +93,11 @@ public class Seeker : Projectile
 		// If there's a seek target, look toward it. If not, look toward the static seek point
 		if( SeekTarget == null )
 		{
-			rigidbody.rotation = Quaternion.LookRotation( SeekPoint - transform.position );
+			GetComponent<Rigidbody>().rotation = Quaternion.LookRotation( SeekPoint - transform.position );
 		}
 		else
 		{
-			rigidbody.rotation = Quaternion.LookRotation( ( SeekTarget.position + ( SeekTarget.rigidbody.velocity * Time.deltaTime * 2f ) ) - transform.position );
+			GetComponent<Rigidbody>().rotation = Quaternion.LookRotation( ( SeekTarget.position + ( SeekTarget.GetComponent<Rigidbody>().velocity * Time.deltaTime * 2f ) ) - transform.position );
 		}
 	}
 }

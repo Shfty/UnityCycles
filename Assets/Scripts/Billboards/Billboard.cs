@@ -40,11 +40,12 @@ public class Billboard : MonoBehaviour
 			{
 
 				GameObject cam = GameControl.Instance.Players[ i ].transform.Find( "Camera" ).gameObject;
-				cameras.Add( cam.camera );
+				cameras.Add( cam.GetComponent<Camera>() );
 				GameObject billboard = GameControl.BillboardPool.Spawn( BillboardPrefab );
-				billboard.SetActive( true );
 				billboard.layer = LayerMask.NameToLayer( "Camera " + ( i + 1 ) );
 				billboard.transform.parent = transform;
+				billboard.transform.position = transform.position;
+				billboard.transform.rotation = Quaternion.LookRotation( cameras[ i ].transform.forward );
 				billboard.GetComponent<MeshRenderer>().material = Material;
 				billboards.Add( billboard );
 			}

@@ -4,7 +4,10 @@ Properties {
     _Base ("Texture", 2D) = "white" {}
 }
 SubShader {
-    Tags { "RenderType" = "Opaque" }
+    Tags {
+	"RenderType" = "Opaque"
+	"PreviewType"="Plane"
+	}
     CGPROGRAM
     #pragma surface surf Lambert
     struct Input {

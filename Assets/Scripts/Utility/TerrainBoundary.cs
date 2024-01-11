@@ -4,6 +4,15 @@ using System.Collections;
 public class TerrainBoundary : MonoBehaviour
 {
 	// Fields
+	float _sideLength;
+
+	// Properties
+	public float SideLength
+	{
+		get { return _sideLength; }
+	}
+
+	// Variables
 	Terrain terrain;
 	GameObject container;
 	GameObject leftBoundary;
@@ -11,8 +20,9 @@ public class TerrainBoundary : MonoBehaviour
 	GameObject frontBoundary;
 	GameObject backBoundary;
 	int wallLayer;
+	float inradius;
+	Vector3 bounds;
 
-	// Properties
 	public int Sides = 4;
 	public float LipSize;
 	public float BoundaryThickness = 20f;
@@ -23,25 +33,26 @@ public class TerrainBoundary : MonoBehaviour
 	// Unity Methods
 	void Awake()
 	{
-		container = new GameObject();
-		container.name = "Boundaries";
 	}
 
 	void Start()
 	{
+		// Create container object for walls
+		container = new GameObject( "Boundaries" );
+
 		// Store relevant variables
 		terrain = GetComponent<Terrain>();
-		Vector3 bounds = terrain.terrainData.size;
+		bounds = terrain.terrainData.size;
 		wallLayer = LayerMask.NameToLayer( "Walls" );
-		
+
 		// Calculate side length
-		float inradius = bounds.z * .5f + BoundaryThickness;
-		float sideLength = 2f * inradius * Mathf.Tan( ( 180f * Mathf.Deg2Rad ) / Sides );
+		inradius = bounds.z * .5f + BoundaryThickness;
+		_sideLength = 2f * inradius * Mathf.Tan( ( 180f * Mathf.Deg2Rad ) / Sides );
 
 		// Base boundary transform
 		Vector3 boundaryPosition = new Vector3( 0f, bounds.y * .5f, inradius - BoundaryThickness * .5f );
 		Quaternion boundaryRotation = Quaternion.identity;
-		Vector3 boundaryScale = new Vector3( sideLength, bounds.y + LipSize, BoundaryThickness );
+		Vector3 boundaryScale = new Vector3( _sideLength, bounds.y + LipSize, BoundaryThickness );
 
 		float angle = 360f / Sides;
 		for( int i = 0; i < Sides; ++i )
@@ -63,7 +74,7 @@ public class TerrainBoundary : MonoBehaviour
 		{
 			boundaryPosition = new Vector3( 0f, bounds.y * .5f, bounds.z * .5f + BoundaryThickness * .5f );
 			boundaryRotation = Quaternion.identity;
-			boundaryScale = new Vector3( sideLength, InvisibleWallHeight, BoundaryThickness );
+			boundaryScale = new Vector3( _sideLength, InvisibleWallHeight, BoundaryThickness );
 
 			for( int i = 0; i < Sides; ++i )
 			{
@@ -87,7 +98,7 @@ public class TerrainBoundary : MonoBehaviour
 
 			boundaryPosition = new Vector3( 0f, bounds.y * .5f, bounds.z * .5f + BoundaryThickness + farPlane * .5f );
 			boundaryRotation = Quaternion.identity;
-			boundaryScale = new Vector3( sideLength, 1f, farPlane * .1f );
+			boundaryScale = new Vector3( _sideLength, 1f, farPlane * .1f );
 
 			for( int i = 0; i < Sides; ++i )
 			{

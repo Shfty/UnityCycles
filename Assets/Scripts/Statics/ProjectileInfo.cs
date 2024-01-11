@@ -7,7 +7,9 @@
 		Rocket = 1,
 		MortarShell = 2,
 		MortarBomb = 3,
-		SeekerMissile = 4
+		SeekerMissile = 4,
+		ShotgunPellet = 5,
+		SlagBall = 6
 	}
 
 	namespace Properties
@@ -34,6 +36,14 @@
 			public static float SeekDelay = .5f;
 			public static float InitialForce = 40f;
 			public static float Accelleration = 2.5f;
+		}
+		static class ShotgunPellet
+		{
+			public static float InitialForce = 40f;
+		}
+		static class SlagBall
+		{
+			public static float InitialForce = 50f;
 		}
 	}
 }

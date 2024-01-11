@@ -7,13 +7,13 @@ public class Rocket : Projectile
 	public void PooledStart()
 	{
 		// Add Initial Force
-		rigidbody.AddForce( transform.forward * ProjectileInfo.Properties.Rocket.InitialForce, ForceMode.Impulse );
+		GetComponent<Rigidbody>().AddForce( transform.forward * ProjectileInfo.Properties.Rocket.InitialForce, ForceMode.Impulse );
 	}
 
 	public void FixedUpdate()
 	{
 		// Add accelleration force
-		rigidbody.AddForce( transform.forward * ProjectileInfo.Properties.Rocket.Accelleration * Time.deltaTime, ForceMode.Acceleration );
+		GetComponent<Rigidbody>().AddForce( transform.forward * ProjectileInfo.Properties.Rocket.Accelleration * Time.deltaTime, ForceMode.Acceleration );
 	}
 
 	public void OnCollisionEnter()
@@ -32,13 +32,13 @@ public class Rocket : Projectile
 	IEnumerator WaitForParticles( ParticleSystem ps )
 	{
 		// Turn off rocket physics, rendering and particle emission
-		rigidbody.isKinematic = true;
+		GetComponent<Rigidbody>().isKinematic = true;
 		ps.enableEmission = false;
 
 		yield return new WaitForSeconds( ps.startLifetime );
 
 		// Reverse changes and disable rocket
-		rigidbody.isKinematic = false;
+		GetComponent<Rigidbody>().isKinematic = false;
 		ps.enableEmission = true;
 
 		GameControl.ProjectilePool.Despawn( gameObject );

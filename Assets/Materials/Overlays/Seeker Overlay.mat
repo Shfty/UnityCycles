@@ -9,6 +9,7 @@ Material:
   m_Name: Seeker Overlay
   m_Shader: {fileID: 4800000, guid: 35cec6671eb5ba14888684739bd7d0bd, type: 3}
   m_ShaderKeywords: []
+  m_CustomRenderQueue: -1
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs:
@@ -72,14 +73,14 @@ Material:
         first:
           name: _MainTexture
         second:
-          m_Texture: {fileID: 2800000, guid: d04f3f984fb83ed45a30d5c4d023ba4a, type: 3}
+          m_Texture: {fileID: 2800000, guid: 701cf443f76d13e4482cc5512053dffa, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
           name: _OccludedTexture
         second:
-          m_Texture: {fileID: 2800000, guid: d04f3f984fb83ed45a30d5c4d023ba4a, type: 3}
+          m_Texture: {fileID: 2800000, guid: 701cf443f76d13e4482cc5512053dffa, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:

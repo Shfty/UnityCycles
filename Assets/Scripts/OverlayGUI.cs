@@ -9,8 +9,8 @@ public class OverlayGUI : MonoBehaviour
 	string winnerText = "";
 	string rematchText = "Aim to restart match";
 	string backToMenuText = "Fire to return to Menu";
-	float prevRematch = 0f;
-	float prevMenu = 0f;
+	bool prevRematch = false;
+	bool prevMenu = false;
 	/* Fade states
 	 * 0 - Fully transparent
 	 * 1 - Partial transparency following game over
@@ -35,23 +35,21 @@ public class OverlayGUI : MonoBehaviour
 
 		if( GameControl.Instance.Players.Count > 0 )
 		{
-			float rematch = 0f;
+			bool rematch = false;
 			foreach( GameObject player in GameControl.Instance.Players )
 			{
-				InputWrapper ir = player.GetComponent<InputWrapper>();
-				rematch += ir.Rematch;
+				InputWrapper iw = player.GetComponent<InputWrapper>();
+				rematch |= iw.Rematch;
 			}
-			rematch = Mathf.Clamp( rematch, 0f, 1f );
 
-			float menu = 0f;
+			bool menu = false;
 			foreach( GameObject player in GameControl.Instance.Players )
 			{
-				InputWrapper ir = player.GetComponent<InputWrapper>();
-				menu += ir.BackToMenu;
+				InputWrapper iw = player.GetComponent<InputWrapper>();
+				menu |= iw.BackToMenu;
 			}
-			menu = Mathf.Clamp( menu, 0f, 1f );
 
-			if( fadeState == 1 && animationFinished && rematch > 0f && prevRematch == 0f )
+			if( fadeState == 1 && animationFinished && rematch && !prevRematch )
 			{
 				fadeDestination = 0;
 				fadeState = 2;
@@ -60,7 +58,7 @@ public class OverlayGUI : MonoBehaviour
 			}
 			prevRematch = rematch;
 
-			if( fadeState == 1 && animationFinished && menu > 0f && prevMenu == 0f )
+			if( fadeState == 1 && animationFinished && menu && !prevMenu )
 			{
 				fadeDestination = 1;
 				fadeState = 2;
@@ -101,25 +99,45 @@ public class OverlayGUI : MonoBehaviour
 	void OnGUI()
 	{
 		GUI.skin = Skin;
+		GUI.skin.label.wordWrap = false;
 		GUI.color = new Color( 1f, 1f, 1f, overlayOpacity );
-		GUI.DrawTexture( camera.pixelRect, OverlayTexture );
+		GUI.DrawTexture( GetComponent<Camera>().pixelRect, OverlayTexture );
 
 		GUI.color = new Color( 1f, 1f, 1f, overlayOpacity );
 
-		GUIContent winnerContent = new GUIContent( winnerText );
-		Vector2 winnerBounds = Skin.label.CalcSize( winnerContent );
-		Rect winnerRect = new Rect( camera.pixelWidth * .5f - winnerBounds.x * .5f, 0 + camera.pixelHeight * .1f, winnerBounds.x, winnerBounds.y );
-		GUI.Label( winnerRect, winnerContent );
+		GUILayout.BeginArea( GetComponent<Camera>().pixelRect );
+		{
+			GUILayout.BeginVertical( GUILayout.ExpandWidth( true ) );
+			{
+				GUILayout.FlexibleSpace();
+				GUILayout.BeginHorizontal( GUILayout.ExpandWidth( true ) );
+				{
+					GUILayout.FlexibleSpace();
+					GUILayout.Label( winnerText );
+					GUILayout.FlexibleSpace();
+				}
+				GUILayout.EndHorizontal();
 
-		GUIContent backToMenuContent = new GUIContent( backToMenuText );
-		Vector2 backToMenuBounds = Skin.label.CalcSize( backToMenuContent );
-		Rect backToMenuRect = new Rect( camera.pixelWidth * .5f - backToMenuBounds.x * .5f, camera.pixelHeight - camera.pixelHeight * .1f, backToMenuBounds.x, backToMenuBounds.y );
-		GUI.Label( backToMenuRect, backToMenuContent );
+				GUILayout.FlexibleSpace();
+				GUILayout.FlexibleSpace();
 
-		GUIContent rematchContent = new GUIContent( rematchText );
-		Vector2 rematchBounds = Skin.label.CalcSize( rematchContent );
-		Rect rematchRect = new Rect( camera.pixelWidth * .5f - rematchBounds.x * .5f, camera.pixelHeight - camera.pixelHeight * .1f - backToMenuRect.height, rematchBounds.x, rematchBounds.y );
-		GUI.Label( rematchRect, rematchContent );
+				GUILayout.BeginHorizontal( GUILayout.ExpandWidth( true ) );
+				{
+					GUILayout.FlexibleSpace();
+					GUILayout.BeginVertical();
+					{
+						GUILayout.Label( rematchText, GUILayout.ExpandWidth( true ) );
+						GUILayout.Label( backToMenuText, GUILayout.ExpandWidth( true ) );
+					}
+					GUILayout.EndVertical();
+					GUILayout.FlexibleSpace();
+				}
+				GUILayout.EndHorizontal();
+				GUILayout.FlexibleSpace();
+			}
+			GUILayout.EndVertical();
+		}
+		GUILayout.EndArea();
 	}
 
 	// Utility Methods

@@ -22,10 +22,10 @@ public class PooledObject : MonoBehaviour
 		initRotation = transform.rotation;
 		initScale = transform.localScale;
 
-		if( rigidbody != null )
+		if( GetComponent<Rigidbody>() != null )
 		{
-			initVelocity = rigidbody.velocity;
-			initAngularVelocity = rigidbody.angularVelocity;
+			initVelocity = GetComponent<Rigidbody>().velocity;
+			initAngularVelocity = GetComponent<Rigidbody>().angularVelocity;
 		}
 	}
 
@@ -36,10 +36,10 @@ public class PooledObject : MonoBehaviour
 		transform.rotation = initRotation;
 		transform.localScale = initScale;
 
-		if( rigidbody != null )
+		if( GetComponent<Rigidbody>() != null )
 		{
-			rigidbody.velocity = initVelocity;
-			rigidbody.angularVelocity = initAngularVelocity;
+			GetComponent<Rigidbody>().velocity = initVelocity;
+			GetComponent<Rigidbody>().angularVelocity = initAngularVelocity;
 		}
 	}
 

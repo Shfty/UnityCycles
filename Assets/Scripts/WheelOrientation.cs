@@ -47,7 +47,7 @@ public class WheelOrientation : MonoBehaviour
 		if( gameActive )
 		{
 			// Update the heading based on impulse direction
-			heading = new Vector3( InputWrapper.LeftStick.x, 0f, InputWrapper.LeftStick.y );
+			heading = new Vector3( InputWrapper.LeftStick.Value.x, 0f, InputWrapper.LeftStick.Value.y );
 		}
 
 		// Update the turn angle if the stick is pressed far enough
@@ -70,7 +70,7 @@ public class WheelOrientation : MonoBehaviour
 		targetRotation = surfaceRotation * Quaternion.AngleAxis( turnAngle, Vector3.up ) * cameraRotation * baseOrientation;
 
 		// Apply rotation to the wheel mesh
-		wheelMesh.Rotate( Vector3.right, marbleScript.Marble.rigidbody.angularVelocity.magnitude * WheelSpinFactor * Time.deltaTime );
+		wheelMesh.Rotate( Vector3.right, marbleScript.Marble.GetComponent<Rigidbody>().angularVelocity.magnitude * WheelSpinFactor * Time.deltaTime );
 
 		// Interpolate the wheel's rotation toward the target rotation
 		Wheel.transform.rotation = Quaternion.Lerp( Wheel.transform.rotation, targetRotation, RotationLerpFactor * Time.deltaTime );

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class GameControl : MonoBehaviour
 {
-	// Fields
+	// Variables
 	GameObject playerContainer;
 	GameObject[] spawnPoints;
 	float pickupTimer = 0f;
@@ -14,10 +14,11 @@ public class GameControl : MonoBehaviour
 	float independentDeltaTime;
 	float targetTimeScale = 0f;
 
-	// Properties
 	public int LocalPlayerCount = 1;
+	public float PlayerSpawnHeight = 25f;
 	public int MaxPickups = 15;
 	public float PickupTimeout = 2f;
+	public float PickupSpawnHeight = 50f;
 	public GameObject MapCamera;
 	public bool GameActive = true;
 	public float TimeLerpFactor = 3f;
@@ -134,9 +135,9 @@ public class GameControl : MonoBehaviour
 				{
 					// Spawn random pickup
 					int randomPickup = Random.Range( 1, Enum.GetNames( typeof( PickupInfo.Type ) ).Length );
-					Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + mapBounds.y * .5f, Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 					Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
-					SpawnPickup( (PickupInfo.Type)randomPickup, randomPosition, randomRotation );
+					float spawnHeight = PickupSpawnHeight + Random.Range( -PickupSpawnHeight * .5f, PickupSpawnHeight * .5f );
+					SpawnPickup( (PickupInfo.Type)randomPickup, RandomMapPosition( spawnHeight ), randomRotation );
 
 					pickupTimer = 0f;
 				}
@@ -188,8 +189,7 @@ public class GameControl : MonoBehaviour
 		// Spawn players
 		for( int i = 0; i < LocalPlayerCount; ++i )
 		{
-			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f, Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
-			SpawnLocalPlayer( randomPosition, i );
+			SpawnLocalPlayer( RandomMapPosition( PlayerSpawnHeight ), i );
 		}
 
 		// Spawn player overlays
@@ -205,25 +205,41 @@ public class GameControl : MonoBehaviour
 		// Rocket Drones
 		for( int i = 0; i < 5; ++i )
 		{
-			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
-			SpawnPickup( PickupInfo.Type.Rocket, randomPosition, randomRotation );
+			float spawnHeight = PickupSpawnHeight + Random.Range( -PickupSpawnHeight * .5f, PickupSpawnHeight * .5f );
+			SpawnPickup( PickupInfo.Type.Rocket, RandomMapPosition( spawnHeight ), randomRotation );
 		}
 
 		// Mortar Drones
 		for( int i = 0; i < 5; ++i )
 		{
-			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
-			SpawnPickup( PickupInfo.Type.Mortar, randomPosition, randomRotation );
+			float spawnHeight = PickupSpawnHeight + Random.Range( -PickupSpawnHeight * .5f, PickupSpawnHeight * .5f );
+			SpawnPickup( PickupInfo.Type.Mortar, RandomMapPosition( spawnHeight ), randomRotation );
 		}
 
 		// Seeker Drones
 		for( int i = 0; i < 5; ++i )
 		{
-			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + Random.Range( 0f, 75f ), Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
 			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
-			SpawnPickup( PickupInfo.Type.Seeker, randomPosition, randomRotation );
+			float spawnHeight = PickupSpawnHeight + Random.Range( -PickupSpawnHeight * .5f, PickupSpawnHeight * .5f );
+			SpawnPickup( PickupInfo.Type.Seeker, RandomMapPosition( spawnHeight ), randomRotation );
+		}
+
+		// Shotgun Storm Drones
+		for( int i = 0; i < 5; ++i )
+		{
+			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
+			float spawnHeight = PickupSpawnHeight + Random.Range( -PickupSpawnHeight * .5f, PickupSpawnHeight * .5f );
+			SpawnPickup( PickupInfo.Type.ShotgunStorm, RandomMapPosition( spawnHeight ), randomRotation );
+		}
+
+		// Slag Cannon Drones
+		for( int i = 0; i < 5; ++i )
+		{
+			Quaternion randomRotation = Quaternion.AngleAxis( Random.Range( 0, 360 ), Vector3.up );
+			float spawnHeight = PickupSpawnHeight + Random.Range( -PickupSpawnHeight * .5f, PickupSpawnHeight * .5f );
+			SpawnPickup( PickupInfo.Type.SlagCannon, RandomMapPosition( spawnHeight ), randomRotation );
 		}
 	}
 
@@ -326,7 +342,7 @@ public class GameControl : MonoBehaviour
 		BindPlayerMembers( player );
 
 		// Calculate camera viewport & culling mask
-		camera.camera.rect = CalculateViewport( idx );
+		camera.GetComponent<Camera>().rect = CalculateViewport( idx );
 		int cameraMask = 0;
 		for( int i = 0; i < 4; ++i )
 		{
@@ -351,8 +367,7 @@ public class GameControl : MonoBehaviour
 			int playerIndex = Players.IndexOf( player );
 
 			// Spawn it's world avatar
-			Vector3 randomPosition = new Vector3( Random.Range( 0, mapBounds.x ) - mapBounds.x * .5f, 25f + mapBounds.y * .5f, Random.Range( 0, mapBounds.z ) - mapBounds.z * .5f );
-			SpawnPooledAvatar( randomPosition, Quaternion.identity, player );
+			SpawnPooledAvatar( RandomMapPosition( PlayerSpawnHeight ), Quaternion.identity, player );
 
 			// Reenable and reset the appropriate overlay
 			PlayerOverlay overlay = PlayerOverlays[ playerIndex ].GetComponent<PlayerOverlay>();
@@ -484,6 +499,17 @@ public class GameControl : MonoBehaviour
 		return cameraRect;
 	}
 
+	Vector3 RandomMapPosition( float height )
+	{
+		float zDist = Random.Range( 0, mapBounds.z * .5f );
+		float boundaryWallSize = Terrain.activeTerrain.GetComponent<TerrainBoundary>().SideLength;
+		Vector3 position = new Vector3( Random.Range( -boundaryWallSize * .5f, boundaryWallSize * .5f ), height, zDist );
+		int sides = Terrain.activeTerrain.GetComponent<TerrainBoundary>().Sides;
+		float rotSlice = 360f / sides;
+		position = Quaternion.AngleAxis( rotSlice * Random.Range( 0, sides ), Vector3.up ) * position;
+		return position;
+	}
+
 	// PICKUPS
 	void SpawnPickup( PickupInfo.Type type, Vector3 position, Quaternion rotation )
 	{
@@ -500,6 +526,12 @@ public class GameControl : MonoBehaviour
 				break;
 			case PickupInfo.Type.Seeker:
 				pickupMesh = SharedPool.Spawn( "Seeker Drone" );
+				break;
+			case PickupInfo.Type.ShotgunStorm:
+				pickupMesh = SharedPool.Spawn( "Shotgun Storm Drone" );
+				break;
+			case PickupInfo.Type.SlagCannon:
+				pickupMesh = SharedPool.Spawn( "Slag Cannon Drone" );
 				break;
 			default:
 				break;
@@ -547,6 +579,12 @@ public class GameControl : MonoBehaviour
 				case PickupInfo.Type.Seeker:
 					droneType = DroneInfo.Type.Seeker;
 					break;
+				case PickupInfo.Type.ShotgunStorm:
+					droneType = DroneInfo.Type.ShotgunStorm;
+					break;
+				case PickupInfo.Type.SlagCannon:
+					droneType = DroneInfo.Type.SlagCannon;
+					break;
 				default:
 					break;
 			}
@@ -567,12 +605,23 @@ public class GameControl : MonoBehaviour
 			{
 				case PickupInfo.Type.Rocket:
 					droneScript.Ammo = 3;
+					droneScript.ReloadTimeout = .5f;
 					break;
 				case PickupInfo.Type.Mortar:
 					droneScript.Ammo = 2;
+					droneScript.ReloadTimeout = .75f;
 					break;
 				case PickupInfo.Type.Seeker:
 					droneScript.Ammo = 1;
+					droneScript.ReloadTimeout = 1f;
+					break;
+				case PickupInfo.Type.ShotgunStorm:
+					droneScript.Ammo = 4;
+					droneScript.ReloadTimeout = 0.4f;
+					break;
+				case PickupInfo.Type.SlagCannon:
+					droneScript.Ammo = 12;
+					droneScript.ReloadTimeout = 0.25f;
 					break;
 				default:
 					break;
@@ -595,6 +644,7 @@ public class GameControl : MonoBehaviour
 	void ResetPickupOverlay( GameObject pickupOverlay, GameObject pickup )
 	{
 		pickupOverlay.GetComponent<KinematicHover>().Target = pickup.transform;
+		pickupOverlay.transform.position = pickup.transform.position;
 
 		Billboard billboardScript = pickupOverlay.GetComponent<Billboard>();
 		// Setup material
@@ -608,6 +658,12 @@ public class GameControl : MonoBehaviour
 				break;
 			case PickupInfo.Type.Seeker:
 				billboardScript.Material = OverlayMaterials.Find( item => item.name == "Seeker Overlay" );
+				break;
+			case PickupInfo.Type.ShotgunStorm:
+				billboardScript.Material = OverlayMaterials.Find( item => item.name == "Shotgun Storm Overlay" );
+				break;
+			case PickupInfo.Type.SlagCannon:
+				billboardScript.Material = OverlayMaterials.Find( item => item.name == "Slag Cannon Overlay" );
 				break;
 			default:
 				break;

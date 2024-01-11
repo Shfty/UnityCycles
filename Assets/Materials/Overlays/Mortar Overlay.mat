@@ -9,6 +9,7 @@ Material:
   m_Name: Mortar Overlay
   m_Shader: {fileID: 4800000, guid: 35cec6671eb5ba14888684739bd7d0bd, type: 3}
   m_ShaderKeywords: []
+  m_CustomRenderQueue: -1
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs:
@@ -72,14 +73,14 @@ Material:
         first:
           name: _MainTexture
         second:
-          m_Texture: {fileID: 2800000, guid: ce73a42df88a2f240a6a074dfaa7d395, type: 3}
+          m_Texture: {fileID: 2800000, guid: bf9cd1c398d57cb4caddc34c97a01b94, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
           name: _OccludedTexture
         second:
-          m_Texture: {fileID: 2800000, guid: ce73a42df88a2f240a6a074dfaa7d395, type: 3}
+          m_Texture: {fileID: 2800000, guid: bf9cd1c398d57cb4caddc34c97a01b94, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:

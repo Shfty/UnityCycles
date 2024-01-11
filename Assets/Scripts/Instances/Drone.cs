@@ -9,6 +9,7 @@ public class Drone : MonoBehaviour
 	Projector aimingHolo = null;
 	Transform lockTarget = null;
 	GameObject droneMesh = null;
+	float reloadTimer = 0f;
 
 	GameObject initPlayer;
 	DroneInfo.Type initType;
@@ -23,6 +24,7 @@ public class Drone : MonoBehaviour
 	public LayerMask raycastLockMask;
 	public DroneInfo.Type Type;
 	public int Ammo;
+	public float ReloadTimeout = 1f;
 	public bool Aim;
 	public Vector3 AimVector;
 	public Vector3 AimPoint;
@@ -87,6 +89,20 @@ public class Drone : MonoBehaviour
 				// LineRenderer
 				aimingLine.SetVertexCount( 3 );
 				break;
+			case DroneInfo.Type.ShotgunStorm:
+				// Mesh
+				droneMesh = GameControl.SharedPool.Spawn( "Shotgun Storm Drone" );
+
+				// LineRenderer
+				aimingLine.SetVertexCount( 2 );
+				break;
+			case DroneInfo.Type.SlagCannon:
+				// Mesh
+				droneMesh = GameControl.SharedPool.Spawn( "Slag Cannon Drone" );
+
+				// LineRenderer
+				aimingLine.SetVertexCount( 2 );
+				break;
 			default:
 				break;
 		}
@@ -95,6 +111,9 @@ public class Drone : MonoBehaviour
 		droneMesh.transform.parent = transform;
 		droneMesh.transform.position = transform.position;
 		droneMesh.transform.rotation = transform.rotation;
+
+		// Inform the player's GUI that this drone now exists
+		Player.transform.Find( "Camera" ).GetComponent<AvatarGUI>().DroneSpawned( this );
 	}
 
 	void FixedUpdate()
@@ -151,12 +170,20 @@ public class Drone : MonoBehaviour
 		AimPoint = rayHitInfo.point;
 
 		// Type-specific drone orientation
+		Avatar avatar = Player.transform.Find( "Avatar" ).GetComponent<Avatar>();
+		bool isActive = avatar.Drones[ avatar.ActiveDroneIndex ].GetComponent<Drone>() == this;
 		switch( Type )
 		{
 			case DroneInfo.Type.Rocket:
-			case DroneInfo.Type.Seeker:
-				// Look straight at the target
-				targetRotation = Quaternion.LookRotation( AimVector );
+				Quaternion upRotation = Quaternion.AngleAxis( 90f, Vector3.Cross( AimVector, Vector3.up ) ) * Quaternion.LookRotation( AimVector );
+				if( isActive )
+				{
+					targetRotation = Quaternion.Slerp( upRotation, Quaternion.LookRotation( AimVector ), 1f - reloadTimer / ReloadTimeout );
+				}
+				else
+				{
+					targetRotation = upRotation;
+				}
 				break;
 			case DroneInfo.Type.Mortar:
 				// Calculate yaw
@@ -166,26 +193,61 @@ public class Drone : MonoBehaviour
 				float dir = Vector3.Dot( hcf, Vector3.up );
 				float yaw = Vector3.Angle( av, Vector3.forward ) * ( dir >= 0 ? -1 : 1 );
 
-				// Calculate pitch
-				float x = transform.position.x - AimPoint.x;
-				float z = transform.position.z - AimPoint.z;
+				float pitch;
+				if( isActive )
+				{
+					// Calculate pitch
+					float x = transform.position.x - AimPoint.x;
+					float z = transform.position.z - AimPoint.z;
 
-				float v = ProjectileInfo.Properties.MortarShell.InitialForce;
+					float v = ProjectileInfo.Properties.MortarShell.InitialForce;
 
-				float v2 = v * v;
-				float v4 = v * v * v * v;
-				float g = -Physics.gravity.y;
-				float d = Mathf.Sqrt( x * x + z * z );
-				float d2 = d * d;
-				float y = ( AimPoint.y - transform.position.y ) + ProjectileInfo.Properties.MortarShell.TargetYOffset;
+					float v2 = v * v;
+					float v4 = v * v * v * v;
+					float g = -Physics.gravity.y;
+					float d = Mathf.Sqrt( x * x + z * z );
+					float d2 = d * d;
+					float y = ( AimPoint.y - transform.position.y ) + ProjectileInfo.Properties.MortarShell.TargetYOffset;
 
-				float sqrFormula = v4 - g * ( ( g * d2 ) + ( 2 * y * v2 ) );
-				float divisor = g * d;
+					float sqrFormula = v4 - g * ( ( g * d2 ) + ( 2 * y * v2 ) );
+					float divisor = g * d;
 
-				float pitch = Mathf.Atan( ( v2 - Mathf.Sqrt( sqrFormula ) ) / divisor );
+					pitch = Mathf.Atan( ( v2 - Mathf.Sqrt( sqrFormula ) ) / divisor );
+
+					pitch += Mathf.Deg2Rad * 45f * reloadTimer / ReloadTimeout;
+				}
+				else
+				{
+					pitch = Mathf.Deg2Rad * 90f;
+				}
 
 				// rotate
 				targetRotation = Quaternion.AngleAxis( yaw, Vector3.up ) * Quaternion.AngleAxis( -pitch * Mathf.Rad2Deg, Vector3.right );
+				break;
+			case DroneInfo.Type.Seeker:
+				Quaternion downRotation = Quaternion.AngleAxis( -135, Vector3.Cross( AimVector, Vector3.up ) ) * Quaternion.LookRotation( AimVector );
+				if( isActive )
+				{
+					targetRotation = Quaternion.Slerp( downRotation, Quaternion.LookRotation( AimVector ), 1f - reloadTimer / ReloadTimeout );
+				}
+				else
+				{
+					targetRotation = downRotation;
+				}
+				break;
+			case DroneInfo.Type.ShotgunStorm:
+			case DroneInfo.Type.SlagCannon:
+				gameObject.GetComponent<KinematicHover>().Offset = -transform.forward * reloadTimer / ReloadTimeout;
+
+				Quaternion inactiveRotation = Quaternion.AngleAxis( 90f, Vector3.Cross( AimVector, Vector3.up ) ) * Quaternion.LookRotation( AimVector );
+				if( isActive )
+				{
+					targetRotation = Quaternion.LookRotation( AimVector );
+				}
+				else
+				{
+					targetRotation = inactiveRotation;
+				}
 				break;
 			default:
 				break;
@@ -193,6 +255,12 @@ public class Drone : MonoBehaviour
 
 		// Interpolate toward the target rotation
 		transform.rotation = Quaternion.Slerp( transform.rotation, targetRotation, 20f * Time.deltaTime );
+
+		// Reload timer
+		if( reloadTimer > 0f )
+		{
+			reloadTimer = Mathf.Max( reloadTimer -= Time.deltaTime, 0f );
+		}
 	}
 
 	void LateUpdate()
@@ -204,13 +272,19 @@ public class Drone : MonoBehaviour
 			{
 				aimingLine.enabled = true;
 			}
+
+			float opacity = 1f - reloadTimer / ReloadTimeout;
+
 			switch( Type )
 			{
 				case DroneInfo.Type.Rocket:
 					// Straight line
 					aimingLine.SetPosition( 0, transform.position );
-					aimingLine.SetPosition( 1, AimPoint );
-					aimingLine.SetColors( Color.red, Color.red );
+					Vector3 aimPointRotated = AimPoint;
+					aimPointRotated = Quaternion.AngleAxis( 90f * reloadTimer / ReloadTimeout, Vector3.Cross( AimPoint, Vector3.up ) ) * aimPointRotated;
+					aimingLine.SetPosition( 1, aimPointRotated );
+					Color red = new Color( 1f, 0f, 0f, opacity );
+					aimingLine.SetColors( red, red );
 					break;
 				case DroneInfo.Type.Mortar:
 					// Calculate subdivided vertex arc from projectile rotation & force
@@ -236,7 +310,8 @@ public class Drone : MonoBehaviour
 					}
 					aimingLine.SetPosition( i, AimPoint );
 
-					aimingLine.SetColors( Color.yellow, Color.yellow );
+					Color yellow = new Color( 1f, 1f, 0f, opacity );
+					aimingLine.SetColors( yellow, yellow );
 					break;
 				case DroneInfo.Type.Seeker:
 					// Straight line to the point where seek delay ends
@@ -252,7 +327,23 @@ public class Drone : MonoBehaviour
 					{
 						aimingLine.SetPosition( 2, lockTarget.position );
 					}
-					aimingLine.SetColors( Color.blue, Color.blue );
+
+					Color blue = new Color( 0f, 0f, 1f, opacity );
+					aimingLine.SetColors( blue, blue );
+					break;
+				case DroneInfo.Type.ShotgunStorm:
+					// Straight line
+					aimingLine.SetPosition( 0, transform.position );
+					aimingLine.SetPosition( 1, AimPoint );
+					Color orange = new Color( 1f, .25f, 0f, opacity );
+					aimingLine.SetColors( orange, orange );
+					break;
+				case DroneInfo.Type.SlagCannon:
+					// Straight line
+					aimingLine.SetPosition( 0, transform.position );
+					aimingLine.SetPosition( 1, AimPoint );
+					Color purple = new Color( 1f, 0f, .25f, opacity );
+					aimingLine.SetColors( purple, purple );
 					break;
 				default:
 					break;
@@ -306,6 +397,11 @@ public class Drone : MonoBehaviour
 	// Utility Methods
 	public void Fire()
 	{
+		if( reloadTimer > 0f )
+		{
+			return;
+		}
+
 		switch( Type )
 		{
 			case DroneInfo.Type.Rocket:
@@ -358,14 +454,61 @@ public class Drone : MonoBehaviour
 				seekerScript.PooledStart();
 				--Ammo;
 				break;
+			case DroneInfo.Type.ShotgunStorm:
+				// Spawn a rocket, activate it and decrement ammo
+				int xCount = 4;
+				int yCount = 4;
+				float aimPlane = 25f;
+				for( int y = 0; y < 4; ++y )
+				{
+					for( int x = 0; x < 4; ++x )
+					{
+						GameObject shot = GameControl.ProjectilePool.Spawn( "Shotgun Pellet" );
+						shot.transform.position = transform.position;
+						Vector3 shotVector = new Vector3( x - xCount * .5f, y - yCount * .5f, aimPlane ).normalized;
+						shot.transform.rotation = Quaternion.LookRotation( transform.rotation * shotVector );
+						ShotgunPellet shotScript = shot.GetComponent<ShotgunPellet>();
+						shotScript.Owner = Player;
+						shotScript.PooledStart();
+					}
+				}
+				--Ammo;
+				break;
+			case DroneInfo.Type.SlagCannon:
+				// Spawn a rocket, activate it and decrement ammo
+				GameObject slagBall = GameControl.ProjectilePool.Spawn( "Slag Ball" );
+				slagBall.transform.position = transform.position;
+				slagBall.transform.rotation = transform.rotation;
+				SlagBall ballScript = slagBall.GetComponent<SlagBall>();
+				ballScript.Owner = Player;
+				ballScript.PooledStart();
+				--Ammo;
+				break;
 			default:
 				break;
 		}
+
+		ResetReloadTimer();
 
 		// If the drone is out of ammo, create an explosion and deactivate it
 		if( Ammo == 0 )
 		{
 			Deactivate();
+		}
+	}
+
+	public void FireHold()
+	{
+		switch( Type )
+		{
+			case DroneInfo.Type.SlagCannon:
+				if( reloadTimer == 0f )
+				{
+					Fire();
+				}
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -377,6 +520,9 @@ public class Drone : MonoBehaviour
         {
             explosion.transform.position = transform.position;
         }
+
+		// Inform the avatar GUI that this drone is despawning
+		Player.transform.Find( "Camera" ).GetComponent<AvatarGUI>().DroneDespawned( this );
 
 		// Deactivate spawned children
 		GameControl.MiscPool.Despawn( aimingLine.gameObject );
@@ -390,5 +536,10 @@ public class Drone : MonoBehaviour
 
 		// Deactivate self
 		GameControl.DronePool.Despawn( gameObject );
+	}
+
+	public void ResetReloadTimer()
+	{
+		reloadTimer = ReloadTimeout;
 	}
 }

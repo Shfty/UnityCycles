@@ -1,15 +1,196 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using XInputDotNetPure;
 
 public class InputWrapper : MonoBehaviour
 {
-	// Fields
+	// Button Class
+	public abstract class Button
+	{
+		// Fields
+		protected bool _down = false;
+		bool _pressed = false;
+
+		// Properties
+		public bool Down
+		{
+			get { return _down; }
+		}
+		public bool Pressed
+		{
+			get { return _pressed; }
+		}
+
+		// Variables
+		string axisName;
+		Func<bool> xboxCallback;
+		bool prevDown = false;
+
+		public abstract void FixedUpdate();
+
+		public void Update()
+		{
+			_pressed = _down && !prevDown;
+			prevDown = _down;
+		}
+	}
+
+	public class UnityButton : Button
+	{
+		string axisName;
+
+		public UnityButton( string an )
+		{
+			axisName = an;
+		}
+
+		public override void FixedUpdate()
+		{
+			_down = Input.GetAxisRaw( axisName ) > 0f;
+		}
+	}
+
+	public class CustomButton : Button
+	{
+		Func<bool> callback;
+
+		public CustomButton( Func<bool> cb )
+		{
+			callback = cb;
+		}
+
+		public override void FixedUpdate()
+		{
+			_down = callback();
+		}
+	}
+
+	public abstract class Axis2D
+	{
+		// Fields
+		protected Vector2 _value;
+		bool _moved = false;
+		bool _pushed = false;
+		Vector2 _moveDelta;
+
+		// Properties
+		public Vector2 Value
+		{
+			get { return _value; }
+		}
+		public bool Moved
+		{
+			get { return _moved; }
+		}
+		public bool Pushed
+		{
+			get { return _pushed; }
+		}
+		public Vector2 MoveDelta
+		{
+			get { return _moveDelta; }
+		}
+
+		// Variables
+		string xAxisName;
+		string yAxisName;
+		Func<Vector2> xboxCallback;
+		Vector2 prevValue;
+
+		public abstract void FixedUpdate();
+
+		public void Update()
+		{
+			if( _value != prevValue )
+			{
+				_moveDelta = _value - prevValue;
+				_moved = true;
+				if( prevValue == Vector2.zero )
+				{
+					_pushed = true;
+				}
+				else
+				{
+					_pushed = false;
+				}
+			}
+			else
+			{
+				_moveDelta = Vector2.zero;
+				_moved = false;
+				_pushed = false;
+			}
+			prevValue = _value;
+		}
+	}
+
+	public class UnityAxis2D : Axis2D
+	{
+		string xAxisName;
+		string yAxisName;
+		float sensitivity;
+
+		public UnityAxis2D( string xAn, string yAn, float s = 1f )
+		{
+			xAxisName = xAn;
+			yAxisName = yAn;
+			sensitivity = s;
+		}
+
+		public override void FixedUpdate()
+		{
+			_value = new Vector2( Input.GetAxisRaw( xAxisName ) * sensitivity, Input.GetAxisRaw( yAxisName ) * sensitivity );
+		}
+	}
+
+	public class CustomAxis2D : Axis2D
+	{
+		Func<Vector2> callback;
+		float sensitivity;
+
+		public CustomAxis2D( Func<Vector2> cb, float s = 1f )
+		{
+			callback = cb;
+			sensitivity = s;
+		}
+
+		public override void FixedUpdate()
+		{
+			_value = callback() * sensitivity;
+		}
+	}
+
+	// Enums
+	public enum InputType
+	{
+		None,
+		UnityPad,
+		XboxPad
+	}
+
+	// Variables
 	GamePadState xboxPadState;
-	PlayerIndex xboxPadIndex;
 	InputType type = InputType.None;
+
+	PlayerIndex xboxPadIndex;
 	string typeSuffix;
 	bool gameActive = true;
+	List<Axis2D> axes2D = new List<Axis2D>();
+	List<Button> buttons = new List<Button>();
+	
+	public int LocalPlayerIndex;
+	public Axis2D LeftStick;
+	public Axis2D RightStick;
+	public Axis2D DPad;
+
+	public Button Jump;
+	public Button Drop;
+	public Button Aim;
+	public Button Fire;
+	public Button SwitchLeft;
+	public Button SwitchRight;
 
 	// Left = Strong Motor, Right = Weak Motor
 	public float StrongRumbleBaseForce = 0f;
@@ -19,30 +200,11 @@ public class InputWrapper : MonoBehaviour
 	public float WeakRumbleForce = 0f;
 	public float WeakRumbleDecayRate = 1.0f;
 
-	// Enums
-	public enum InputType
-	{
-		None,
-		UnityPad,
-		XboxPad
-	}
-	
-	// Properties
-	public int LocalPlayerIndex;
-	public Vector2 LeftStick;
-	public Vector2 RightStick;
-	public float Jump;
-	public float Drop;
-	public float Aim;
-	public float Fire;
-	public float SwitchLeft;
-	public float SwitchRight;
-
 	public float Dash;
 	public Vector2 DashVector;
 
-	public float Rematch;
-	public float BackToMenu;
+	public bool Rematch;
+	public bool BackToMenu;
 
 	// Startup function to be called manually by instantiator
 	public void Init()
@@ -58,7 +220,7 @@ public class InputWrapper : MonoBehaviour
 			{
 				case "Controller (XBOX 360 For Windows)":
 					// Only works under Windows
-					if( Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsEditor )
+					if( Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor )
 					{
 						// Set the appropriate type and instantiate the XInput pad index
 						type = InputType.XboxPad;
@@ -88,59 +250,80 @@ public class InputWrapper : MonoBehaviour
 			// If there are no joysticks left and the keyboard is taken, log a warning message
 			Debug.LogWarning( "InputWrapper " + LocalPlayerIndex + " unable to bind joystick" );
 		}
+
+		if( type == InputType.UnityPad )
+		{
+			// Setup stick objects
+			LeftStick = new UnityAxis2D( "Move Horizontal" + typeSuffix, "Move Vertical" + typeSuffix );
+			axes2D.Add( LeftStick );
+			RightStick = new UnityAxis2D( "Camera Horizontal" + typeSuffix, "Camera Vertical" + typeSuffix, typeSuffix == " (Keyboard)" ? GameInfo.Properties.MouseAimSensitivity : GameInfo.Properties.GamePadAimSensitivity );
+			axes2D.Add( RightStick );
+			DPad = new UnityAxis2D( "D-Pad X" + typeSuffix, "D-Pad Y" + typeSuffix );
+			axes2D.Add( DPad );
+
+			// Setup button objects
+			Jump = new UnityButton( "Jump" + typeSuffix );
+			buttons.Add( Jump );
+			Drop = new UnityButton( "Drop" + typeSuffix );
+			buttons.Add( Drop );
+			Aim = new UnityButton( "Aim" + typeSuffix );
+			buttons.Add( Aim );
+			Fire = new UnityButton( "Fire" + typeSuffix );
+			buttons.Add( Fire );
+			SwitchLeft = new CustomButton( () => Input.GetAxisRaw( "Switch Left" + typeSuffix ) > 0f || Input.GetAxisRaw( "Switch (Mouse)" ) < 0f );
+			buttons.Add( SwitchLeft );
+			SwitchRight = new CustomButton( () => Input.GetAxisRaw( "Switch Right" + typeSuffix ) > 0f || Input.GetAxisRaw( "Switch (Mouse)" ) > 0f );
+			buttons.Add( SwitchRight );
+		}
+		else if( type == InputType.XboxPad )
+		{
+			// Setup stick objects
+			LeftStick = new CustomAxis2D( () => new Vector2( xboxPadState.ThumbSticks.Left.X, xboxPadState.ThumbSticks.Left.Y ) );
+			axes2D.Add( LeftStick );
+			RightStick = new CustomAxis2D( () => new Vector2( xboxPadState.ThumbSticks.Right.X, xboxPadState.ThumbSticks.Right.Y ), GameInfo.Properties.GamePadAimSensitivity );
+			axes2D.Add( RightStick );
+			DPad = new CustomAxis2D(
+				() => new Vector2(
+					( xboxPadState.DPad.Left == ButtonState.Pressed ? -1f : 0f )
+				  + ( xboxPadState.DPad.Right == ButtonState.Pressed ? 1f : 0f ),
+					( xboxPadState.DPad.Up == ButtonState.Pressed ? 1f : 0f )
+				  + ( xboxPadState.DPad.Down == ButtonState.Pressed ? -1f : 0f )
+				)
+			);
+			axes2D.Add( DPad );
+
+			// Setup button objects
+			Jump = new CustomButton( () => xboxPadState.Buttons.LeftShoulder == ButtonState.Pressed );
+			buttons.Add( Jump );
+			Drop = new CustomButton( () => xboxPadState.Buttons.RightShoulder == ButtonState.Pressed );
+			buttons.Add( Drop );
+			Aim = new CustomButton( () => xboxPadState.Triggers.Left > .25f );
+			buttons.Add( Aim );
+			Fire = new CustomButton( () => xboxPadState.Triggers.Right > .25f );
+			buttons.Add( Fire );
+			SwitchLeft = new CustomButton( () => xboxPadState.Buttons.X == ButtonState.Pressed );
+			buttons.Add( SwitchLeft );
+			SwitchRight = new CustomButton( () => xboxPadState.Buttons.B == ButtonState.Pressed );
+			buttons.Add( SwitchRight );
+		}
 	}
 
 	// Unity Methods
 	void FixedUpdate()
 	{
-		// Set values from Unity/XInput based on the appropriate axis + suffix
-		switch( type )
+		if( type == InputType.XboxPad )
 		{
-			case InputType.UnityPad:
-				LeftStick.x = Input.GetAxisRaw( "Move Horizontal" + typeSuffix );
-				LeftStick.y = Input.GetAxisRaw( "Move Vertical" + typeSuffix );
+			xboxPadState = GamePad.GetState( xboxPadIndex );
+		}
 
-				if( typeSuffix != " (Keyboard)" )
-				{
-					RightStick.x = Input.GetAxisRaw( "Camera Horizontal" + typeSuffix );
-					RightStick.y = Input.GetAxisRaw( "Camera Vertical" + typeSuffix );
-				}
-				else
-				{
-					RightStick.x = Input.GetAxisRaw( "Camera Horizontal" + typeSuffix );
-					RightStick.y = Input.GetAxisRaw( "Camera Vertical" + typeSuffix );
-				}
+		foreach( Axis2D axis2D in axes2D )
+		{
+			axis2D.FixedUpdate();
+		}
 
-				Jump = Input.GetAxisRaw( "Jump" + typeSuffix );
-				Drop = Input.GetAxisRaw( "Drop" + typeSuffix );
-				Aim = Input.GetAxisRaw( "Aim" + typeSuffix );
-				Fire = Input.GetAxisRaw( "Fire" + typeSuffix );
-				SwitchLeft = Input.GetAxisRaw( "Switch Left" + typeSuffix );
-				SwitchRight = Input.GetAxisRaw( "Switch Right" + typeSuffix );
-				if( typeSuffix == " (Keyboard)" )
-				{
-					SwitchLeft += Input.GetAxisRaw( "Switch (Mouse)" ) < 0f ? 1f : 0f;
-					SwitchRight += Input.GetAxisRaw( "Switch (Mouse)" ) > 0f ? 1f : 0f;
-				}
-				SwitchLeft = Mathf.Min( SwitchLeft, 1f );
-				SwitchRight = Mathf.Min( SwitchRight, 1f );
-				break;
-			case InputType.XboxPad:
-				xboxPadState = GamePad.GetState( xboxPadIndex );
-
-				LeftStick.x = xboxPadState.ThumbSticks.Left.X;
-				LeftStick.y = xboxPadState.ThumbSticks.Left.Y;
-
-				RightStick.x = xboxPadState.ThumbSticks.Right.X;
-				RightStick.y = xboxPadState.ThumbSticks.Right.Y;
-
-				Jump = xboxPadState.Buttons.LeftShoulder == ButtonState.Pressed ? 1f : 0f;
-				Drop = ( xboxPadState.Buttons.RightShoulder == ButtonState.Pressed ? 1f : 0f );
-				Aim = ( xboxPadState.Triggers.Left >= .25f ? 1f : 0f );
-				Fire = ( xboxPadState.Triggers.Right >= .25f ? 1f : 0f );
-				SwitchLeft = ( xboxPadState.Buttons.X == ButtonState.Pressed ? 1f : 0f );
-				SwitchRight = ( xboxPadState.Buttons.B == ButtonState.Pressed ? 1f : 0f );
-				break;
+		foreach( Button button in buttons )
+		{
+			button.FixedUpdate();
 		}
 
 		// Vibration
@@ -178,17 +361,27 @@ public class InputWrapper : MonoBehaviour
 
 	void Update()
 	{
+		foreach( Axis2D axis2D in axes2D )
+		{
+			axis2D.Update();
+		}
+
+		foreach( Button button in buttons )
+		{
+			button.Update();
+		}
+
 		// Set values from Unity/XInput based on the appropriate axis + suffix
 		switch( type )
 		{
 			case InputType.UnityPad:
-				Rematch = Input.GetAxisRaw( "Aim" + typeSuffix );
-				BackToMenu = Input.GetAxisRaw( "Fire" + typeSuffix );
+				Rematch = Aim.Pressed;
+				BackToMenu = Fire.Pressed;
 				break;
 			case InputType.XboxPad:
 				xboxPadState = GamePad.GetState( xboxPadIndex );
-				Rematch = ( xboxPadState.Triggers.Left >= .25f ? 1f : 0f );
-				BackToMenu = ( xboxPadState.Triggers.Right >= .25f ? 1f : 0f );
+				Rematch = ( xboxPadState.Triggers.Left >= .25f ? true : false );
+				BackToMenu = ( xboxPadState.Triggers.Right >= .25f ? true : false );
 				break;
 			default:
 				break;
@@ -258,18 +451,18 @@ public class InputWrapper : MonoBehaviour
 			dashTimer = 0f;
 		}
 
-		if( dashInputState == 0 && LeftStick.magnitude < innerZoneBoundary )
+		if( dashInputState == 0 && LeftStick.Value.magnitude < innerZoneBoundary )
 		{
 			dashInputState = 1;
 			dashTimer = dashTimeout;
 		}
-		if( dashInputState == 1 && LeftStick.magnitude > outerZoneBoundary )
+		if( dashInputState == 1 && LeftStick.Value.magnitude > outerZoneBoundary )
 		{
 			dashInputState = 2;
 			dashTimer = dashTimeout;
-			DashVector = LeftStick.normalized;
+			DashVector = LeftStick.Value.normalized;
 		}
-		if( dashInputState == 2 && LeftStick.magnitude < innerZoneBoundary )
+		if( dashInputState == 2 && LeftStick.Value.magnitude < innerZoneBoundary )
 		{
 			dashInputState = 3;
 			dashTimer = dashTimeout;
@@ -292,7 +485,7 @@ public class InputWrapper : MonoBehaviour
 
 		if( prevDash == 0f && Input.GetKey( KeyCode.LeftShift ) )
 		{
-			DashVector = LeftStick.normalized;
+			DashVector = LeftStick.Value.normalized;
 			Dash = 1f;
 		}
 		prevDash = Input.GetAxis( "Dash" + typeSuffix );

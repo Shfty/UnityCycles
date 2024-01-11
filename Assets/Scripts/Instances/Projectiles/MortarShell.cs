@@ -18,8 +18,8 @@ public class MortarShell : Projectile
 		startPos = transform.position;
 
 		// Add initial force and torque
-		rigidbody.AddForce( transform.forward * ProjectileInfo.Properties.MortarShell.InitialForce, ForceMode.VelocityChange );
-		rigidbody.AddTorque( transform.right * ProjectileInfo.Properties.MortarShell.InitialTorque, ForceMode.Impulse );
+		GetComponent<Rigidbody>().AddForce( transform.forward * ProjectileInfo.Properties.MortarShell.InitialForce, ForceMode.VelocityChange );
+		GetComponent<Rigidbody>().AddTorque( transform.right * ProjectileInfo.Properties.MortarShell.InitialTorque, ForceMode.Impulse );
 	}
 
 	public void FixedUpdate()

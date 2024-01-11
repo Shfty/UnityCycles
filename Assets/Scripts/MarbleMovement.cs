@@ -10,8 +10,6 @@ public class MarbleMovement : MonoBehaviour
 	// Variables
 	// Private
 	Vector3 forwardVector;
-	float prevJump = 0f;
-	float prevDrop = 0f;
 	bool gameActive = true;
 
 	Vector3 initPosition;
@@ -56,8 +54,8 @@ public class MarbleMovement : MonoBehaviour
 		// Store init state
 		initPosition = Marble.transform.position;
 		initRotation = Marble.transform.rotation;
-		initVelocity = Marble.rigidbody.velocity;
-		initAngularVelocity = Marble.rigidbody.angularVelocity;
+		initVelocity = Marble.GetComponent<Rigidbody>().velocity;
+		initAngularVelocity = Marble.GetComponent<Rigidbody>().angularVelocity;
 		ResetSurfaceNormal();
         gameActive = true;
 	}
@@ -67,8 +65,8 @@ public class MarbleMovement : MonoBehaviour
 		// Reset object to init state
 		Marble.transform.position = initPosition;
 		Marble.transform.rotation = initRotation;
-		Marble.rigidbody.velocity = initVelocity;
-		Marble.rigidbody.angularVelocity = initAngularVelocity;
+		Marble.GetComponent<Rigidbody>().velocity = initVelocity;
+		Marble.GetComponent<Rigidbody>().angularVelocity = initAngularVelocity;
 	}
 
 	void Update() // Update is called once per frame
@@ -76,11 +74,11 @@ public class MarbleMovement : MonoBehaviour
 		if( gameActive )
 		{
 			// Update properties
-			Velocity = Marble.rigidbody.velocity;
+			Velocity = Marble.GetComponent<Rigidbody>().velocity;
 
 			// Rotation / Directional Force
-			float horz = InputWrapper.LeftStick.x;
-			float vert = InputWrapper.LeftStick.y;
+			float horz = InputWrapper.LeftStick.Value.x;
+			float vert = InputWrapper.LeftStick.Value.y;
 
 			// Calculate camera-relative XZ axes
 			Quaternion nq = Quaternion.FromToRotation( Vector3.up, Up );
@@ -90,60 +88,60 @@ public class MarbleMovement : MonoBehaviour
 			// Add force based on whether the marble is grounded
 			if( Grounded )
 			{
-				Marble.rigidbody.AddForce( Forward * vert * GroundForceFactor * Time.deltaTime, ForceMode.Impulse );
-				Marble.rigidbody.AddForce( Right * horz * GroundForceFactor * Time.deltaTime, ForceMode.Impulse );
-				Marble.rigidbody.AddTorque( Forward * -horz * GroundTorqueFactor * Time.deltaTime, ForceMode.Impulse );
-				Marble.rigidbody.AddTorque( Right * vert * GroundTorqueFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddForce( Forward * vert * GroundForceFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddForce( Right * horz * GroundForceFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddTorque( Forward * -horz * GroundTorqueFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddTorque( Right * vert * GroundTorqueFactor * Time.deltaTime, ForceMode.Impulse );
 			}
 			else
 			{
-				Marble.rigidbody.AddForce( Forward * vert * AirForceFactor * Time.deltaTime, ForceMode.Impulse );
-				Marble.rigidbody.AddForce( Right * horz * AirForceFactor * Time.deltaTime, ForceMode.Impulse );
-				Marble.rigidbody.AddTorque( Forward * -horz * AirTorqueFactor * Time.deltaTime, ForceMode.Impulse );
-				Marble.rigidbody.AddTorque( Right * vert * AirTorqueFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddForce( Forward * vert * AirForceFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddForce( Right * horz * AirForceFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddTorque( Forward * -horz * AirTorqueFactor * Time.deltaTime, ForceMode.Impulse );
+				Marble.GetComponent<Rigidbody>().AddTorque( Right * vert * AirTorqueFactor * Time.deltaTime, ForceMode.Impulse );
 			}
 
 			// Calculate jump vector as halfway between the surface and world up
 			Vector3 jumpVector = Vector3.Lerp( Vector3.up, Up, .5f );
-			if( InputWrapper.Jump > 0f )
+			if( InputWrapper.Jump.Pressed )
 			{
-				if( JumpFired == false && prevJump == 0f )
+				if( JumpFired == false )
 				{
 					// If the jump jets are ready, apply jump force and set jumpFired flag
-					Marble.rigidbody.AddForce( jumpVector * JumpForce, ForceMode.Impulse );
+					Marble.GetComponent<Rigidbody>().AddForce( jumpVector * JumpForce, ForceMode.Impulse );
 					InputWrapper.WeakRumbleForce += JumpForce * WeakRumbleForceFactor;
+					JumpFired = true;
 				}
-				else
-				{
-					// Otherwise, apply hover force
-					Marble.rigidbody.AddForce( jumpVector * HoverForce * Time.deltaTime, ForceMode.Force );
-					InputWrapper.WeakRumbleBaseForce = HoverForce * WeakRumbleForceFactor;
-				}
-				JumpFired = true;
 			}
-			prevJump = InputWrapper.Jump;
+
+			if( InputWrapper.Jump.Down )
+			{
+				// Otherwise, apply hover force
+				Marble.GetComponent<Rigidbody>().AddForce( jumpVector * HoverForce * Time.deltaTime, ForceMode.Force );
+				InputWrapper.WeakRumbleBaseForce = HoverForce * WeakRumbleForceFactor;
+			}
 
 			// Drop
-			if( InputWrapper.Drop > 0 )
+			if( InputWrapper.Drop.Pressed )
 			{
-				if( DropFired == false && prevDrop == 0f )
+				if( DropFired == false )
 				{
 					// If the drop jets are ready, apply drop force and set dropFired flag
-					Marble.rigidbody.AddForce( Up * -DownBurstForce, ForceMode.Impulse );
+					Marble.GetComponent<Rigidbody>().AddForce( -Up * DownBurstForce, ForceMode.Impulse );
 					InputWrapper.WeakRumbleForce += DownBurstForce * WeakRumbleForceFactor;
+					DropFired = true;
 				}
-				else
-				{
-					// Otherwise, apply downward accelleration
-					Marble.rigidbody.AddForce( Vector3.up * -DownJetForce * Time.deltaTime, ForceMode.Force );
-					InputWrapper.WeakRumbleBaseForce = DownJetForce * WeakRumbleForceFactor;
-				}
-				DropFired = true;
 			}
-			prevDrop = InputWrapper.Drop;
+
+			if( InputWrapper.Drop.Down )
+			{
+				// Otherwise, apply downward accelleration
+				Marble.GetComponent<Rigidbody>().AddForce( -Vector3.up * DownJetForce * Time.deltaTime, ForceMode.Force );
+				InputWrapper.WeakRumbleBaseForce = DownJetForce * WeakRumbleForceFactor;
+			}
 
 			// Disable jet rumble in the air if needed
-			if( InputWrapper.Jump == 0f && InputWrapper.Drop == 0f && !Grounded )
+			if( !InputWrapper.Jump.Down && !InputWrapper.Drop.Down && !Grounded )
 			{
 				InputWrapper.WeakRumbleBaseForce = 0f;
 			}
@@ -153,9 +151,9 @@ public class MarbleMovement : MonoBehaviour
 			{
 				float dash = GetComponent<Avatar>().Dash;
 				float force = Mathf.Min( dash, 1f );
-				Marble.rigidbody.velocity = Vector3.zero;
-				Marble.rigidbody.AddForce( force * Forward * InputWrapper.DashVector.y * DashForce, ForceMode.VelocityChange );
-				Marble.rigidbody.AddForce( force * Right * InputWrapper.DashVector.x * DashForce, ForceMode.VelocityChange );
+				Marble.GetComponent<Rigidbody>().velocity = Vector3.zero;
+				Marble.GetComponent<Rigidbody>().AddForce( force * Forward * InputWrapper.DashVector.y * DashForce, ForceMode.VelocityChange );
+				Marble.GetComponent<Rigidbody>().AddForce( force * Right * InputWrapper.DashVector.x * DashForce, ForceMode.VelocityChange );
 				GetComponent<WheelParticles>().DashBurst();
 				dash -= force;
 				GetComponent<Avatar>().Dash = dash;
@@ -173,7 +171,7 @@ public class MarbleMovement : MonoBehaviour
 			// Ground rumble
 			if( Grounded )
 			{
-				InputWrapper.WeakRumbleBaseForce = Marble.rigidbody.angularVelocity.magnitude * WeakRumbleForceFactor;
+				InputWrapper.WeakRumbleBaseForce = Marble.GetComponent<Rigidbody>().angularVelocity.magnitude * WeakRumbleForceFactor;
 			}
 		}
 	}

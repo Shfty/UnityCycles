@@ -35,6 +35,7 @@ public class AvatarCamera : MonoBehaviour
 	float yAngle = 0f;
 	float followDistance;
 	GameObject[] mapCameraAnchors;
+	delegate bool CheckAngle( out RaycastHit th );
 
 	int terrainMask;
 	int wallMask;
@@ -46,9 +47,8 @@ public class AvatarCamera : MonoBehaviour
 	public Vector3 Offset;
 	public float MinFollowDistance = 1f;
 	public float MaxFollowDistance = 10f;
-	public float PositionLerpFactor = 12f;
 	public float CameraRadius = .5f;
-	public float SmallValue = .01f;
+	public float SmallValue = .05f;
 	
 	// Unity Methods
 	void Awake()
@@ -73,7 +73,7 @@ public class AvatarCamera : MonoBehaviour
 
 	void Update()
 	{
-		// Fallback to a map anchor if the follow target is unsuitable
+		// Fallback to a map anchor if the follow target is null or inactive
 		if( Target == null || !Target.parent.gameObject.activeSelf )
 		{
 			// Randomly pick a camera anchor
@@ -83,76 +83,58 @@ public class AvatarCamera : MonoBehaviour
 		}
 
 		// Take Input and clamp Y Axis
-		xAngle += InputWrapper.RightStick.x * 90f * Time.deltaTime;
-		yAngle += InputWrapper.RightStick.y * -90f * Time.deltaTime;
-
+		xAngle += InputWrapper.RightStick.Value.x * 90f * Time.deltaTime;
+		yAngle += InputWrapper.RightStick.Value.y * -90f * Time.deltaTime;
 		yAngle = Mathf.Clamp( yAngle, -80f, 80f );
 
+		CalculateTargetPosition();
+
 		// Correct positioning
-		bool targetObscured;
-		bool clipTerrain;
-		bool clipWall;
-		do
+		Vector3 tc = TargetToCameraVector();
+
+		// Adjust angle from terrain
+		RaycastHit terrainHitInfo = new RaycastHit();
+		bool clipTerrain = false;
+		Vector3 targetOffset = new Vector3( 0, -Target.GetComponent<SphereCollider>().radius * .5f, 0 );
+
+		CheckAngle checkTerrain = ( out RaycastHit th ) => Physics.Raycast( Target.transform.position + targetOffset, tc.normalized, out th, MaxFollowDistance, terrainMask );
+		clipTerrain = checkTerrain( out terrainHitInfo );
+		while( clipTerrain )
 		{
-			// Update the target position
-			UpdateTarget();
+			yAngle += SmallValue;
+			CalculateTargetPosition();
+			tc = TargetToCameraVector();
+			clipTerrain = checkTerrain( out terrainHitInfo );
+		}
 
-			// Check line-of-sight between camera and target
-			Vector3 cto = Vector3.Normalize( ( Target.position + new Vector3( 0f, -.25f, 0f ) ) - targetPosition );
-			targetObscured = Physics.Raycast( new Ray( targetPosition, cto ), followDistance, terrainMask | wallMask );
-			if( targetObscured )
-			{
-				// If it's obscured, move up slightly
-				yAngle += SmallValue;
-			}
+		// Adjust distance from walls
+		RaycastHit wallHitInfo;
+		bool clipWall = false;
 
-			// Check if camera is clipping into the terrain
-			clipTerrain = Physics.CheckSphere( transform.position, CameraRadius, terrainMask );
-			if( clipTerrain )
-			{
-				// If so, move the camera upward by a small amount
-				transform.position += new Vector3( 0f, SmallValue, 0f );
-			}
-
-			// Check if camera is clipping into a wall
-			clipWall = Physics.CheckSphere( targetPosition, CameraRadius, wallMask ) && followDistance > MinFollowDistance;
-			if( clipWall )
-			{
-				// If so, move the camera forward by a small amount
-				followDistance -= SmallValue;
-			}
-		} while( targetObscured || clipTerrain || clipWall );
-
-		// Check if the follow distance needs to increase
-		bool canReverse;
-		do
+		clipWall = Physics.Raycast( Target.transform.position, tc.normalized, out wallHitInfo, tc.magnitude, wallMask );
+		if( clipWall )
 		{
-			// Update the target position
-			UpdateTarget();
+			tc = tc.normalized * ( wallHitInfo.distance - CameraRadius );
+		}
 
-			// Check if the camera is able to move backward
-			Vector3 ttt = Vector3.Normalize( targetPosition - Target.position );
-			canReverse = !Physics.CheckSphere( targetPosition + ttt * SmallValue, 1f, wallMask ) && followDistance < MaxFollowDistance;
-
-			// If so, move backward by a small amount
-			if( canReverse )
-			{
-				followDistance += SmallValue;
-			}
-		} while( canReverse );
+		targetPosition = Target.position + tc;
 
 		// Apply transform changes
-		transform.position = Vector3.Lerp( transform.position, targetPosition, PositionLerpFactor * Time.deltaTime );
-		transform.rotation = Quaternion.LookRotation( Vector3.Normalize( ( Target.position + Offset ) - transform.position ), Vector3.up );
+		float distScale = tc.magnitude / MaxFollowDistance;
+		transform.position = targetPosition;
+		transform.rotation = Quaternion.LookRotation( Vector3.Normalize( ( Target.position + Offset * distScale ) - transform.position ), Vector3.up );
 	}
 
-	// Utility Methods
-	void UpdateTarget()
+	void CalculateTargetPosition()
 	{
-		// Calculate the camera's position and rotation relative to the target
-		Vector3 cameraForward = Vector3.forward;
-		cameraForward = Quaternion.AngleAxis( yAngle, Vector3.right ) * cameraForward;
+		// Calculate the 'ideal' camera position
+		Vector3 cameraForward = Quaternion.AngleAxis( yAngle, Vector3.right ) * Vector3.forward;
 		cameraForward = Quaternion.AngleAxis( xAngle, Vector3.up ) * cameraForward;
 		targetPosition = Target.position - ( cameraForward * followDistance );
+	}
+
+	Vector3 TargetToCameraVector()
+	{
+		return targetPosition - Target.position;
 	}
 }

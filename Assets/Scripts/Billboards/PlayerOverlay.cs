@@ -21,7 +21,7 @@ public class PlayerOverlay : Billboard
 				}
 
 				GameObject cam = GameControl.Instance.Players[ i ].transform.Find( "Camera" ).gameObject;
-				cameras.Add( cam.camera );
+				cameras.Add( cam.GetComponent<Camera>() );
 				GameObject billboard = GameControl.BillboardPool.Spawn( BillboardPrefab );
 				billboard.layer = LayerMask.NameToLayer( "Camera " + ( i + 1 ) );
 				billboard.transform.parent = transform;

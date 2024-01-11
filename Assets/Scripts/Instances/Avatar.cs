@@ -45,7 +45,7 @@ public class Avatar : MonoBehaviour
 		// Recharge Dash
 		if( Dash < MaxDash && GetComponent<MarbleMovement>().Grounded && !GetComponent<MarbleMovement>().ObtuseAngle )
 		{
-			Rigidbody rb = transform.Find( "Marble" ).rigidbody;
+			Rigidbody rb = transform.Find( "Marble" ).GetComponent<Rigidbody>();
 			Dash = Mathf.Min( Dash + ( rb.angularVelocity.magnitude * DashRechargeSpinFactor * Time.deltaTime ), MaxDash );
 		}
 
@@ -59,34 +59,28 @@ public class Avatar : MonoBehaviour
 				{
 					// Set the drone's Aim property
 					Drone droneScript = Drones[ ActiveDroneIndex ].GetComponent<Drone>();
-					if( InputWrapper.Aim > 0 )
-					{
-						droneScript.Aim = true;
-					}
-					else
-					{
-						droneScript.Aim = false;
-					}
+					droneScript.Aim = InputWrapper.Aim.Down;
 
 					// Relay fire events
-					if( InputWrapper.Fire > 0 && prevFire == 0f )
+					if( InputWrapper.Fire.Pressed )
 					{
 						droneScript.Fire();
 					}
-					prevFire = InputWrapper.Fire;
+					if( InputWrapper.Fire.Down )
+					{
+						droneScript.FireHold();
+					}
 
 					// Switch drones
-					if( InputWrapper.SwitchRight > 0 && prevSwitchRight == 0f )
+					if( InputWrapper.SwitchRight.Pressed || ( InputWrapper.DPad.Pushed && InputWrapper.DPad.MoveDelta.x > 0f ) )
 					{
 						SwitchDrone( true );
 					}
-					prevSwitchRight = InputWrapper.SwitchRight;
 
-					if( InputWrapper.SwitchLeft > 0 && prevSwitchLeft == 0f )
+					if( InputWrapper.SwitchLeft.Pressed || ( InputWrapper.DPad.Pushed && InputWrapper.DPad.MoveDelta.x < 0f ) )
 					{
 						SwitchDrone( false );
 					}
-					prevSwitchLeft = InputWrapper.SwitchLeft;
 				}
 			}
 		}
@@ -117,24 +111,24 @@ public class Avatar : MonoBehaviour
 		// Reshuffle into position
 		if( Drones.Count > 0 )
 		{
-			KinematicHover mDroneScript = Drones[ ActiveDroneIndex ].GetComponent<KinematicHover>();
-			if( mDroneScript.Target != DroneAnchors[ 0 ] )
+			KinematicHover mDroneScript = Drones[ 0 ].GetComponent<KinematicHover>();
+			if( mDroneScript.Target != DroneAnchors[ ActiveDroneIndex ] )
 			{
-				mDroneScript.Target = DroneAnchors[ 0 ];
+				mDroneScript.Target = DroneAnchors[ ActiveDroneIndex ];
 			}
 			if( Drones.Count > 1 )
 			{
-				KinematicHover lDroneScript = Drones[ WrapIndex( ActiveDroneIndex + 1, Drones.Count - 1 ) ].GetComponent<KinematicHover>();
-				if( lDroneScript.Target != DroneAnchors[ 1 ] )
+				KinematicHover lDroneScript = Drones[ 1 ].GetComponent<KinematicHover>();
+				if( lDroneScript.Target != DroneAnchors[ WrapIndex( ActiveDroneIndex - 1, 2 ) ] )
 				{
-					lDroneScript.Target = DroneAnchors[ 1 ];
+					lDroneScript.Target = DroneAnchors[ WrapIndex( ActiveDroneIndex - 1, 2 ) ];
 				}
 				if( Drones.Count > 2 )
 				{
-					KinematicHover rDroneScript = Drones[ WrapIndex( ActiveDroneIndex - 1, Drones.Count - 1 ) ].GetComponent<KinematicHover>();
-					if( rDroneScript.Target != DroneAnchors[ 2 ] )
+					KinematicHover rDroneScript = Drones[ 2 ].GetComponent<KinematicHover>();
+					if( rDroneScript.Target != DroneAnchors[ WrapIndex( ActiveDroneIndex + 1, 2 ) ] )
 					{
-						rDroneScript.Target = DroneAnchors[ 2 ];
+						rDroneScript.Target = DroneAnchors[ WrapIndex( ActiveDroneIndex + 1, 2 ) ];
 					}
 				}
 			}
@@ -169,6 +163,11 @@ public class Avatar : MonoBehaviour
 		else
 		{
 			ActiveDroneIndex = WrapIndex( ActiveDroneIndex + 1, Drones.Count - 1 );
+		}
+
+		foreach( GameObject drone in Drones )
+		{
+			drone.GetComponent<Drone>().ResetReloadTimer();
 		}
 	}
 

@@ -61,6 +61,7 @@ Camera:
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_HDR: 0
+  m_OcclusionCulling: 1
 --- !u!81 &8100000
 AudioListener:
   m_ObjectHideFlags: 1
@@ -102,7 +103,6 @@ MonoBehaviour:
   Offset: {x: 0, y: 2.5, z: 0}
   MinFollowDistance: 1
   MaxFollowDistance: 10
-  PositionLerpFactor: 12
   CameraRadius: .5
   SmallValue: .00999999978
 --- !u!114 &11400008
@@ -119,10 +119,13 @@ MonoBehaviour:
   Skin: {fileID: 11400000, guid: 19313567b39939448b4492007a62a020, type: 2}
   CrosshairTexture: {fileID: 2800000, guid: 5dc62c3ceb82e34498bf32fb1a81d11c, type: 3}
   DroneIconTextures:
-  - {fileID: 2800000, guid: 8576087f16a98f446b43f3d5bec62652, type: 3}
-  - {fileID: 2800000, guid: ce73a42df88a2f240a6a074dfaa7d395, type: 3}
-  - {fileID: 2800000, guid: d04f3f984fb83ed45a30d5c4d023ba4a, type: 3}
-  IconLerpFactor: 5
+  - {fileID: 2800000, guid: 045747f4598eacf499f1b50594c0eef8, type: 3}
+  - {fileID: 2800000, guid: bf9cd1c398d57cb4caddc34c97a01b94, type: 3}
+  - {fileID: 2800000, guid: 701cf443f76d13e4482cc5512053dffa, type: 3}
+  - {fileID: 2800000, guid: 45340c0ca86803446921b2221ea6770e, type: 3}
+  - {fileID: 2800000, guid: dee81cd342d56194dba00d13e7cdceef, type: 3}
+  DroneIconSize: 64
+  IconLerpFactor: 12
   BarLerpFactor: 5
   DeathCam: 0
 --- !u!124 &12400000
